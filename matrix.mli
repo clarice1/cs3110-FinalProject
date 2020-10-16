@@ -19,7 +19,7 @@ val iterate : ('a -> 'a) -> int -> 'a t -> 'a t
 
 (**[iterate_with_stop m f n p] is the matrix with the same number of rows and
    columns as [m] whose value at row [i] column [j] is [(some k, z)] if 
-   [1 <= k <= n] is minimal such that [p (f(f(...f(get i j m))) ) = true], 
+   [0 <= k <= n] is minimal such that [p (f(f(...f(get i j m))) ) = true], 
    where [k] is the number of times [f] is applyed and [z] is the result of 
    applying [f] to [get i j m] [k] times, or [(none, z)] if there is no
    such [k] and [z] is the result of applying [f] to [get i j m] [n] times.
