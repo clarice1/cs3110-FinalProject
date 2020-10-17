@@ -1,4 +1,4 @@
-(**AF: The list [[a11,...,a1m], [an1,...,anm]] represents the matrix
+(**AF: The list [[a11,...,a1m], ..., [an1,...,anm]] represents the matrix
    a11 ... a1m
     . .     .
     .   .   .
@@ -33,14 +33,18 @@ let rec iterate_fun f iter_num n x =
 let iterate f n m = 
   map (iterate_fun (fun x y -> f y) 0 n) m
 
-(**[val_to_tuple f p n x] is [(Some n, y)] if [x = (None, y)]
-   and [p y], [(None, f y)] if [x = (None, y)] and not [p y], 
+(**[checker p n x] is [(Some n, x)] if [p x] otherwise [(None, x)] *)
+let checker p n x = 
+  if p x then (Some n, x) else (None, x)
+
+(**[val_to_tuple f p n x] is [(Some (n + 1), f y)] if [x = (None, y)]
+   and [p (f y)], [(None, f y)] if [x = (None, y)] and not [p (f y)], 
    and [x] otherwise*)
 let val_to_tuple f p n = function
-  | (None, y) -> if p y then (Some n, y) else (None, f y)
+  | (None, y) -> 
+    checker p (n + 1) (f y)
   | y -> y
 
 let iterate_with_stop f n p m = 
-  m |> map (fun x -> (None, x))
-  |> map (iterate_fun (val_to_tuple f p) 0 n) 
-  |> map (val_to_tuple (fun y -> y) p n)
+  m |> map (checker p 0)
+  |> map (iterate_fun (val_to_tuple f p) 0 n)

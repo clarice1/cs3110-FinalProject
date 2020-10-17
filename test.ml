@@ -116,12 +116,24 @@ let matrix_tests = [
   iter_check "adding 100 to each value in zero yields 100 matrix" zero_matrix
     ((+) 1) 100 (Matrix.init 7 7 (fun x y -> 100)) (str_matrix pp_int);
 
-  iterate_with_stop_check "iterating 0 times includes each into (None, p)"
+  iterate_with_stop_check 
+    "iterating 0 times with false includes each into (None, p)"
     matrix_0123 
     (fun x -> false) 
     (fun x -> 7) 
     0
     (Matrix.init 2 2 (fun x y -> (None, x + 2 * y)))
+    string_option_int_matrix;
+
+  iterate_with_stop_check 
+    "iterating 0 times maps to (Some 0, z) when p, otherwise (None, z)"
+    matrix_0123
+    (fun x -> x > 1)
+    (fun x -> 7)
+    0
+    (Matrix.init 2 2 
+       (fun x y -> let z = x + 2 * y in 
+         if z > 1 then (Some 0, z) else (None, z)))
     string_option_int_matrix;
 
   iterate_with_stop_check "add 100 with no stop to 0123"
