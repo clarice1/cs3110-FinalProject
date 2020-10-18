@@ -11,12 +11,12 @@ val to_lst : 'a t -> 'a list list
 val init : int -> int -> (int -> int -> 'a) -> 'a t
 
 (**[complex_init ll ur height width] is the complex matrix with [width] many 
-   rows and [height] manycolumns whose values are a grid of evenly spaced 
+   rows and [height] many columns whose values are a grid of evenly spaced 
    complex numbers with value in the lower left corner ll and value in 
    upper right ur
    Requires: 
    [ll.re < ur.re]
-   [ll.im < ur.re]
+   [ll.im < ur.im]
    [width, height > 0*)
 val cx_init : Complex.t -> Complex.t -> int -> int -> cx_t
 
