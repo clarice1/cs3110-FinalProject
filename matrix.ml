@@ -8,10 +8,27 @@
 *)
 type 'a t = 'a list list
 
+type cx_t = Complex.t t
+
 let to_lst m = m
 
 let init rows columns f = 
   List.init rows (fun i -> (List.init columns (f i)))
+
+(**[from_2flt_int z1 z2 x] is [(z1 - z2) / (x - 1)]*)
+let from_2flt_int z1 z2 x =
+  (z1 -. z2) /. (float_of_int (x - 1))
+
+(**[cx_init_fun ll x_step y_step m n] is [ll + n * x_step + m * y_step] *)
+let cx_init_fun l_re t_im x_step y_step m n: Complex.t=
+  let fn = float_of_int n in 
+  let fm = float_of_int m in 
+  {re = l_re +. fn *. x_step; im = t_im -. fm *. y_step}
+
+let cx_init (ll : Complex.t) (ur : Complex.t) height width = 
+  let x_step = from_2flt_int ur.re ll.re width in
+  let y_step = from_2flt_int ur.im ll.im height in
+  init height width (cx_init_fun ll.re ur.im x_step y_step)
 
 let get i j m = 
   try (
