@@ -51,18 +51,30 @@ let rec iterate_fun f iter_num n x =
 let iterate f n m = 
   map (iterate_fun (fun x y -> f y) 0 n) m
 
+let p f x = Option.is_none (Option.bind (Some x) f)
+
 (**[checker p n x] is [(Some n, x)] if [p x] otherwise [(None, x)] *)
-let checker p n x = 
-  if p x then (Some n, x) else (None, x)
+let checker f n x = 
+  if p f x then (Some n, x) else (None, x)
+
+let checker_opt f n = function
+  |(None, y) -> if p f y then (Some n, y) else (None, y)
+  | y -> y
 
 (**[val_to_tuple f p n x] is [(Some (n + 1), f y)] if [x = (None, y)]
    and [p (f y)], [(None, f y)] if [x = (None, y)] and not [p (f y)], 
    and [x] otherwise*)
-let val_to_tuple f p n = function
+let val_to_tuple f n = function
   | (None, y) -> 
-    checker p (n + 1) (f y)
+    begin
+      match f y with 
+      | None -> (Some n, y)
+      | (Some z) -> (None, z)
+    end
   | y -> y
 
-let iterate_with_stop f n p m = 
-  m |> map (checker p 0)
-  |> map (iterate_fun (val_to_tuple f p) 0 n)
+let iterate_with_stop (f : 'a -> 'a option) (n : int) (m : 'a t) : 
+  (int option* 'a) t = 
+  m |> map (checker f 0)
+  |> map (iterate_fun (val_to_tuple f) 0 n)
+  |> map (checker_opt f n)

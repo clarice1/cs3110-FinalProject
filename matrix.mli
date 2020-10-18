@@ -1,3 +1,5 @@
+(**Matrix operations *)
+
 (**The type of a matrix. Indices start at 0*)
 type 'a t
 
@@ -17,7 +19,7 @@ val init : int -> int -> (int -> int -> 'a) -> 'a t
    Requires: 
    [ll.re < ur.re]
    [ll.im < ur.im]
-   [width, height > 0*)
+   [width, height > 0]*)
 val cx_init : Complex.t -> Complex.t -> int -> int -> cx_t
 
 (**[get i j m] is the value of [m] at row [i] column [j]. Raises
@@ -29,12 +31,10 @@ val get : int -> int -> 'a t -> 'a
    Requires: [n >= 0]*)
 val iterate : ('a -> 'a) -> int -> 'a t -> 'a t
 
-(**[iterate_with_stop f n p m] is the matrix with the same number of rows and
-   columns as [m] whose value at row [i] column [j] is [(some k, z)] if 
-   [0 <= k <= n] is minimal such that [p (f(f(...f(get i j m))) ) = true], 
-   where [k] is the number of times [f] is applyed and [z] is the result of 
-   applying [f] to [get i j m] [k] times, or [(none, z)] if there is no
-   such [k] and [z] is the result of applying [f] to [get i j m] [n] times.
-   Requires: [n >= 0]*)
-val iterate_with_stop : ('a -> 'a) -> int -> ('a -> bool) -> 
-  'a t -> (int option * 'a) t
+(**[iterate_with_stop f n m] is the matrix with the same number of rows and 
+   columns as [m] and whose value at i, j is (Some k, z) if 0 <= k <= n is 
+   such that 
+   -[(z -> Option.bind z f)^k (Some m(i, j)) = Some z] and 
+   -[(z -> Option.bind z f)^(k+1) (Some m(i,j)) = None], 
+   or [(None, f^n(z))] if no such [k] exists.*)
+val iterate_with_stop : ('a -> 'a option) -> int -> 'a t -> (int option * 'a) t

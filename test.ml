@@ -4,6 +4,9 @@ open OUnit2
    To do that, run [make build]. *)
 open Matrix
 
+(**Change to true if test cases involving larger matrices should be run *)
+let do_big_test = false
+
 (** [pp_string s] pretty-prints string [s]. *)
 let pp_string s = "\"" ^ s ^ "\""
 
@@ -63,7 +66,9 @@ let iter_check name m f n expected_out printer =
     test named [name] that asserts the equality of [expected_output]
     with [Matrix.iterate f n p m]. *)
 let iterate_with_stop_check name m p f n expected_out printer =
-  check_eq name expected_out (Matrix.iterate_with_stop f n p m) printer
+  check_eq name expected_out 
+    (Matrix.iterate_with_stop (fun x -> if p x then None else Some (f x)) n m) 
+    printer
 
 (**The 7x7 matrix with all 0s *)
 let zero_matrix = Matrix.init 7 7 (fun x y -> 0)
@@ -181,7 +186,6 @@ let matrix_tests = [
          | _ -> failwith "impossible"))
     string_option_int_matrix;
 
-  let do_big_test = false in
   if do_big_test then 
     begin
       iterate_with_stop_check 
