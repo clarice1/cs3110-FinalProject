@@ -4,6 +4,9 @@ open OUnit2
    To do that, run [make build]. *)
 open Matrix
 
+(**Change to true if test cases involving larger matrices should be run *)
+let do_big_test = false
+
 (** [pp_string s] pretty-prints string [s]. *)
 let pp_string s = "\"" ^ s ^ "\""
 
@@ -27,6 +30,9 @@ let pp_list pp_elt lst =
    to print each entry *)
 let pp_listlist pp_elt lst = 
   pp_list (pp_list pp_elt) lst
+
+let str_complex (z : Complex.t) = 
+  pp_string (string_of_float z.re ^ " + "^ string_of_float z.im ^ "i")
 
 (**[str_matrix pp_elt m] is a string representing the matrix where
    elements are printed according to pp_elt[m] *)
@@ -60,7 +66,9 @@ let iter_check name m f n expected_out printer =
     test named [name] that asserts the equality of [expected_output]
     with [Matrix.iterate f n p m]. *)
 let iterate_with_stop_check name m p f n expected_out printer =
-  check_eq name expected_out (Matrix.iterate_with_stop f n p m) printer
+  check_eq name expected_out 
+    (Matrix.iterate_with_stop (fun x -> if p x then None else Some (f x)) n m) 
+    printer
 
 (**The 7x7 matrix with all 0s *)
 let zero_matrix = Matrix.init 7 7 (fun x y -> 0)
@@ -68,6 +76,9 @@ let zero_matrix = Matrix.init 7 7 (fun x y -> 0)
 (**The 10x10 matrix with values the unique quadratic bijection N -> N. *)
 let quadratic_matrix = Matrix.init 8 7 
     (fun x y -> (x + y) * (x + y + 1) / 2 + y)
+
+(**The 11x11 complex matrix with values evenly spaced in the unit square *)
+let cx_matrix = Matrix.cx_init {re = -1.; im = -1.} {re = 1.; im = 1.} 11 11
 
 (**The matrix
    [0 1]
@@ -95,6 +106,23 @@ let matrix_tests = [
     (Invalid_argument "(5, 10)");
   test_exception "quadratic_matrix has no value at 6, 7" quadratic_matrix 6 7
     (Invalid_argument "(6, 7)");
+
+  matrix_test "cx_matrix at 0, 0 is -1 + 1i" cx_matrix 0 0 str_complex
+    {re = -1.; im = 1.};
+  matrix_test "cx_matrix at 1, 1 is -.8 + .8i" cx_matrix 1 1 str_complex
+    {re = -0.8; im = 0.8};
+  matrix_test "cx_matrix at 1, 2 is -.6 + .8i" cx_matrix 1 2 str_complex
+    {re = -0.6; im = 0.8};
+  matrix_test "cx_matrix at 2, 1 is -.8 + .6i" cx_matrix 2 1 str_complex
+    {re = -0.8; im = 0.6};
+  matrix_test "cx_matrix at 5, 5 is 0" cx_matrix 5 5 str_complex
+    {re = 0.; im = 0.};
+  matrix_test "cx_matrix at 0, 10 is 1 + i" cx_matrix 0 10 str_complex
+    {re = 1.; im = 1.};
+  matrix_test "cx_matrix at 10, 0 is -1 - i" cx_matrix 10 0 str_complex
+    {re = -1.; im = -1.};
+  matrix_test "cx_matrix at 10, 10 is 1 - i" cx_matrix 10 10 str_complex
+    {re = 1.; im = -1.};
 
   matrix_test "quadratic_matrix at 0, 0 is 0" quadratic_matrix 0 0 
     pp_int 0;
@@ -158,16 +186,21 @@ let matrix_tests = [
          | _ -> failwith "impossible"))
     string_option_int_matrix;
 
-  iterate_with_stop_check 
-    "add 1_000 to big_row_num, stopping when over 1_500"
-    big_row_num
-    (fun x -> x > 1_500)
-    ((+) 1)
-    1_000
-    (Matrix.init 1_000 1_000 (fun x y -> 
-         if x <= 500 then (None, x + 1_000) 
-         else (Some (1_501 - x), 1501)))
-    string_option_int_matrix;
+  if do_big_test then 
+    begin
+      iterate_with_stop_check 
+        "add 1_000 to big_row_num, stopping when over 1_500"
+        big_row_num
+        (fun x -> x > 1_500)
+        ((+) 1)
+        1_000
+        (Matrix.init 1_000 1_000 (fun x y -> 
+             if x <= 500 then (None, x + 1_000) 
+             else (Some (1_501 - x), 1501)))
+        string_option_int_matrix;
+    end
+  else matrix_test "quadratic_matrix at 0, 2 is 5" quadratic_matrix 0 2 
+      pp_int 5;
 ]
 
 let tests =
