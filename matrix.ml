@@ -19,7 +19,8 @@ let init rows columns f =
 let from_2flt_int z1 z2 x =
   (z1 -. z2) /. (float_of_int (x - 1))
 
-(**[cx_init_fun ll x_step y_step m n] is [ll + n * x_step + m * y_step] *)
+(**[cx_init_fun ll x_step y_step m n] is the complex numer with real part
+   [l_re + n x_step] and imaginary part [t_im - m y_step]*)
 let cx_init_fun l_re t_im x_step y_step m n: Complex.t=
   let fn = float_of_int n in 
   let fm = float_of_int m in 
