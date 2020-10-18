@@ -1,0 +1,6 @@
+"Rule: ocaml: ml & cmi -> cmo (%=matrix )": "\155y\194E\017\254P\152\153;\128\145\212U\004%"
+"Rule: ocaml dependencies ml (%=matrix )": "\155A\195\191\129X\182\007D\224E\163\161/\171i"
+"Rule: ocaml dependencies mli (%=matrix )": "\240\216\234\\\170\146\199?Xe\176\177\"\216\187\218"
+"Rule: ocaml: mli -> cmi (%=matrix )": "\130\188j\166\188\241\012!\251\002fY>!!\018"
+"Resource: /home/pps33/3110/FinalProject/3110-FinalProject/matrix.ml": "rc\235\152'/\150\216x\006\b\253r;\024\196"
+"Resource: /home/pps33/3110/FinalProject/3110-FinalProject/matrix.mli": "=\022!L\225\153M\187\165.\012\175\207j\160s"
