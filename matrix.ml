@@ -61,9 +61,10 @@ let checker_opt f n = function
   |(None, y) -> if p f y then (Some n, y) else (None, y)
   | y -> y
 
-(**[val_to_tuple f p n x] is [(Some (n + 1), f y)] if [x = (None, y)]
-   and [p (f y)], [(None, f y)] if [x = (None, y)] and not [p (f y)], 
-   and [x] otherwise*)
+(**[val_to_tuple f p n x] is 
+   -[(Some n, y)] if [x = (None, y)] and [f y = None]
+   -[(Some z, y)] if [x = (None, y)] and [f y = None]
+   -[x] otherwise*)
 let val_to_tuple f n = function
   | (None, y) -> 
     begin
