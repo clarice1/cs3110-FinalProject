@@ -10,8 +10,13 @@ type cx_t = Complex.t t
 (**[to_lst m] is the rows of [m]*)
 val to_lst : 'a t -> 'a list list
 
+val rows : 'a t -> int
+
+val columns : 'a t -> int
+
 (**[init rows columns f] is the matrix with [rows] many rows
-   [columns] many columns, and the value and row i, column j is [f i j]*)
+   [columns] many columns, and the value and row i, column j is [f i j]
+   Requires: [rows, columns > 0]*)
 val init : int -> int -> (int -> int -> 'a) -> 'a t
 
 (**[complex_init ll ur height width] is the complex matrix with [width] many 
@@ -21,7 +26,7 @@ val init : int -> int -> (int -> int -> 'a) -> 'a t
    Requires: 
    [ll.re < ur.re]
    [ll.im < ur.im]
-   [width, height > 0]*)
+   [width, height > 1]*)
 val cx_init : Complex.t -> Complex.t -> int -> int -> cx_t
 
 (**[get i j m] is [m(i, j)]. Raises

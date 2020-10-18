@@ -98,6 +98,13 @@ let matrix_tests = [
   check_eq "list representation of 0123 matrix" [[0; 2]; [1; 3]] 
     (Matrix.to_lst matrix_0123) (pp_listlist pp_int);
 
+  check_eq "zero_matrix has 7 rows" 7 (Matrix.rows zero_matrix) pp_int;
+  check_eq "zero_matrix has 7 columns" 7 (Matrix.columns zero_matrix) pp_int;
+  check_eq "quadratic_matrix has 8 rows" 8 
+    (Matrix.rows quadratic_matrix) pp_int;
+  check_eq "quadratic matrix has 7 columns" 7 
+    (Matrix.columns quadratic_matrix) pp_int;
+
   matrix_test "zero_matrix at row 0, column 0 is 0" zero_matrix 0 0 
     pp_int 0;
   test_exception "zero matrix has no value at 10, 5" zero_matrix 10 5 

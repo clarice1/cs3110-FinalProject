@@ -4,13 +4,20 @@
     .   .   .
     .     . .
    an1 ... anm
-   RI: each list has the same number of elements.
+   RI: each list has the same number of elements. The list is nonempty, 
+   as are each of its elements. 
 *)
 type 'a t = 'a list list
 
 type cx_t = Complex.t t
 
 let to_lst m = m
+
+let rows = List.length
+
+let columns = function
+  | [] -> failwith "impossible"
+  | hd :: _ -> List.length hd
 
 let init rows columns f = 
   List.init rows (fun i -> (List.init columns (f i)))
@@ -76,6 +83,6 @@ let val_to_tuple f n = function
 
 let iterate_with_stop (f : 'a -> 'a option) (n : int) (m : 'a t) : 
   (int option* 'a) t = 
-  m |> map (checker f 0)
+  m |> map (fun x -> (None, x))
   |> map (iterate_fun (val_to_tuple f) 0 n)
   |> map (checker_opt f n)
