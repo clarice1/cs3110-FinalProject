@@ -1,4 +1,6 @@
-(**Matrix operations *)
+(**Matrix operations. 
+   Throughout, m(i, j) is the value of matrix m at row i, column j 
+   Throughout, f^k is the k-fold composition of f with itself*)
 
 (**The type of a matrix. Indices start at 0*)
 type 'a t
@@ -22,12 +24,12 @@ val init : int -> int -> (int -> int -> 'a) -> 'a t
    [width, height > 0]*)
 val cx_init : Complex.t -> Complex.t -> int -> int -> cx_t
 
-(**[get i j m] is the value of [m] at row [i] column [j]. Raises
+(**[get i j m] is [m(i, j)]. Raises
    [Invalid_argument "(i, j)"] if there is no value for that index.*)
 val get : int -> int -> 'a t -> 'a
 
 (**[iterate f n m] is the matrix with the same number of rows and columns as [m]
-   whose value at row [i] column [j] is [f] applied to [get i j m] [n] times.
+   whose value at row [i] column [j] is [f^n m(i, j)].
    Requires: [n >= 0]*)
 val iterate : ('a -> 'a) -> int -> 'a t -> 'a t
 
