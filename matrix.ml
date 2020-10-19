@@ -7,20 +7,17 @@
    RI: each list has the same number of elements. The list is nonempty, 
    as are each of its elements. 
 *)
-type 'a t = 'a list list
+type 'a t = 'a array array
 
 type cx_t = Complex.t t
 
-let to_lst m = m
+let to_lst m = m |> Array.map Array.to_list |> Array.to_list
 
-let rows = List.length
+let rows = Array.length
 
-let columns = function
-  | [] -> failwith "impossible"
-  | hd :: _ -> List.length hd
+let columns m = Array.length m.(0)
 
-let init rows columns f = 
-  List.init rows (fun i -> (List.init columns (f i)))
+let init rows columns f = Array.init rows (fun i -> Array.init columns (f i))
 
 (**[from_2flt_int z1 z2 x] is [(z1 - z2) / (x - 1)]*)
 let from_2flt_int z1 z2 x =
@@ -40,14 +37,14 @@ let cx_init (ll : Complex.t) (ur : Complex.t) height width =
 
 let get i j m = 
   try (
-    List.nth (List.nth m i) j) 
+    m.(i).(j))
   with 
-  |Failure _| Invalid_argument _ -> 
+  | Invalid_argument _ -> 
     raise 
       (Invalid_argument ("(" ^ string_of_int i ^ ", " ^ string_of_int j ^ ")"))
 
 (**[map m f] is the matrix obtained by applying [f] to each entry of [m]*)
-let map f m = List.map (List.map f) m
+let map f = Array.map (Array.map f)
 
 (**[iterate_fun f n x] is [f iter_num (f (iternum + 1) (...f iternum + n x)...)] 
    where [f] is applied [n] times
@@ -77,12 +74,11 @@ let val_to_tuple f n = function
     begin
       match f y with 
       | None -> (Some n, y)
-      | (Some z) -> (None, z)
+      | Some z -> (None, z)
     end
   | y -> y
 
-let iterate_with_stop (f : 'a -> 'a option) (n : int) (m : 'a t) : 
-  (int option* 'a) t = 
+let iterate_with_stop f n m = 
   m |> map (fun x -> (None, x))
   |> map (iterate_fun (val_to_tuple f) 0 n)
   |> map (checker_opt f n)

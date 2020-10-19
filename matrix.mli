@@ -10,8 +10,10 @@ type cx_t = Complex.t t
 (**[to_lst m] is the rows of [m]*)
 val to_lst : 'a t -> 'a list list
 
+(**[rows m] is the number of rows in [m]*)
 val rows : 'a t -> int
 
+(**[columns m] is the number of columns in [m]*)
 val columns : 'a t -> int
 
 (**[init rows columns f] is the matrix with [rows] many rows

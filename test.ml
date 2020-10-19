@@ -113,6 +113,10 @@ let matrix_tests = [
     (Invalid_argument "(5, 10)");
   test_exception "quadratic_matrix has no value at 6, 7" quadratic_matrix 6 7
     (Invalid_argument "(6, 7)");
+  test_exception "quadratic matrix has no value at -2, 1" quadratic_matrix (-2) 
+    1 (Invalid_argument "(-2, 1)");
+  test_exception "quadratic matrix has no value at 1, -2" quadratic_matrix 1 
+    (-2) (Invalid_argument "(1, -2)");
 
   matrix_test "cx_matrix at 0, 0 is -1 + 1i" cx_matrix 0 0 str_complex
     {re = -1.; im = 1.};
