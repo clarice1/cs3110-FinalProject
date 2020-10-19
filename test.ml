@@ -1,7 +1,4 @@
 open OUnit2
-(* If you get an "unbound module" error from the line below,
-   it's most likely because you have not (re)compiled [enigma.ml]. 
-   To do that, run [make build]. *)
 open Matrix
 
 (**Change to true if test cases involving larger matrices should be run *)

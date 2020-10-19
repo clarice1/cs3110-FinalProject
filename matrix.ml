@@ -1,10 +1,10 @@
-(**AF: The list [[a11,...,a1m], ..., [an1,...,anm]] represents the matrix
+(**AF: The array [|[|a11,...,a1m|], ..., [|an1,...,anm|]|] represents the matrix
    a11 ... a1m
     . .     .
     .   .   .
     .     . .
    an1 ... anm
-   RI: each list has the same number of elements. The list is nonempty, 
+   RI: each array has the same number of elements. The array is nonempty, 
    as are each of its elements. 
 *)
 type 'a t = 'a array array
