@@ -211,6 +211,8 @@ open Polynomial
 let clst1 : Complex.t list = [{re = 4.; im = 0.}]
 
 let polynomial_tests = [
+  check_eq "list to array" clst1 (Array.to_list (from_list clst1)) 
+    (pp_list str_complex);
 ]
 
 let tests =

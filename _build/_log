@@ -1,10 +1,21 @@
 ### Starting build.
-# Target: matrix.mli.depends, tags: { package(camlimages.core), package(ounit2), extension:mli, file:matrix.mli, ocaml, ocamldep, quiet, traverse }
+# Target: test.ml.depends, tags: { package(camlimages.core), package(ounit2), debug, extension:ml, file:test.ml, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package camlimages.core -modules test.ml > test.ml.depends # cached
+# Target: matrix.mli.depends, tags: { package(camlimages.core), package(ounit2), debug, extension:mli, file:matrix.mli, ocaml, ocamldep, quiet, traverse }
 ocamlfind ocamldep -package ounit2 -package camlimages.core -modules matrix.mli > matrix.mli.depends # cached
-# Target: matrix.cmi, tags: { package(camlimages.core), package(ounit2), byte, compile, extension:mli, file:matrix.mli, interf, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package camlimages.core -o matrix.cmi matrix.mli # cached
-# Target: matrix.ml.depends, tags: { package(camlimages.core), package(ounit2), extension:ml, file:matrix.ml, ocaml, ocamldep, quiet, traverse }
-ocamlfind ocamldep -package ounit2 -package camlimages.core -modules matrix.ml > matrix.ml.depends # cached
-# Target: matrix.cmo, tags: { package(camlimages.core), package(ounit2), byte, compile, extension:cmo, extension:ml, file:matrix.cmo, file:matrix.ml, implem, ocaml, quiet, traverse }
-ocamlfind ocamlc -c -package ounit2 -package camlimages.core -o matrix.cmo matrix.ml # cached
-# Compilation successful.
+# Target: polynomial.mli.depends, tags: { package(camlimages.core), package(ounit2), debug, extension:mli, file:polynomial.mli, ocaml, ocamldep, quiet, traverse }
+ocamlfind ocamldep -package ounit2 -package camlimages.core -modules polynomial.mli > polynomial.mli.depends # cached
+# Target: polynomial.cmi, tags: { package(camlimages.core), package(ounit2), byte, compile, debug, extension:mli, file:polynomial.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package ounit2 -package camlimages.core -o polynomial.cmi polynomial.mli # cached
+# Target: matrix.cmi, tags: { package(camlimages.core), package(ounit2), byte, compile, debug, extension:mli, file:matrix.mli, interf, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package ounit2 -package camlimages.core -o matrix.cmi matrix.mli
+# Target: test.cmo, tags: { package(camlimages.core), package(ounit2), byte, compile, debug, extension:cmo, extension:ml, file:test.cmo, file:test.ml, implem, ocaml, quiet, traverse }
+ocamlfind ocamlc -c -g -package ounit2 -package camlimages.core -o test.cmo test.ml
++ ocamlfind ocamlc -c -g -package ounit2 -package camlimages.core -o test.cmo test.ml
+File "test.ml", line 214, characters 48-65:
+214 |   check_eq "list to array" clst1 (Array.to_list (from_list clst1)) 
+                                                      ^^^^^^^^^^^^^^^^^
+Error: This expression has type Polynomial.t
+       but an expression was expected of type 'a array
+Command exited with code 2.
+# Compilation unsuccessful.
