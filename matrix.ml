@@ -82,3 +82,10 @@ let iterate_with_stop f n m =
   m |> map (fun x -> (None, x))
   |> map (iterate_fun (val_to_tuple f) 0 n)
   |> map (checker_opt f n)
+
+let map2 f = Array.map2 (Array.map2 f)
+
+let iterate_with_stop_2 f n m =
+  m |> map (fun x -> (None, x))
+  |> map2 (fun x y -> (iterate_fun (val_to_tuple (f x)) 0 n) y) m
+  |> map2 (fun x y -> checker_opt (f x) n y) m

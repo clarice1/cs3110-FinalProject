@@ -70,6 +70,9 @@ let iterate_with_stop_check name m p f n expected_out printer =
     (Matrix.iterate_with_stop (fun x -> if p x then None else Some (f x)) n m) 
     printer
 
+let iterate_with_stop_2_check name m f n expected_out printer =
+  check_eq name expected_out (Matrix.iterate_with_stop_2 f n m) printer
+
 (**The 7x7 matrix with all 0s *)
 let zero_matrix = Matrix.init 7 7 (fun x y -> 0)
 
@@ -212,6 +215,34 @@ let matrix_tests = [
     end
   else matrix_test "quadratic_matrix at 0, 2 is 5" quadratic_matrix 0 2 
       pp_int 5;
+
+  iterate_with_stop_2_check 
+    "add initial_val to 0123, stopping when bigger than 2"
+    matrix_0123 
+    (fun x y -> if y > 2 then None else Some (x + y)) 
+    2
+    (Matrix.init 2 2 (fun x y -> 
+         match x, y with 
+         | 0, 0 -> (None, 0)
+         | 1, 0 -> (Some 2, 3)
+         | 0, 1 -> (Some 1, 4)
+         | 1, 1 -> (Some 0, 3)
+         | _ -> failwith "impossible"))
+    string_option_int_matrix;
+
+  iterate_with_stop_2_check 
+    "square then add initial_val to 0123, stopping when bigger than 5"
+    matrix_0123 
+    (fun x y -> if y > 10 then None else Some (x + y * y)) 
+    10
+    (Matrix.init 2 2 (fun x y -> 
+         match x, y with 
+         | 0, 0 -> (None, 0)
+         | 1, 0 -> (Some 3, 26)
+         | 0, 1 -> (Some 2, 38)
+         | 1, 1 -> (Some 1, 12)
+         | _ -> failwith "impossible"))
+    string_option_int_matrix;
 ]
 
 let tests =

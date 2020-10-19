@@ -47,3 +47,9 @@ val iterate : ('a -> 'a) -> int -> 'a t -> 'a t
    -[(z -> Option.bind z f)^(k+1) (Some m(i,j)) = None], 
    or [(None, f^n(z))] if no such [k] exists.*)
 val iterate_with_stop : ('a -> 'a option) -> int -> 'a t -> (int option * 'a) t
+
+(**Like iterate_with_stop, but the function map also depend on its initial
+   value. The input function should have as its first argument the initial
+   value and its second the most recent value. *)
+val iterate_with_stop_2 : ('a -> 'a -> 'a option) -> int -> 'a t -> 
+  (int option * 'a) t
