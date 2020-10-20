@@ -208,12 +208,61 @@ let matrix_tests = [
 
 open Polynomial
 
-let clst1 : Complex.t list = [{re = 4.; im = 0.}]
+let eval_test 
+    (name : string) 
+    (p : t ) 
+    (z : Complex.t)
+    (expected_output : Complex.t) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (eval p z)
+        ~printer:str_complex)
+
+let get_bound_test
+    (name : string)
+    (p : t)
+    (expected_output : float) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (get_bound p)~printer:string_of_float)
+
+let bounded_test
+    (name : string)
+    (p : t)
+    (z : Complex.t)
+    (expected_output : Complex.t option) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (bounded p z))
+
+let polydeg1 = from_list [{re = 1.; im = 0.}]
+let polydeg2 = from_list [{re = 1.; im = 0.}; {re = 4.; im = 0.}]
+let polydeg3 = from_list [{re = 1.; im = 45.}]
+let polydeg4 = from_list [{re = 1.; im = 7.}; {re = 4.; im = 2.}]
+let (z1 : Complex.t) = {re = 4.; im = 0.}
+let (z2 : Complex.t) = {re = 2.; im = 1.}
+let polydeg5 = from_list [{re = 54.; im = 0.}; {re = 3.; im = 0.}; 
+                          {re = 0.; im = 9.}]
+let polydeg6 = from_list [{re = 1.; im = 0.}; {re = 0.; im = 0.}]
+let polydeg7 = from_list [{re = -1.; im = 0.}; {re = 3.; im = 0.}]
+let polydeg8 = from_list [{re = 70.; im = 0.}; {re = 78.; im = 0.}]
+let polydeg9 = from_list [{re = 0.3; im = 0.}; {re = 78.; im = 0.}]
 
 let polynomial_tests = [
-  check_eq "list to array" clst1 (Array.to_list (from_list clst1)) 
-    (pp_list str_complex);
+  eval_test "zero polynomial" zero {re = 4.; im = 5.} {re = 0.; im = 0.};
+  eval_test "deg 0 poly, no im" polydeg1 z1 {re = 1.; im = 0.};
+  eval_test "deg 1 poly, no im" polydeg2 z1 {re = 8.; im = 0.};
+  eval_test "deg 0 poly w im" polydeg3 z2 {re = 1.; im = 45.};
+  eval_test "deg 1 poly w im" polydeg4 z2 {re = -1.; im = 17.};
+  get_bound_test "zero poly" zero infinity;
+  get_bound_test "p = 54x^2 + 3x + 9i" polydeg5 1.;
+  get_bound_test "p = constant" polydeg1 infinity;
+  get_bound_test "|a| < 1 " polydeg9 infinity;
+  get_bound_test "|a| > 1 " polydeg8 0.;
+  get_bound_test "|a| = 1, a != 1, b != 0" polydeg7 infinity;
+  get_bound_test "|a| = 1, a = 1, b = 0" polydeg6 infinity;
+  get_bound_test "|a| = 1, a = 1, b != 0" polydeg2 0.;
+  bounded_test "poly diverges" polydeg2 z1 None;
+  bounded_test "poly does not diverge" polydeg1 z1 (Some {re = 1.; im = 0.})
 ]
+
 
 let tests =
   "test suite for A1"  >::: List.flatten [

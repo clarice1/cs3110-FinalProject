@@ -47,4 +47,5 @@ let get_bound (p : Complex.t list) =
   in 
   if size >= 2 then Float.max 1. (form 1. (List.rev p)) else bound_deg_l2 size p
 
-let bounded p z = failwith "Unimplemented"
+let bounded p z =
+  if get_bound p = infinity then Some (eval p z) else None

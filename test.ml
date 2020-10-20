@@ -208,13 +208,6 @@ let matrix_tests = [
 
 open Polynomial
 
-let from_list_test 
-    (name : string) 
-    (lst : Complex.t list)
-    (expected_output : t) : test = 
-  name >:: (fun _ -> 
-      assert_equal expected_output (from_list lst))
-
 let eval_test 
     (name : string) 
     (p : t ) 
@@ -231,6 +224,14 @@ let get_bound_test
   name >:: (fun _ -> 
       assert_equal expected_output (get_bound p)~printer:string_of_float)
 
+let bounded_test
+    (name : string)
+    (p : t)
+    (z : Complex.t)
+    (expected_output : Complex.t option) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (bounded p z))
+
 let polydeg1 = from_list [{re = 1.; im = 0.}]
 let polydeg2 = from_list [{re = 1.; im = 0.}; {re = 4.; im = 0.}]
 let polydeg3 = from_list [{re = 1.; im = 45.}]
@@ -245,7 +246,6 @@ let polydeg8 = from_list [{re = 70.; im = 0.}; {re = 78.; im = 0.}]
 let polydeg9 = from_list [{re = 0.3; im = 0.}; {re = 78.; im = 0.}]
 
 let polynomial_tests = [
-  from_list_test "zero poly is []" [] zero;
   eval_test "zero polynomial" zero {re = 4.; im = 5.} {re = 0.; im = 0.};
   eval_test "deg 0 poly, no im" polydeg1 z1 {re = 1.; im = 0.};
   eval_test "deg 1 poly, no im" polydeg2 z1 {re = 8.; im = 0.};
@@ -259,7 +259,10 @@ let polynomial_tests = [
   get_bound_test "|a| = 1, a != 1, b != 0" polydeg7 infinity;
   get_bound_test "|a| = 1, a = 1, b = 0" polydeg6 infinity;
   get_bound_test "|a| = 1, a = 1, b != 0" polydeg2 0.;
+  bounded_test "poly diverges" polydeg2 z1 None;
+  bounded_test "poly does not diverge" polydeg1 z1 (Some {re = 1.; im = 0.})
 ]
+
 
 let tests =
   "test suite for A1"  >::: List.flatten [

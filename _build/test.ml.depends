@@ -1,1 +1,1 @@
-test.ml: Array Complex List Matrix OUnit2 Polynomial
+test.ml: Complex List Matrix OUnit2 Polynomial
