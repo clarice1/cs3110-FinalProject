@@ -1,18 +1,25 @@
 (** 
-   Representation of a Julia Set in a .bmp image.
+   Representation of a matrix in a .bmp image.
 
-   This module draws the Julia Set from a particular function           (*QUESTION: Do we need any other inputs here?*)
+   This module maps a matrix onto a graphic .bmp image, with each value in the
+   matrix determining the particular color in the corresponding region on .bmp.
+   It further handles the colorization of a Julia Set.
 *)
 
 
-(** An image.*)
-open Images                                                             (*we should import Images into our _tags file, like in A2 *)
+open Images
 
-(*QUESTION: I couldn't figure out each input was supposed to represent; we need to revisit this entire mli *)
-(** [julia_color d iter] is the color of a particular complex coordinate in the matrix*)
+
+(** [julia_color coordinate iter] is the color of a particular complex
+    [coordinate] in the matrix, having applied the function for this particular 
+    Julia Set [iter] times. N.B. [coordinate] is a pair containing the final 
+    value option after applying the function [iter] times (should it converge)
+    as well as the complex coordinate *)
 val julia_color : (int option * Complex.t) -> int -> Color.rgb
 
-(** [ colorize f m ] takes a function f that returns a *)
+(** [colorize f m ] is the .bmp image of matrix [m] with function [f] applied to
+    each complex coordinate to determine the color of that corresponding region
+    of the image *)
 val colorize : ((int option * Complex.t) -> Color.rgb) -> 
   (int option * Complex.t) Matrix.t -> Images.t
 

@@ -16,8 +16,8 @@ val zero : t
 val eval : t -> Complex.t -> Complex.t
 
 (** [bounded p input] is [None] if iterating polynomial [p] beginning at [input]
-    is guaranteed to diverge and [Some eval p z] if [p] is not guaranteed to (*QUESTION: what does eval do? Why do we have it here?*)
-    diverge after [input] *)
+    is guaranteed to diverge and [Some (eval p input)] if [p] is not guaranteed 
+    to diverge *)
 val bounded : t -> Complex.t -> Complex.t option
 
 (** [from_list lst] is the polynomial with coefficients in [lst]. The 

@@ -5,15 +5,11 @@
    complex matrices.
 *)
 
-(**Matrix operations. 
-   Throughout, m(i, j) is the value of matrix m at row i, column j 
-   Throughout, f^k is the k-fold composition of f with itself*)
-
 (** ['a t] is the type of a matrix containing values of type ['a] *)
 type 'a t
 
 (** [cx_t] is the type representing complex numbers *)
-type cx_t = Complex.t t                                              (*QUESTION: Why do we need this? Isn't Complex.t t enough? *)
+type cx_t = Complex.t t
 
 (**[to_lst m] is a list of the rows of matrix [m], each represented as a list *)
 val to_lst : 'a t -> 'a list list
@@ -46,13 +42,8 @@ val iterate : ('a -> 'a) -> int -> 'a t -> 'a t
 (**[iterate_with_stop f n m] is [iterate f n m] except each value in the output
    matrix is an ['a] option, with [Some f^n m(i, j)] representing the n-fold 
    composition of f with itself and [None] the value stored if [f^n m(i, j)]
-   diverges sufficiently. 
-
-
-                                                                        (*QUESTION: Is this a correct way to describe iterate_with_stop?*)
-   if 0 <= k <= n is 
-   such that 
-   -[(z -> Option.bind z f)^k (Some m(i, j)) = Some z] and 
-   -[(z -> Option.bind z f)^(k+1) (Some m(i,j)) = None], 
-   or [(None, f^n(z))] if no such [k] exists.*)
+   diverges sufficiently. The options are outputted in a pair, along with the 
+   value [f^n m(i, j)] converges to (if it does converge) or the last value 
+   outputted by [f] before it is decided that [f] will diverge.
+*)
 val iterate_with_stop : ('a -> 'a option) -> int -> 'a t -> (int option * 'a) t
