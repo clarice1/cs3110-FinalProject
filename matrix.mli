@@ -19,6 +19,12 @@ val to_lst : 'a t -> 'a list list
    matrix is [f i j] *)
 val init : int -> int -> (int -> int -> 'a) -> 'a t
 
+(**[rows m] is the number of rows in [m]*)
+val rows : 'a t -> int
+
+(**[columns m] is the number of columns in [m]*)
+val columns : 'a t -> int
+
 (**[complex_init ll ur rows columns] is the complex matrix with [rows] many 
    rows and [columns] many columns whose values are a grid of evenly spaced 
    complex numbers with the value [ll] in its lower left corner and the value 
