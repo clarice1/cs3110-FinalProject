@@ -23,10 +23,9 @@ val init : int -> int -> (int -> int -> 'a) -> 'a t
    rows and [columns] many columns whose values are a grid of evenly spaced 
    complex numbers with the value [ll] in its lower left corner and the value 
    [ur] in its upper right corner
-   Requires: the real number in [ll] is less than the real number in [ur] and
-             the imaginary number in [ll] is less than the imaginary number in
-             [ur] and
-             [rows] and [columns] are both greater than 0 *)
+   Requires: [ll.re < ur.re]
+             [ll.im < ur.im]
+             [rows, columns > 1] *)
 val cx_init : Complex.t -> Complex.t -> int -> int -> cx_t
 
 (**[get i j m] is the value in the [i]th row and [j]th column of matrix [m] 
@@ -39,11 +38,16 @@ val get : int -> int -> 'a t -> 'a
    Requires: [n] is greater than 0 *)
 val iterate : ('a -> 'a) -> int -> 'a t -> 'a t
 
-(**[iterate_with_stop f n m] is [iterate f n m] except each value in the output
-   matrix is an ['a] option, with [Some f^n m(i, j)] representing the n-fold 
-   composition of f with itself and [None] the value stored if [f^n m(i, j)]
-   diverges sufficiently. The options are outputted in a pair, along with the 
-   value [f^n m(i, j)] converges to (if it does converge) or the last value 
-   outputted by [f] before it is decided that [f] will diverge.
-*)
+(**[iterate_with_stop f n m] is the matrix with the same number of rows and 
+   columns as [m] but whose value at index row i, column j is (Some k, z) 
+   if 0 <= k <= n is such that 
+      -[(z -> Option.bind z f)^k (Some m(i, j)) = Some z] and 
+      -[(z -> Option.bind z f)^(k+1) (Some m(i,j)) = None], 
+      or [(None, f^n(z))] if no such [k] exists *)
 val iterate_with_stop : ('a -> 'a option) -> int -> 'a t -> (int option * 'a) t
+
+(**Like iterate_with_stop, but the function map also depends on its initial
+   value. The input function should have as its first argument the initial
+   value and its second the most recent value. *)
+val iterate_with_stop_2 : ('a -> 'a -> 'a option) -> int -> 'a t -> 
+  (int option * 'a) t

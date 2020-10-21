@@ -9,7 +9,6 @@
 
 open Images
 
-
 (** [julia_color coordinate iter] is the color of a particular complex
     [coordinate] in the matrix, having applied the function for this particular 
     Julia Set [iter] times. N.B. [coordinate] is a pair containing the final 
