@@ -25,7 +25,7 @@ val init : int -> int -> (int -> int -> 'a) -> 'a t
    [ur] in its upper right corner
    Requires: [ll.re < ur.re]
              [ll.im < ur.im]
-             [rows, columns > 1] *)
+             [rows, columns >= 2] *)
 val cx_init : Complex.t -> Complex.t -> int -> int -> cx_t
 
 (**[get i j m] is the value in the [i]th row and [j]th column of matrix [m] 
