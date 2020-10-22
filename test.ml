@@ -1,7 +1,4 @@
 open OUnit2
-(* If you get an "unbound module" error from the line below,
-   it's most likely because you have not (re)compiled [matrix.ml]. 
-   To do that, run [make build]. *)
 open Matrix
 
 (**Change to true if test cases involving larger matrices should be run *)
@@ -73,6 +70,9 @@ let iterate_with_stop_check name m p f n expected_out printer =
     (Matrix.iterate_with_stop (fun x -> if p x then None else Some (f x)) n m) 
     printer
 
+let iterate_with_stop_2_check name m f n expected_out printer =
+  check_eq name expected_out (Matrix.iterate_with_stop_2 f n m) printer
+
 (**The 7x7 matrix with all 0s *)
 let zero_matrix = Matrix.init 7 7 (fun x y -> 0)
 
@@ -101,6 +101,13 @@ let matrix_tests = [
   check_eq "list representation of 0123 matrix" [[0; 2]; [1; 3]] 
     (Matrix.to_lst matrix_0123) (pp_listlist pp_int);
 
+  check_eq "zero_matrix has 7 rows" 7 (Matrix.rows zero_matrix) pp_int;
+  check_eq "zero_matrix has 7 columns" 7 (Matrix.columns zero_matrix) pp_int;
+  check_eq "quadratic_matrix has 8 rows" 8 
+    (Matrix.rows quadratic_matrix) pp_int;
+  check_eq "quadratic matrix has 7 columns" 7 
+    (Matrix.columns quadratic_matrix) pp_int;
+
   matrix_test "zero_matrix at row 0, column 0 is 0" zero_matrix 0 0 
     pp_int 0;
   test_exception "zero matrix has no value at 10, 5" zero_matrix 10 5 
@@ -109,6 +116,10 @@ let matrix_tests = [
     (Invalid_argument "(5, 10)");
   test_exception "quadratic_matrix has no value at 6, 7" quadratic_matrix 6 7
     (Invalid_argument "(6, 7)");
+  test_exception "quadratic matrix has no value at -2, 1" quadratic_matrix (-2) 
+    1 (Invalid_argument "(-2, 1)");
+  test_exception "quadratic matrix has no value at 1, -2" quadratic_matrix 1 
+    (-2) (Invalid_argument "(1, -2)");
 
   matrix_test "cx_matrix at 0, 0 is -1 + 1i" cx_matrix 0 0 str_complex
     {re = -1.; im = 1.};
@@ -204,6 +215,34 @@ let matrix_tests = [
     end
   else matrix_test "quadratic_matrix at 0, 2 is 5" quadratic_matrix 0 2 
       pp_int 5;
+
+  iterate_with_stop_2_check 
+    "add initial_val to 0123, stopping when bigger than 2"
+    matrix_0123 
+    (fun x y -> if y > 2 then None else Some (x + y)) 
+    2
+    (Matrix.init 2 2 (fun x y -> 
+         match x, y with 
+         | 0, 0 -> (None, 0)
+         | 1, 0 -> (Some 2, 3)
+         | 0, 1 -> (Some 1, 4)
+         | 1, 1 -> (Some 0, 3)
+         | _ -> failwith "impossible"))
+    string_option_int_matrix;
+
+  iterate_with_stop_2_check 
+    "square then add initial_val to 0123, stopping when bigger than 5"
+    matrix_0123 
+    (fun x y -> if y > 10 then None else Some (x + y * y)) 
+    10
+    (Matrix.init 2 2 (fun x y -> 
+         match x, y with 
+         | 0, 0 -> (None, 0)
+         | 1, 0 -> (Some 3, 26)
+         | 0, 1 -> (Some 2, 38)
+         | 1, 1 -> (Some 1, 12)
+         | _ -> failwith "impossible"))
+    string_option_int_matrix;
 ]
 
 open Polynomial

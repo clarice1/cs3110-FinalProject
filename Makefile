@@ -38,3 +38,6 @@ docs-private: build
 	ocamlfind ocamldoc -I _build -package camlimages.core,ANSITerminal \
 		-html -stars -d doc.private \
 		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
+
+run: 
+	$(OCAMLBUILD) $(MAIN) && ./$(MAIN) (*not really sure how this works...*)
