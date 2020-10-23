@@ -22,8 +22,9 @@ val julia_color : int -> col -> (int option * Complex.t) -> Color.rgb
 (** [colorize f m ] is the .bmp image of matrix [m] with function [f] applied to
     each complex coordinate to determine the color of that corresponding region
     of the image *)
-val colorize : (int -> col -> (int option * Complex.t) -> Color.rgb) -> 
-  (int option * 'a) Matrix.t -> Images.t
+val colorize : int -> col -> (int -> col -> 
+                              (int option * Complex.t) -> 
+                              Color.rgb) -> (int option * Complex.t) Matrix.t -> Images.t
 
 
 

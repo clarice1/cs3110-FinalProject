@@ -301,12 +301,40 @@ let polynomial_tests = [
   bounded_test "poly diverges" polydeg2 z1 None;
   bounded_test "poly does not diverge" polydeg1 z1 (Some {re = 1.; im = 0.})
 ]
+open ToImage
+
+let julia_color_test
+    (name : string)
+    (iter : int)
+    (col : col)
+    (coordinate : (int option * Complex.t))
+    (expected_output : Color.rgb) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (julia_color iter col coordinate))
+
+let black : Color.rgb = {r = 0; g = 0; b = 0}
+let light_blue : Color.rgb = {r = 0; g = 0; b = 255 - ((500) * 255 / 5000) }
+let dark_red : Color.rgb = {r = 255 - ((3000) * 255 / 5000); g = 0; b = 0}
+let light_green : Color.rgb = {r = 0; g = 255 - ((300) * 255 / 2000); b = 0}
+
+let toImage_tests = [
+  julia_color_test "Point is colored black" 5000 R (None, {re = 0.; im = 0.}) 
+    black;
+  julia_color_test "Point is colored with a light blue" 
+    5000 B (Some 500, {re = 2.; im = 1.;}) light_blue;
+  julia_color_test "Point is colored with a dark_red" 
+    5000 R (Some 3000, {re = 2.; im = 1.;}) dark_red;
+  julia_color_test "Point is colored with a dark_red" 
+    2000 G (Some 300, {re = 2.; im = 1.;}) light_green;
+
+]
 
 
 let tests =
   "test suite for A1"  >::: List.flatten [
     matrix_tests;
     polynomial_tests;
+    toImage_tests;
   ]
 
 let _ = run_test_tt_main tests
