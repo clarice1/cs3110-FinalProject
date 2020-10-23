@@ -10,6 +10,9 @@ let pp_string s = "\"" ^ s ^ "\""
 (** [pp_int] pretty-prints int [x]. *)
 let pp_int x = pp_string (string_of_int x)
 
+(** [pp_float] pretty-prints float [x]. *)
+let pp_float x = pp_string (string_of_float x)
+
 (** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt]
     to pretty-print each element of [lst]. *)
 let pp_list pp_elt lst =
@@ -88,7 +91,7 @@ let matrix_0123 = Matrix.init 2 2 (fun x y -> x + 2 * y)
 (**The 1_000 by 1_000 matrix whose value at row i, column j is i *)
 let big_row_num = Matrix.init 1_000 1_000 (fun x y -> x)
 
-let string_option_int_matrix= 
+let string_option_int_matrix = 
   str_matrix (fun (n, x) -> match n, x with 
       | (None, x) -> "(None, " ^ pp_string (string_of_int x) ^ ")"
       | (Some n, x) -> 
@@ -242,9 +245,68 @@ let matrix_tests = [
     string_option_int_matrix;
 ]
 
+open Polynomial
+
+let eval_test 
+    (name : string) 
+    (p : t ) 
+    (z : Complex.t)
+    (expected_output : Complex.t) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (eval p z)
+        ~printer:str_complex)
+
+let get_bound_test
+    (name : string)
+    (p : t)
+    (expected_output : float) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (get_bound p)~printer:string_of_float)
+
+let bounded_test
+    (name : string)
+    (p : t)
+    (z : Complex.t)
+    (expected_output : Complex.t option) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (bounded p z))
+
+let polydeg1 = from_list [{re = 1.; im = 0.}]
+let polydeg2 = from_list [{re = 1.; im = 0.}; {re = 4.; im = 0.}]
+let polydeg3 = from_list [{re = 1.; im = 45.}]
+let polydeg4 = from_list [{re = 1.; im = 7.}; {re = 4.; im = 2.}]
+let (z1 : Complex.t) = {re = 4.; im = 0.}
+let (z2 : Complex.t) = {re = 2.; im = 1.}
+let polydeg5 = from_list [{re = 54.; im = 0.}; {re = 3.; im = 0.}; 
+                          {re = 0.; im = 9.}]
+let polydeg6 = from_list [{re = 1.; im = 0.}; {re = 0.; im = 0.}]
+let polydeg7 = from_list [{re = -1.; im = 0.}; {re = 3.; im = 0.}]
+let polydeg8 = from_list [{re = 70.; im = 0.}; {re = 78.; im = 0.}]
+let polydeg9 = from_list [{re = 0.3; im = 0.}; {re = 78.; im = 0.}]
+
+let polynomial_tests = [
+  eval_test "zero polynomial" zero {re = 4.; im = 5.} {re = 0.; im = 0.};
+  eval_test "deg 0 poly, no im" polydeg1 z1 {re = 1.; im = 0.};
+  eval_test "deg 1 poly, no im" polydeg2 z1 {re = 8.; im = 0.};
+  eval_test "deg 0 poly w im" polydeg3 z2 {re = 1.; im = 45.};
+  eval_test "deg 1 poly w im" polydeg4 z2 {re = -1.; im = 17.};
+  get_bound_test "zero poly" zero infinity;
+  get_bound_test "p = 54x^2 + 3x + 9i" polydeg5 1.;
+  get_bound_test "p = constant" polydeg1 infinity;
+  get_bound_test "|a| < 1 " polydeg9 infinity;
+  get_bound_test "|a| > 1 " polydeg8 0.;
+  get_bound_test "|a| = 1, a != 1, b != 0" polydeg7 infinity;
+  get_bound_test "|a| = 1, a = 1, b = 0" polydeg6 infinity;
+  get_bound_test "|a| = 1, a = 1, b != 0" polydeg2 0.;
+  bounded_test "poly diverges" polydeg2 z1 None;
+  bounded_test "poly does not diverge" polydeg1 z1 (Some {re = 1.; im = 0.})
+]
+
+
 let tests =
   "test suite for A1"  >::: List.flatten [
-    matrix_tests
+    matrix_tests;
+    polynomial_tests;
   ]
 
 let _ = run_test_tt_main tests
