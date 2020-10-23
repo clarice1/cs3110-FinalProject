@@ -283,6 +283,10 @@ let polydeg6 = from_list [{re = 1.; im = 0.}; {re = 0.; im = 0.}]
 let polydeg7 = from_list [{re = -1.; im = 0.}; {re = 3.; im = 0.}]
 let polydeg8 = from_list [{re = 70.; im = 0.}; {re = 78.; im = 0.}]
 let polydeg9 = from_list [{re = 0.3; im = 0.}; {re = 78.; im = 0.}]
+let polydeg10 = from_list [{re = 4.; im = 0.}; {re = 0.; im = 2.}; 
+                           {re = 7.; im = 0.}]
+let polydeg11 = from_list [{re = 17.; im = 4.}; {re = 4.; im = 0.}; 
+                           {re = 0.; im = 2.}; {re = 7.; im = 0.}]
 
 let polynomial_tests = [
   eval_test "zero polynomial" zero {re = 4.; im = 5.} {re = 0.; im = 0.};
@@ -292,6 +296,8 @@ let polynomial_tests = [
   eval_test "deg 1 poly w im" polydeg4 z2 {re = -1.; im = 17.};
   get_bound_test "zero poly" zero infinity;
   get_bound_test "p = 54x^2 + 3x + 9i" polydeg5 1.;
+  get_bound_test "p = 4x^2 + 2ix + 7" polydeg10 2.5;
+  get_bound_test "p = (17+4i)x^3 + 4x^2 + 2ix + 7" polydeg11 1.;
   get_bound_test "p = constant" polydeg1 infinity;
   get_bound_test "|a| < 1 " polydeg9 infinity;
   get_bound_test "|a| > 1 " polydeg8 0.;
