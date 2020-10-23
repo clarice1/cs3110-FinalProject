@@ -19,7 +19,7 @@ type col = R | B | G
     as well as the complex coordinate *)
 val julia_color : int -> col -> (int option * Complex.t) -> Color.rgb
 
-(** [colorize iter of_color f m ] is the .bmp image of matrix [m] with function [f] applied to
+(** [colorize f m ] is the .bmp image of matrix [m] with function [f] applied to
     each complex coordinate to determine the color of that corresponding region
     of the image *)
 val colorize : ((int option * 'a) -> Color.rgb) -> 

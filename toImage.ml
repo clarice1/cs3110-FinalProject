@@ -19,7 +19,7 @@ let julia_color iter of_color coordinate =
              {b = 0; r = 0; g = 255 - ((coord_iter) * 255 / iter);} in green_col
   end
 
-let colorize f m =
+let colorize (f : ((int option * 'a) -> Color.rgb)) m =
   let rows = rows m
   and columns = columns m in
   let orig_image = Rgb24.make columns rows {r = 0; g = 0; b = 0; } in 
