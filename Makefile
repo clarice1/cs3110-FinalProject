@@ -42,5 +42,5 @@ docs-private: build
 		-html -stars -d doc.private \
 		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 
-run: 
-	$(OCAMLBUILD) $(MAIN) && ./$(MAIN) (*not really sure how this works...*)
+fractal: 
+	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
