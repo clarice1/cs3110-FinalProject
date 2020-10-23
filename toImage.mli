@@ -7,7 +7,7 @@
 *)
 open Images
 
-(** [ col ] is the type invariant that represents the color desired by the 
+(** [col] is the type invariant that represents the color desired by the 
     client for the fractal. If the col were to be R, then the fractal would be 
     colored with shades of red. This is also true for B (Blue) and G (Green). *)
 type col = R | B | G
