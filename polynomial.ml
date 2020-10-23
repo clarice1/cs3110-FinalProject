@@ -43,7 +43,7 @@ let get_bound p =
   let f acc c = 
     acc +. Complex.norm c
   in
-  if size >= 2 then List.fold_left f 0. (pop p) /. peek p |> Float.max 1.
+  if size >= 2 then List.fold_left f 1. (pop p) /. peek p |> Float.max 1.
   else bound_deg_l2 size p
 
 let bounded p z =
