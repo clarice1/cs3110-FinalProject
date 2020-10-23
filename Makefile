@@ -1,4 +1,4 @@
-MODULES=matrix
+MODULES=matrix polynomial toImage main
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -6,6 +6,9 @@ TEST=test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 BW=black_and_white.byte
+
+zip:
+	zip ms1.zip *.ml* _tags Makefile
 
 default: build
 	utop
@@ -24,7 +27,7 @@ bw:
 
 clean:
 	ocamlbuild -clean
-	rm -rf doc.public doc.private a.bmp
+	rm -rf doc.public doc.private a.bmp ms1.zip
 
 docs: docs-public docs-private
 	
