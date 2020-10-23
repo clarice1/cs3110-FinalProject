@@ -20,7 +20,7 @@ let julia_color iter of_color coordinate =
   end
 
 let colorize iter of_color 
-    (f : (int -> col -> int option * Complex.t -> Color.rgb)) m =
+    (f : (int -> col -> int option * 'a -> Color.rgb)) m =
   let rows = rows m
   and columns = columns m in
   let orig_image = Rgb24.make columns rows {r = 0; g = 0; b = 0; } in 
