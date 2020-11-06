@@ -13,6 +13,41 @@ let eval p z =
   in 
   List.fold_left f Complex.zero p
 
+(**[de_zero p] is [p] without leading 0s*)
+let rec de_zero = function 
+  | hd :: tl as s -> if hd = Complex.zero then de_zero tl else s
+  | x -> x
+
+let rec diff_with_degree deg = function
+  | [] | [_] -> []
+  | hd :: tl -> (Complex.mul {re = float_of_int deg; im = 0.} hd) :: 
+                diff_with_degree (deg - 1) tl
+
+let diff p = diff_with_degree (List.length p) p |> de_zero
+
+(**[of_degree n p] is [p] with [n - degree(p)] many 0s added*)
+let rec of_degree n p = if List.length p - 1 <= n 
+  then Complex.zero :: of_degree (n - 1) p
+  else p
+
+let sum p q = 
+  let size = (max (List.length p) (List.length q)) in 
+  let p = of_degree size p in 
+  let q = of_degree size q in 
+  List.map2 (fun a b -> Complex.add a b) p q |> de_zero
+
+let rec mul p = function 
+  | hd :: tl -> 
+    sum (mul p tl) 
+      (List.map (Complex.mul hd) (p @ (List.init (List.length tl) 
+                                         (fun x -> Complex.zero))))
+  | [] -> []
+
+let from_roots = 
+  List.fold_left (fun acc c -> mul (from_list [Complex.one; Complex.neg c]) acc) 
+    [Complex.one]
+
+
 (** [bound_deg_l2 size p] returns infinity if [p] is of degree 1 or less. 
     It returns infinity if [p] does not diverge and it returns 0. if [p] 
     diverges immediately. *)
@@ -27,24 +62,13 @@ let bound_deg_l2 size p =
       if a <> Complex.one || norm b = 0. then infinity else 0.
     | _ -> failwith "broke if statement" 
 
-(** [peek lst] returns the first element of [lst].
-    Returns: failwith "Empty" if [lst] is the empty list. *)
-let peek = function
-  | [] -> failwith "Empty"
-  | x :: _ -> Complex.norm x
-
-(** [pop lst] returns [lst] without its first element *)
-let pop = function
-  | [] -> []
-  | _ :: xs -> xs
-
 let get_bound p = 
-  let size = List.length p - 1 in
-  let f acc c = 
-    acc +. Complex.norm c
-  in
-  if size >= 2 then List.fold_left f 1. (pop p) /. peek p |> Float.max 1.
-  else bound_deg_l2 size p
+  match p with
+  | [] | [_] | [_; _] -> bound_deg_l2 (List.length p - 1) p
+  | hd :: tl -> 
+    let f acc c = 
+      acc +. Complex.norm c
+    in List.fold_left f 1. tl /. (Complex.norm hd) |> Float.max 1.
 
 let bounded p z =
   if Complex.norm z > get_bound p then None else Some (eval p z)

@@ -271,6 +271,14 @@ let bounded_test
   name >:: (fun _ -> 
       assert_equal expected_output (bounded p z))
 
+let sum_test name p q z = 
+  check_eq name (Complex.add (Polynomial.eval p z) (Polynomial.eval q z))
+    (Polynomial.eval (Polynomial.sum p q) z) str_complex
+
+let mul_test name p q z = 
+  check_eq name (Complex.mul (Polynomial.eval p z) (Polynomial.eval q z))
+    (Polynomial.eval (Polynomial.mul p q) z) str_complex
+
 let polydeg1 = from_list [{re = 1.; im = 0.}]
 let polydeg2 = from_list [{re = 1.; im = 0.}; {re = 4.; im = 0.}]
 let polydeg3 = from_list [{re = 1.; im = 45.}]
@@ -305,7 +313,15 @@ let polynomial_tests = [
   get_bound_test "|a| = 1, a = 1, b = 0" polydeg6 infinity;
   get_bound_test "|a| = 1, a = 1, b != 0" polydeg2 0.;
   bounded_test "poly diverges" polydeg2 z1 None;
-  bounded_test "poly does not diverge" polydeg1 z1 (Some {re = 1.; im = 0.})
+  bounded_test "poly does not diverge" polydeg1 z1 (Some {re = 1.; im = 0.});
+
+  sum_test "two degree 2s at 7" polydeg5 polydeg10 {re = 7.; im = 0.};
+  sum_test "degree 2 plus degree 3 at 7" polydeg5 polydeg11 {re = 7.; im = 0.};
+  sum_test "degree 3 plus degree 2 at 7" polydeg11 polydeg5 {re = 7.; im = 0.};
+
+  mul_test "two degree 2s at 7" polydeg5 polydeg10 {re = 7.; im = 0.};
+  mul_test "degree 2 plus degree 3 at 7" polydeg5 polydeg11 {re = 7.; im = 0.};
+  mul_test "degree 3 plus degree 2 at 7" polydeg11 polydeg5 {re = 7.; im = 0.};
 ]
 open ToImage
 

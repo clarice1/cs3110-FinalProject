@@ -15,6 +15,19 @@ val zero : t
 (** [eval p z] is the result of applying polynomial [p] to input [z] *)
 val eval : t -> Complex.t -> Complex.t
 
+(**[diff p] is the derivative of [p]*)
+val diff : t -> t
+
+(**[sum p q] is the polynomial [p + q] *)
+val sum : t -> t -> t
+
+(**[mul p q] is the polynomial [pq] *)
+val mul : t -> t -> t
+
+(**[from roots lst] is the monic polynomial of degree [List.length lst] whose
+   roots are the entries in [lst]*)
+val from_roots : Complex.t list -> t
+
 (** [bounded p input] is [None] if iterating polynomial [p] beginning at [input]
     is guaranteed to diverge and [Some (eval p input)] if [p] is not guaranteed 
     to diverge *)
