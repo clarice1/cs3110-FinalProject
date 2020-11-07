@@ -10,14 +10,14 @@ open Images
 (** [col] is the type invariant that represents the color desired by the 
     client for the fractal. If the col were to be R, then the fractal would be 
     colored with shades of red. This is also true for B (Blue) and G (Green). *)
-type col = R | B | G
+(*type col = R | B | G*)
 
 (** [julia_color iter of_color coordinate ] is the color of a particular complex
     [coordinate] in the matrix, having applied the function for this particular 
     Julia Set [iter] times. N.B. [coordinate] is a pair containing the final 
     value option after applying the function [iter] times (should it converge)
     as well as the complex coordinate *)
-val julia_color : int -> col -> (int option * Complex.t) -> Color.rgb
+val julia_color : int -> Color.rgb -> (int option * Complex.t) -> Color.rgb
 
 (** [colorize f m ] is the .bmp image of matrix [m] with function [f] applied to
     each complex coordinate to determine the color of that corresponding region

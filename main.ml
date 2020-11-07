@@ -2,6 +2,7 @@ open Complex
 open Polynomial
 open Matrix
 open ToImage
+open Graphics
 
 (** [complex_of_float f] is the complex representation of float [f], with [re]
     as [f] and [im] as 0. *)
@@ -19,9 +20,25 @@ let lst_of_complex_floats str =
   |> List.map float_of_string
   |> List.map complex_of_float
 
+(** [string_of_rgb str] returns the rgb value of color [str]. *)
+let string_of_rgb str = match str with
+  | "red" -> let my_col : Color.rgb = {b = 39; r = 234; g = 32;} in my_col
+  | "orange" -> {b = 34; r = 230; g = 126;}
+  | "yellow" -> {b = 15; r = 241; g = 196;}
+  | "green" -> {b = 50; r = 0; g = 148;}
+  | "blue" -> {b = 221; r = 6; g = 82;}
+  | "indigo" -> {b = 100; r = 27; g = 20;}
+  | _ -> {b = 241; r = 205; g = 132;}
+
+
+
 (** [make_image lst] produces .bmp image representation of the Julia Set taken
     by repeatedly applying the polynomial represented by [seq] *)
 let make_image seq =
+  print_endline "please enter the ROYGBIV color of the image";
+  print_string "> ";
+  let col = string_of_rgb (read_line ())
+  in 
   print_endline "please enter the width of the image";
   print_string "> ";
   let width = int_of_string (read_line ())
@@ -34,19 +51,19 @@ let make_image seq =
   print_string "> ";
   let iter = int_of_string (read_line ())
   in 
-  print_endline "lower left coordinate real value? (preferrably a negative float";
+  print_endline "lower left coordinate real value? (preferrably a negative float)";
   print_string "> ";
   let llre = float_of_string (read_line ())
   in
-  print_endline "lower left coordinate imaginary value? (preferrably a negative float";
+  print_endline "lower left coordinate imaginary value? (preferrably a negative float)";
   print_string "> ";
   let llim = float_of_string (read_line ())
   in
-  print_endline "upper right coordinate real value? (preferrably a negative float";
+  print_endline "upper right coordinate real value? (preferrably a negative float)";
   print_string "> ";
   let urre = float_of_string (read_line ())
   in
-  print_endline "upper right coordinate imaginary value? (preferrably a negative float";
+  print_endline "upper right coordinate imaginary value? (preferrably a negative float)";
   print_string "> ";
   let urim = float_of_string (read_line ())
   in                                                     
@@ -58,7 +75,7 @@ let make_image seq =
   let polynomial = from_list (lst_of_complex_floats seq) 
   in                                          (*Hardcoding color Blue for now *) 
   colorize 
-    (julia_color iter B) 
+    (julia_color iter col) 
     (iterate_with_stop (bounded polynomial) iter matrix)
 
 (** [main ()] prompts for the client to input a sequence of numbers, then tells
