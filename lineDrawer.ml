@@ -27,6 +27,7 @@ let coord_of_cx
 
 let rec go s f = 
   if Graphics.key_pressed () then () else
+  if Graphics.button_down () then
     let (mp1, mp2) as mp = Graphics.mouse_pos () in
     if mp = s.started_drawing then
       match s.last_point with 
@@ -40,6 +41,7 @@ let rec go s f =
           Graphics.lineto x1 x2; else ();
         go {s with last_point = Some fx} f
     else go {s with last_point = None; started_drawing = mp} f
+  else go s f
 
 let start ll ur ll_c ur_c = 
   go {ll; ur; ll_c; ur_c; started_drawing = (Graphics.mouse_pos ()); 
