@@ -1,4 +1,4 @@
-MODULES=matrix polynomial toImage main newton
+MODULES=matrix polynomial toImage main newton lineDrawer
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
