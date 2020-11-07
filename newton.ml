@@ -1,7 +1,9 @@
+let newton_fun_no_stop f f' z = Complex.(sub z (div (f z) (f' z)))
+
 let newton_fun f f' roots tolerance z =
   if List.exists (fun c -> Complex.(norm (sub c z) < tolerance)) roots 
   then None
-  else Some Complex.(sub z (div (f z) (f' z)))
+  else Some (newton_fun_no_stop f f' z)
 
 let default_colors : Color.rgb list = [
   {r = 0; g = 0; b = 255};

@@ -1,7 +1,14 @@
+
+
 (**[newton_fun f f' roots tolerance z] is [None] if [z] is within
    [tolerance] of a value in [roots] and is [Some z-f(z)/f'(z)] otherwise*)
 val newton_fun : (Complex.t -> Complex.t) -> (Complex.t -> Complex.t) 
   -> Complex.t list -> float -> Complex.t -> Complex.t option
+
+(**[newton_fun_no_stop] is like [newton_fun] but does not stop if a value
+   is near a root.*)
+val newton_fun_no_stop : (Complex.t -> Complex.t) -> (Complex.t -> Complex.t) 
+  -> Complex.t -> Complex.t
 
 (**[newton_color colors roots tolerance (n, z)] is a color
    in [colors] satisfying [|z - c < tolerance|], where [c] is the
