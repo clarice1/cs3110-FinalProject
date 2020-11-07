@@ -4,7 +4,8 @@ type state = {
   ll_c : Complex.t;
   ur_c : Complex.t;
   started_drawing : int * int;
-  last_point : Complex.t option
+  last_point : Complex.t option;
+  draw : bool
 }
 
 let is_in_window {ll_c; ur_c} ({re; im} : Complex.t) = 
@@ -27,25 +28,29 @@ let coord_of_cx
 
 let rec go s f im= 
   if Graphics.key_pressed () then () else
-  if Graphics.button_down () then
+  if s.draw || Graphics.button_down () then
     let (mp1, mp2) as mp = Graphics.mouse_pos () in
     if mp = s.started_drawing then
       match s.last_point with 
       | None -> 
         Graphics.moveto mp1 mp2;
-        go {s with last_point = Some (cx_of_coord s (Graphics.mouse_pos ()))} 
+        go {s with last_point = Some (cx_of_coord s (Graphics.mouse_pos ()));
+                   draw = true} 
           f im
       | Some x -> 
         let fx = f x in
         if is_in_window s fx then
           let (x1, x2) = coord_of_cx s fx in 
-          Graphics.lineto x1 x2; else ();
-        go {s with last_point = Some fx} f im
-    else 
-      Graphics.draw_image im 0 0;
-    go {s with last_point = None; started_drawing = mp} f im
+          Graphics.lineto x1 x2; 
+          Unix.sleepf 0.2;
+        else ();
+        go {s with last_point = Some fx; draw = true} f im
+    else (
+      Graphics.draw_image im 0 0; 
+      go {s with last_point = None; started_drawing = mp;
+                 draw = false} f im)
   else go s f im
 
 let start ll ur ll_c ur_c im = 
   go {ll; ur; ll_c; ur_c; started_drawing = (Graphics.mouse_pos ()); 
-      last_point = None} im
+      last_point = None; draw = true} im
