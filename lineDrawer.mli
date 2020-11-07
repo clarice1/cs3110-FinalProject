@@ -2,4 +2,4 @@
    and starts drawing a lines corresponding to where the point is mapped by 
    repeatedly applying [f]. The graphics window should already be open.*)
 val start : int * int -> int * int -> Complex.t -> Complex.t -> 
-  (Complex.t -> Complex.t) -> unit
+  (Complex.t -> Complex.t) -> Graphics.image -> unit
