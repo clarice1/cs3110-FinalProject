@@ -1,4 +1,4 @@
-MODULES=matrix polynomial toImage main
+MODULES=matrix polynomial toImage main newton
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -8,7 +8,7 @@ OCAMLBUILD=ocamlbuild -use-ocamlfind
 BW=black_and_white.byte
 
 zip:
-	zip ms1.zip *.ml* _tags Makefile
+	zip ms1.zip *.ml* _tags Makefile *.txt
 
 default: build
 	utop

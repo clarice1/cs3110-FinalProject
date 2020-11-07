@@ -34,6 +34,8 @@ let pp_listlist pp_elt lst =
 let str_complex (z : Complex.t) = 
   pp_string (string_of_float z.re ^ " + "^ string_of_float z.im ^ "i")
 
+let str_poly p = pp_list str_complex (Polynomial.to_list p)
+
 (**[str_matrix pp_elt m] is a string representing the matrix where
    elements are printed according to pp_elt[m] *)
 let str_matrix pp_elt m =
@@ -271,6 +273,14 @@ let bounded_test
   name >:: (fun _ -> 
       assert_equal expected_output (bounded p z))
 
+let sum_test name p q z = 
+  check_eq name (Complex.add (Polynomial.eval p z) (Polynomial.eval q z))
+    (Polynomial.eval (Polynomial.sum p q) z) str_complex
+
+let mul_test name p q z = 
+  check_eq name (Complex.mul (Polynomial.eval p z) (Polynomial.eval q z))
+    (Polynomial.eval (Polynomial.mul p q) z) str_complex
+
 let polydeg1 = from_list [{re = 1.; im = 0.}]
 let polydeg2 = from_list [{re = 1.; im = 0.}; {re = 4.; im = 0.}]
 let polydeg3 = from_list [{re = 1.; im = 45.}]
@@ -287,6 +297,8 @@ let polydeg10 = from_list [{re = 4.; im = 0.}; {re = 0.; im = 2.};
                            {re = 7.; im = 0.}]
 let polydeg11 = from_list [{re = 17.; im = 4.}; {re = 4.; im = 0.}; 
                            {re = 0.; im = 2.}; {re = 7.; im = 0.}]
+
+let three_roots = from_roots [Complex.zero; Complex.one; Complex.(neg one)]
 
 let polynomial_tests = [
   eval_test "zero polynomial" zero {re = 4.; im = 5.} {re = 0.; im = 0.};
@@ -305,7 +317,29 @@ let polynomial_tests = [
   get_bound_test "|a| = 1, a = 1, b = 0" polydeg6 infinity;
   get_bound_test "|a| = 1, a = 1, b != 0" polydeg2 0.;
   bounded_test "poly diverges" polydeg2 z1 None;
-  bounded_test "poly does not diverge" polydeg1 z1 (Some {re = 1.; im = 0.})
+  bounded_test "poly does not diverge" polydeg1 z1 (Some {re = 1.; im = 0.});
+
+  check_eq "derivative of 54x^2 + 3x + 9i is 108x + 3" 
+    (Polynomial.from_list [{re = 108.; im = 0.}; {re = 3.; im = 0.}])
+    (Polynomial.diff polydeg5)
+    str_poly;
+
+  sum_test "two degree 2s at 7" polydeg5 polydeg10 {re = 7.; im = 0.};
+  sum_test "degree 2 plus degree 3 at 7" polydeg5 polydeg11 {re = 7.; im = 0.};
+  sum_test "degree 3 plus degree 2 at 7" polydeg11 polydeg5 {re = 7.; im = 0.};
+
+  mul_test "two degree 2s at 7" polydeg5 polydeg10 {re = 7.; im = 0.};
+  mul_test "degree 2 plus degree 3 at 7" polydeg5 polydeg11 {re = 7.; im = 0.};
+  mul_test "degree 3 plus degree 2 at 7" polydeg11 polydeg5 {re = 7.; im = 0.};
+
+  eval_test "0 is a root of z(z - 1)(z + 1)" three_roots 
+    Complex.zero Complex.zero;
+  eval_test "1 is a root of z(z - 1)(z + 1)" 
+    three_roots Complex.one Complex.zero;
+  eval_test "-1 is a root of z(z - 1)(z + 1)" three_roots
+    Complex.(neg one) Complex.zero;
+  eval_test "2(2 - 1)(2 + 1) = 6" three_roots {re = 2.; im = 0.} 
+    {re = 6.; im = 0.};
 ]
 open ToImage
 

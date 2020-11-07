@@ -1,0 +1,31 @@
+Our program requires
+
+-CamlImages, which can be installed using
+   opam install CamlImages
+
+Installation
+
+1. Download and extract the files
+2. Build the system
+   The command ``make fractal'' will build and start the system
+3. Follow the instructions on the screen to input 
+  -the desired name of the output file (do not put an extension, will be added as .bmp)
+   -the coefficients for a polynomial. Here are some suggestions for interesting images:
+     1 0 .25
+     1 0 .27
+     1 0 -.75
+     1 0 1
+     1 0 -1.5
+   -the number of iterations you would like to iterate for (100 is usually sufficient to get good images. )
+   -the width of the image (in pixels)
+   -the height of the image (in pixels)
+   -the lower left corner of the desired image (the real and complex parts, one after another, 
+      -2-2i is sufficient for polynomials with small coefficients, included the recommended above)
+   -the upper right corner of the desired image (the real and complex parts, one after another, 
+      2+2i is sufficient for polynomials with small coefficients, included the recommended above)
+
+ 
+4. Look at output
+   -the image will be saved as file with the inputted name, with extension .bmp
+
+Congratulations! You have generated your own fractal.
