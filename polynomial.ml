@@ -8,6 +8,8 @@ let zero = []
 
 let from_list lst = lst
 
+let to_list lst = lst
+
 let eval p z =
   let f acc c = Complex.add (Complex.mul acc z) c
   in 
@@ -23,7 +25,7 @@ let rec diff_with_degree deg = function
   | hd :: tl -> (Complex.mul {re = float_of_int deg; im = 0.} hd) :: 
                 diff_with_degree (deg - 1) tl
 
-let diff p = diff_with_degree (List.length p) p |> de_zero
+let diff p = diff_with_degree (List.length p - 1) p |> de_zero
 
 (**[of_degree n p] is [p] with [n - degree(p)] many 0s added*)
 let rec of_degree n p = if List.length p - 1 <= n 

@@ -34,6 +34,8 @@ let pp_listlist pp_elt lst =
 let str_complex (z : Complex.t) = 
   pp_string (string_of_float z.re ^ " + "^ string_of_float z.im ^ "i")
 
+let str_poly p = pp_list str_complex (Polynomial.to_list p)
+
 (**[str_matrix pp_elt m] is a string representing the matrix where
    elements are printed according to pp_elt[m] *)
 let str_matrix pp_elt m =
@@ -296,6 +298,8 @@ let polydeg10 = from_list [{re = 4.; im = 0.}; {re = 0.; im = 2.};
 let polydeg11 = from_list [{re = 17.; im = 4.}; {re = 4.; im = 0.}; 
                            {re = 0.; im = 2.}; {re = 7.; im = 0.}]
 
+let three_roots = from_roots [Complex.zero; Complex.one; Complex.(neg one)]
+
 let polynomial_tests = [
   eval_test "zero polynomial" zero {re = 4.; im = 5.} {re = 0.; im = 0.};
   eval_test "deg 0 poly, no im" polydeg1 z1 {re = 1.; im = 0.};
@@ -315,6 +319,11 @@ let polynomial_tests = [
   bounded_test "poly diverges" polydeg2 z1 None;
   bounded_test "poly does not diverge" polydeg1 z1 (Some {re = 1.; im = 0.});
 
+  check_eq "derivative of 54x^2 + 3x + 9i is 108x + 3" 
+    (Polynomial.from_list [{re = 108.; im = 0.}; {re = 3.; im = 0.}])
+    (Polynomial.diff polydeg5)
+    str_poly;
+
   sum_test "two degree 2s at 7" polydeg5 polydeg10 {re = 7.; im = 0.};
   sum_test "degree 2 plus degree 3 at 7" polydeg5 polydeg11 {re = 7.; im = 0.};
   sum_test "degree 3 plus degree 2 at 7" polydeg11 polydeg5 {re = 7.; im = 0.};
@@ -322,6 +331,15 @@ let polynomial_tests = [
   mul_test "two degree 2s at 7" polydeg5 polydeg10 {re = 7.; im = 0.};
   mul_test "degree 2 plus degree 3 at 7" polydeg5 polydeg11 {re = 7.; im = 0.};
   mul_test "degree 3 plus degree 2 at 7" polydeg11 polydeg5 {re = 7.; im = 0.};
+
+  eval_test "0 is a root of z(z - 1)(z + 1)" three_roots 
+    Complex.zero Complex.zero;
+  eval_test "1 is a root of z(z - 1)(z + 1)" 
+    three_roots Complex.one Complex.zero;
+  eval_test "-1 is a root of z(z - 1)(z + 1)" three_roots
+    Complex.(neg one) Complex.zero;
+  eval_test "2(2 - 1)(2 + 1) = 6" three_roots {re = 2.; im = 0.} 
+    {re = 6.; im = 0.};
 ]
 open ToImage
 

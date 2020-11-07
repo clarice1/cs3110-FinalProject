@@ -24,8 +24,8 @@ val sum : t -> t -> t
 (**[mul p q] is the polynomial [pq] *)
 val mul : t -> t -> t
 
-(**[from roots lst] is the monic polynomial of degree [List.length lst] whose
-   roots are the entries in [lst]*)
+(**[from_roots [c_1; ...; c_n] is the 
+   polynomial (z - c_1)(z - c_2)...(z - c_n)*)
 val from_roots : Complex.t list -> t
 
 (** [bounded p input] is [None] if iterating polynomial [p] beginning at [input]
@@ -38,6 +38,9 @@ val bounded : t -> Complex.t -> Complex.t option
     polynomial, continuing in decreasing order of degree
     Requires: if [lst] is non-empty, the first element of [lst] is not 0 *)
 val from_list : Complex.t list -> t
+
+(**[from_list p] is the list of coefficients of [p]*)
+val to_list : t -> Complex.t list
 
 (** [get_bound p] returns a radius outside of which iterating polynomial [p] is 
     guaranteed to diverge *)
