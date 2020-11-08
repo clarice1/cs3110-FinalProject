@@ -10,7 +10,7 @@ let color_z2pc c =
               Graphic_image.of_image in 
   Graphics.draw_image image 0 0; 
   LineDrawer.start (0, 0) (750, 750) {re = -2.; im = -2.}
-    {re = 2.; im = 2.} (Polynomial.eval poly) image
+    {re = 2.; im = 2.} Graphics.red  (Polynomial.eval poly) image
 
 let () = 
   let beginning_matrix = 
@@ -24,10 +24,9 @@ let () =
   let image = ToImage.colorize 
       (ToImage.julia_color 100 ToImage.B) final_matrix 
               |> Graphic_image.of_image in
-  Graphics.draw_image image 0 0;
-  Graphics.set_color Graphics.red;
   LineDrawer.start_with_bonus (0, 0) (750, 750) {re = -2.; im = -2.}
     {re = 2.; im = 2.} 
+    Graphics.red
     (fun c z -> Complex.add (Complex.mul z z) c)
     image
     color_z2pc

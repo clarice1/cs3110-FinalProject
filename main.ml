@@ -67,7 +67,7 @@ let make_image seq =
   let g = Graphic_image.of_image im in
   Graphics.draw_image g 0 0; 
   LineDrawer.start (0, 0) (width, length) {re = llre; im = llim}
-    {re = urre; im = urim} (eval polynomial) g;
+    {re = urre; im = urim} Graphics.red (eval polynomial) g;
 
   im
 
