@@ -56,7 +56,6 @@ let rec go s f im click button =
       go {s with last_point = None; started_drawing = mp} f im) click button
 
 let start_with_bonus ll ur ll_c ur_c = 
-  Graphics.set_color Graphics.red;
   go {ll; ur; ll_c; ur_c; started_drawing = (Graphics.mouse_pos ()); 
       last_point = None}
 
