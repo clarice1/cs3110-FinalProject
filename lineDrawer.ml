@@ -34,26 +34,32 @@ let coord_of_cx
   let dy = float_of_int (u2 - l2) /. (ur_c.im -. ll_c.im) *. (im -. ll_c.im) in
   (int_of_float dx + l1, int_of_float dy + l2)
 
-let rec go s f im= 
-  if Graphics.key_pressed () then () else
+let rec go s f im click button = 
+  if Graphics.key_pressed () then button (Graphics.read_key ()) else
     let (mp1, mp2) as mp = Graphics.mouse_pos () in
+    if Graphics.button_down () then click (cx_of_coord s mp);
     if mp = s.started_drawing then (*User has not moved mouse *)
       match s.last_point with 
       | None -> 
         Graphics.moveto mp1 mp2;
-        go {s with last_point = Some (cx_of_coord s mp)} f im
+        go {s with last_point = Some (cx_of_coord s mp)} f im click button
       | Some x -> 
-        let fx = f x in
+        let fx = f (cx_of_coord s mp) x in
         if is_in_window s fx then
           let (x1, x2) = coord_of_cx s fx in 
           Graphics.lineto x1 x2; 
           Unix.sleepf 0.2;
         else ();
-        go {s with last_point = Some fx} f im
+        go {s with last_point = Some fx} f im click button
     else (
       Graphics.draw_image im 0 0; 
-      go {s with last_point = None; started_drawing = mp} f im)
+      go {s with last_point = None; started_drawing = mp} f im) click button
 
-let start ll ur ll_c ur_c im = 
+let start_with_bonus ll ur ll_c ur_c = 
+  Graphics.set_color Graphics.red;
   go {ll; ur; ll_c; ur_c; started_drawing = (Graphics.mouse_pos ()); 
-      last_point = None} im
+      last_point = None}
+
+let start ll ur ll_c ur_c f im = 
+  start_with_bonus ll ur ll_c ur_c (fun x y -> f y) im 
+    (fun x -> ()) (fun x -> ())
