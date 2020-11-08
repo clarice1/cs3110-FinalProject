@@ -12,7 +12,7 @@ open Images
     colored with shades of red. This is also true for B (Blue) and G (Green). *)
 (*type col = R | B | G*)
 
-(** [julia_color iter of_color coordinate ] is the color of a particular complex
+(** [julia_color iter of_color coordinate] is the color of a particular complex
     [coordinate] in the matrix, having applied the function for this particular 
     Julia Set [iter] times. N.B. [coordinate] is a pair containing the final 
     value option after applying the function [iter] times (should it converge)

@@ -3,6 +3,14 @@ open Images
 
 (*type col = R | B | G *)
 
+let gamma_correction coord_iter col =
+  let conv col = 
+    (float_of_int col) ** 2.2
+    |> Float.mul (1. /. float_of_int coord_iter)
+  in 
+  (conv col) ** (1. /. 2.2) 
+  |> int_of_float
+
 let julia_color iter of_color coordinate = 
   let black : Color.rgb = {r = 0; g = 0; b = 0} in
   if fst coordinate = None then black
@@ -11,11 +19,12 @@ let julia_color iter of_color coordinate =
       let coord_iter = match fst coordinate with 
         | None -> 0
         | Some x -> x in 
-      let col_decr = ((coord_iter) * 255 / iter) in
       match of_color with
       | {b = blue; r = red; g = green;} -> 
         let my_col : Color.rgb = 
-          {b = blue - col_decr; r = red - col_decr; g = green - col_decr} in my_col
+          {b = gamma_correction coord_iter blue; 
+           r = gamma_correction coord_iter red; 
+           g = gamma_correction coord_iter green;} in my_col
     end
 
 let colorize (f : ((int option * 'a) -> Color.rgb)) m =

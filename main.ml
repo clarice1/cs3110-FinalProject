@@ -4,6 +4,8 @@ open Matrix
 open ToImage
 open Graphics
 
+exception Color_not_found
+
 (** [complex_of_float f] is the complex representation of float [f], with [re]
     as [f] and [im] as 0. *)
 let complex_of_float f =
@@ -22,14 +24,14 @@ let lst_of_complex_floats str =
 
 (** [string_of_rgb str] returns the rgb value of color [str]. *)
 let string_of_rgb str = match str with
-  | "red" -> let my_col : Color.rgb = {b = 39; r = 234; g = 32;} in my_col
-  | "orange" -> {b = 34; r = 230; g = 126;}
-  | "yellow" -> {b = 15; r = 241; g = 196;}
-  | "green" -> {b = 50; r = 0; g = 148;}
-  | "blue" -> {b = 221; r = 6; g = 82;}
-  | "indigo" -> {b = 100; r = 27; g = 20;}
-  | _ -> {b = 241; r = 205; g = 132;}
-
+  | "R" -> let my_col : Color.rgb = {b = 39; r = 234; g = 32;} in my_col
+  | "O" -> {b = 34; r = 230; g = 126;}
+  | "Y" -> {b = 15; r = 241; g = 196;}
+  | "G" -> {b = 50; r = 0; g = 148;}
+  | "B" -> {b = 221; r = 6; g = 82;}
+  | "I" -> {b = 100; r = 27; g = 20;}
+  | "V" -> {b = 241; r = 205; g = 132;}
+  | _ -> raise Color_not_found
 
 
 (** [make_image lst] produces .bmp image representation of the Julia Set taken
