@@ -24,6 +24,7 @@ let () =
   let image = ToImage.colorize 
       (ToImage.julia_color 100 ToImage.B) final_matrix 
               |> Graphic_image.of_image in
+  Graphics.draw_image image 0 0;
   Graphics.set_color Graphics.red;
   LineDrawer.start_with_bonus (0, 0) (750, 750) {re = -2.; im = -2.}
     {re = 2.; im = 2.} 
