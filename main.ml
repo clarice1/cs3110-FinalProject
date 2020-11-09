@@ -2,6 +2,9 @@ open Complex
 open Polynomial
 open Matrix
 open ToImage
+open Graphics
+
+exception Color_not_found
 
 (** [complex_of_float f] is the complex representation of float [f], with [re]
     as [f] and [im] as 0. *)
@@ -19,9 +22,25 @@ let lst_of_complex_floats str =
   |> List.map float_of_string
   |> List.map complex_of_float
 
+(** [string_of_rgb str] returns the rgb value of color [str]. *)
+let string_of_rgb str = match str with
+  | "R" -> let my_col : Color.rgb = {b = 39; r = 234; g = 32;} in my_col
+  | "O" -> {b = 34; r = 230; g = 126;}
+  | "Y" -> {b = 15; r = 241; g = 196;}
+  | "G" -> {b = 50; r = 0; g = 148;}
+  | "B" -> {b = 221; r = 6; g = 82;}
+  | "I" -> {b = 100; r = 27; g = 20;}
+  | "V" -> {b = 241; r = 205; g = 132;}
+  | _ -> raise Color_not_found
+
+
 (** [make_image lst] produces .bmp image representation of the Julia Set taken
     by repeatedly applying the polynomial represented by [seq] *)
 let make_image seq =
+  print_endline "please enter the ROYGBIV color of the image";
+  print_string "> ";
+  let col = string_of_rgb (read_line ())
+  in 
   print_endline "please enter the width of the image";
   print_string "> ";
   let width = int_of_string (read_line ())
@@ -56,10 +75,10 @@ let make_image seq =
       width
   in
   let polynomial = from_list (lst_of_complex_floats seq) 
-  in                                          (*Hardcoding color Blue for now *) 
+  in
 
   let im = colorize 
-      (julia_color iter B) 
+      (julia_color iter col) 
       (iterate_with_stop (bounded polynomial) iter matrix) in
 
   let str = " " ^ (string_of_int width) ^ "x" ^ (string_of_int length) in
