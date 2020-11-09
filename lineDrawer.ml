@@ -15,10 +15,14 @@ type state = {
   fb : Complex.t -> Complex.t -> Complex.t option;
   f : Complex.t -> Complex.t -> Complex.t;
   color : (int option * Complex.t) -> Color.rgb;
-  iter : int
+  iter : int;
+  col : Graphics.color
 }
 
 let recompute s = 
+  Graphics.set_color Graphics.white;
+  Graphics.fill_rect 0 0 (Graphics.size_x ()) (Graphics.size_y ());
+  Graphics.set_color s.col;
   let s' = {s with width = Graphics.size_x (); height = Graphics.size_y ()} in
   let beginning_matrix = 
     Matrix.cx_init s.ll_c s.ur_c s'.height s'.width in
@@ -99,7 +103,7 @@ let start_with_bonus ll_c ur_c col fb color f iter click button im =
   let s = {ll_c; ur_c; started_drawing; 
            last_point = None; im; width;
            color; f; 
-           fb; iter; height} in
+           fb; iter; height; col} in
   redraw s col;
   go s col click button
 
