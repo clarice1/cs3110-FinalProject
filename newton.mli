@@ -18,6 +18,12 @@ val newton_color : Color.rgb list -> Complex.t list -> float ->
   (int option * Complex.t) -> Color.rgb
 
 (**[newton_with_defs] is like [newton_color] but with a built-in default list of
-   colors. Requires: at most 6 roots.*)
+   colors. Requires: at most 8 roots.*)
 val newton_with_defs : Complex.t list -> float ->
   (int option * Complex.t) -> Color.rgb
+
+(**[full_newton ll ur iter width height roots] manages all of Newton's method
+   for an image of width [width], height [height], [iter] many iterations on
+   a polynomial with roots in [roots]. There should be at most 8 roots.*)
+val full_newton : Complex.t -> Complex.t -> int -> int -> int ->
+  Complex.t list -> unit

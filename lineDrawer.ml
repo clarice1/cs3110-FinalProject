@@ -72,8 +72,8 @@ let rec go s color f im click button =
         go {s with last_point = Some fx}  color f im click button
     else (
       redraw s im color;
-      go {s with last_point = None; started_drawing = mp} color f im) 
-        click button
+      go {s with last_point = None; started_drawing = mp} color f im 
+        click button)
 
 let start_with_bonus ll ur ll_c ur_c col f im= 
   Graphics.set_color col;
