@@ -6,7 +6,7 @@ let color_z2pc c =
       (Polynomial.bounded poly) 
       100 beginning_matrix in 
   let image = ToImage.colorize 
-      (ToImage.julia_color 100 ToImage.B) final_matrix |> 
+      (ToImage.julia_color 100 {r = 0; b = 255; g = 0}) final_matrix |> 
               Graphic_image.of_image in 
   Graphics.draw_image image 0 0; 
   LineDrawer.start (0, 0) (750, 750) {re = -2.; im = -2.}
@@ -22,7 +22,7 @@ let () =
       beginning_matrix in 
   Graphics.open_graph " 750x750";
   let image = ToImage.colorize 
-      (ToImage.julia_color 100 ToImage.B) final_matrix 
+      (ToImage.julia_color 100 {r = 0; b = 255; g = 0}) final_matrix 
               |> Graphic_image.of_image in
   LineDrawer.start_with_bonus (0, 0) (750, 750) {re = -2.; im = -2.}
     {re = 2.; im = 2.} 
