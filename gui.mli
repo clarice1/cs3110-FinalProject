@@ -2,6 +2,10 @@
    User Interface (GUI).*)
 type t 
 
+
+(** [make_default_context] sets default GUI settings for a GUI window.*)
+val make_default_context: unit -> t
+
 (** [get_bcol g] is the background color of [g]. *)
 val get_bcol : t -> Graphics.color
 
@@ -37,3 +41,6 @@ val set_lw : t -> int -> unit
 
 (** [set_curr g p] sets [p] as the current location of the mouse in [g]*)
 val set_curr : t -> int * int -> unit
+
+(** [use_gui g] applies the settings in [g] to a graphical window.*)
+val use_gui : t -> unit
