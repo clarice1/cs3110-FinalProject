@@ -1,12 +1,12 @@
 open Matrix
 open Images
 
-(*type col = R | B | G *)
+type col = R | B | G
 
-let gamma_correction coord_iter col =
+let gamma_correction coord_iter iter col =
   let conv col = 
     (float_of_int col) ** 2.2
-    |> Float.mul (1. /. float_of_int coord_iter)
+    |> Float.mul (1. -. (float_of_int coord_iter /. float_of_int iter))
   in 
   (conv col) ** (1. /. 2.2) 
   |> int_of_float
@@ -22,9 +22,9 @@ let julia_color iter of_color coordinate =
       match of_color with
       | {b = blue; r = red; g = green;} -> 
         let my_col : Color.rgb = 
-          {b = gamma_correction coord_iter blue; 
-           r = gamma_correction coord_iter red; 
-           g = gamma_correction coord_iter green;} in my_col
+          {b = gamma_correction coord_iter iter blue; 
+           r = gamma_correction coord_iter iter red; 
+           g = gamma_correction coord_iter iter green;} in my_col
     end
 
 let colorize (f : ((int option * 'a) -> Color.rgb)) m =

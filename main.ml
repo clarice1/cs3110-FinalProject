@@ -61,11 +61,11 @@ let make_image seq =
   print_string "> ";
   let llim = float_of_string (read_line ())
   in
-  print_endline "upper right coordinate real value? (preferrably a negative float)";
+  print_endline "upper right coordinate real value? (preferrably a positive float)";
   print_string "> ";
   let urre = float_of_string (read_line ())
   in
-  print_endline "upper right coordinate imaginary value? (preferrably a negative float)";
+  print_endline "upper right coordinate imaginary value? (preferrably a positive float)";
   print_string "> ";
   let urim = float_of_string (read_line ())
   in                                                     
