@@ -75,10 +75,20 @@ let make_image seq =
       width
   in
   let polynomial = from_list (lst_of_complex_floats seq) 
-  in                                          (*Hardcoding color Blue for now *) 
-  colorize 
-    (julia_color iter col) 
-    (iterate_with_stop (bounded polynomial) iter matrix)
+  in
+
+  let im = colorize 
+      (julia_color iter col) 
+      (iterate_with_stop (bounded polynomial) iter matrix) in
+
+  let str = " " ^ (string_of_int width) ^ "x" ^ (string_of_int length) in
+  Graphics.open_graph str;
+  let g = Graphic_image.of_image im in
+  Graphics.draw_image g 0 0; 
+  LineDrawer.start (0, 0) (width, length) {re = llre; im = llim}
+    {re = urre; im = urim} Graphics.red (eval polynomial) g;
+
+  im
 
 (** [main ()] prompts for the client to input a sequence of numbers, then tells
     the client where to find the outputted .bmp image *)
@@ -96,7 +106,9 @@ let main () =
   print_string  "> ";
   match read_line () with
   | exception End_of_file -> ()
-  | seq -> Bmp.save (name ^ ".bmp") [] (make_image seq); 
+  | seq -> 
+    let im = make_image seq in
+    Bmp.save (name ^ ".bmp") [] im;
 
     print_endline "you can find the .bmp file here. "
 

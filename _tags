@@ -1,3 +1,5 @@
 true: package(camlimages.core)
+true: package(camlimages.graphics)
 true: package(ounit2)
 true: package(ANSITerminal)
+true: package(graphics)
