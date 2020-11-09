@@ -1,11 +1,15 @@
-MODULES=matrix polynomial toImage main newton
+MODULES=matrix polynomial toImage main newton lineDrawer mandelbrot
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
+MANDELBROT=mandelbrot.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 BW=black_and_white.byte
+
+mandelbrot:
+	$(OCAMLBUILD) $(MANDELBROT) && ./$(MANDELBROT)
 
 zip:
 	zip ms1.zip *.ml* _tags Makefile *.txt
