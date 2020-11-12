@@ -7,7 +7,8 @@
    the image and resize if the window is resized. [c] should be the 
    desired color for lines. *)
 val start : Complex.t -> Complex.t -> Graphics.color -> 
-  (Complex.t -> Complex.t option) -> ((int option * Complex.t) -> Color.rgb) ->
+  (Complex.t -> Complex.t option) -> 
+  (int -> (int option * Complex.t) -> Color.rgb) ->
   (Complex.t -> Complex.t) -> int -> Graphics.image -> unit
 
 (**[start_with_bonus] is like [start], but the user may also specify the 
@@ -16,6 +17,6 @@ val start : Complex.t -> Complex.t -> Graphics.color ->
    The function may also depend on the initial value.*)
 val start_with_bonus : Complex.t -> Complex.t -> Graphics.color -> 
   (Complex.t -> Complex.t -> Complex.t option) -> 
-  ((int option * Complex.t) -> Color.rgb) ->
+  (int -> (int option * Complex.t) -> Color.rgb) ->
   (Complex.t -> Complex.t -> Complex.t)-> int ->
   (Complex.t -> unit) -> (char -> unit)  -> Graphics.image -> unit

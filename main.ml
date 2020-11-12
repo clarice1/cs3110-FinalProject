@@ -88,7 +88,7 @@ let make_image seq =
   LineDrawer.start {re = llre; im = llim}
     {re = urre; im = urim} Graphics.red 
     (bounded polynomial)
-    (julia_color iter col)
+    (fun (iter : int) -> (julia_color iter col))
     (eval polynomial) iter g;
 
   im

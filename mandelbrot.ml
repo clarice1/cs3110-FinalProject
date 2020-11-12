@@ -13,11 +13,12 @@ let color_z2pc c =
   Graphics.draw_image image 0 0; 
   LineDrawer.start {re = -2.; im = -2.}
     {re = 2.; im = 2.} Graphics.red (Polynomial.bounded poly) 
-    (ToImage.julia_color 100 {r = 0; b = 255; g = 0})
+    (fun i -> ToImage.julia_color i {r = 0; b = 255; g = 0})
     (Polynomial.eval poly) 100 image
 
 
 let poly c = (Polynomial.from_list [Complex.one; Complex.zero; c])
+
 
 let () = 
   let beginning_matrix = 
@@ -34,7 +35,7 @@ let () =
     {re = 2.; im = 2.} 
     Graphics.red
     (fun c -> Polynomial.bounded (poly c))
-    (ToImage.julia_color 100 {r = 0; b = 255; g = 0})
+    (fun i -> ToImage.julia_color i {r = 0; b = 255; g = 0})
     (fun c z -> Complex.add (Complex.mul z z) c)
     100
     color_z2pc

@@ -46,7 +46,7 @@ let full_newton ll ur iter width height roots tolerance =
   LineDrawer.start ll ur
     Graphics.black 
     (newton_fun polyfun diff roots tolerance)
-    (newton_with_defs roots tolerance)
+    (fun i -> newton_with_defs roots tolerance)
     (newton_fun_no_stop polyfun diff) 
     iter
     g

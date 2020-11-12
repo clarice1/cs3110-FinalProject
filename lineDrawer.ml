@@ -14,7 +14,7 @@ type state = {
   height : int;
   fb : Complex.t -> Complex.t -> Complex.t option;
   f : Complex.t -> Complex.t -> Complex.t;
-  color : (int option * Complex.t) -> Color.rgb;
+  color : int -> (int option * Complex.t) -> Color.rgb;
   iter : int;
   col : Graphics.color
 }
@@ -31,7 +31,7 @@ let rec_im f col iter ll ur color =
   let beginning_matrix = 
     Matrix.cx_init ll ur height width in
   let final_matrix = Matrix.iterate_with_stop_2 f iter beginning_matrix in
-  ToImage.colorize color final_matrix |> Graphic_image.of_image 
+  ToImage.colorize (color iter) final_matrix |> Graphic_image.of_image 
 
 let recompute s = 
   let im = rec_im s.fb s.col s.iter s.ll_c s.ur_c s.color in 
@@ -117,7 +117,8 @@ and zoom factor s =
   let x_step = (s.ur_c.re -. s.ll_c.re) /. (2. *. factor) in
   let y_step = (s.ur_c.im -. s.ll_c.im) /. (2. *. factor) in 
   {s with ll_c = {re = center.re -. x_step; im = center.im -. y_step};
-          ur_c = {re = center.re +. x_step; im = center.im +. y_step}} 
+          ur_c = {re = center.re +. x_step; im = center.im +. y_step};
+          last_point = None} 
   |> recompute 
 
 and key_reader s click button = 
@@ -126,9 +127,10 @@ and key_reader s click button =
       match Graphics.read_key () with 
       | 'q' -> raise Q
       | 'z' -> raise Z
-      | 'c' -> start_with_bonus_state (zoom 2. s) click button
+      | 'c' -> start_with_bonus_state (zoom 20. s) click button
       | 'e' -> start_with_bonus_state 
-                 (recompute {s with iter = s.iter * 2}) click button
+                 (recompute {s with iter = s.iter * 2; last_point = None}) 
+                 click button
       | x -> let str = Char.escaped x in 
         begin
           match float_of_string_opt str with 
