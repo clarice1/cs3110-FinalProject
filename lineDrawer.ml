@@ -16,12 +16,15 @@ type state = {
   f : Complex.t -> Complex.t -> Complex.t;
   color : int -> (int option * Complex.t) -> Color.rgb;
   iter : int;
-  col : Graphics.color
+  col : Graphics.color;
+  click : Complex.t -> unit;
+  button : char -> unit;
+  mutable redo : state option
 }
 
 exception Q
 
-exception Z
+exception Z of state
 
 let rec_im f col iter ll ur color = 
   Graphics.set_color Graphics.white;
@@ -78,23 +81,28 @@ let coord_of_cx
   let dy = float_of_int (height) /. (ur_c.im -. ll_c.im) *. (im -. ll_c.im) in
   (int_of_float dx, int_of_float dy)
 
-let clicker click s mp = 
-  try if Graphics.button_down () then click (cx_of_coord s mp)
-  with 
-  | Z -> ()
+let catch_z s e1 = 
+  try e1 () with 
+  | Z s' -> 
+    s.redo <- Some s';
+    redraw s
 
-let rec go s (click : Complex.t -> unit) button = 
-  key_reader s click button;
+let clicker (s : state) (mp : int * int) : unit = 
+  (fun () -> if Graphics.button_down () then s.click (cx_of_coord s mp)) 
+  |> catch_z s
+
+let rec go s  = 
+  key_reader s;
   if Graphics.size_x () <> s.width || Graphics.size_y () <> s.height then
-    resize s click button 
+    resize s
   else
     let (mp1, mp2) as mp = Graphics.mouse_pos () in
-    clicker click s mp;
+    clicker s mp;
     if mp = s.started_drawing then (*User has not moved mouse *)
       match s.last_point with 
       | None -> 
         Graphics.moveto mp1 mp2;
-        go {s with last_point = Some (cx_of_coord s mp)} click button
+        go {s with last_point = Some (cx_of_coord s mp)}
       | Some x -> 
         let fx = s.f (cx_of_coord s mp) x in
         if is_in_window s fx then
@@ -102,15 +110,15 @@ let rec go s (click : Complex.t -> unit) button =
           Graphics.lineto x1 x2; 
           Unix.sleepf 0.2;
         else ();
-        go {s with last_point = Some fx} click button
+        go {s with last_point = Some fx}
     else (
       redraw s;
-      go {s with last_point = None; started_drawing = mp} click button)
+      go {s with last_point = None; started_drawing = mp})
 
-and resize s click button = 
+and resize s= 
   let s' = recompute s in 
   redraw s';
-  go s' click button
+  go s'
 
 and zoom factor s = 
   let center = Graphics.mouse_pos () |> cx_of_coord s in 
@@ -121,30 +129,43 @@ and zoom factor s =
           last_point = None} 
   |> recompute 
 
-and key_reader s click button = 
+and e s = 
+  (fun () -> recompute {s with iter = s.iter * 2; last_point = None} |> 
+             start_with_bonus_state) |> (catch_z s)
+
+and c s = (fun () -> zoom 20. s |> start_with_bonus_state) |> catch_z s
+
+and y s = 
+  match s.redo with 
+  | None -> () 
+  | Some s' -> (fun () -> start_with_bonus_state_with_redo s') |> catch_z s
+
+and key_reader s = 
   if Graphics.key_pressed () then
     begin
       match Graphics.read_key () with 
       | 'q' -> raise Q
-      | 'z' -> raise Z
-      | 'c' -> start_with_bonus_state (zoom 20. s) click button
-      | 'e' -> start_with_bonus_state 
-                 (recompute {s with iter = s.iter * 2; last_point = None}) 
-                 click button
-      | x -> let str = Char.escaped x in 
-        begin
-          match float_of_string_opt str with 
-          | Some factor when factor > 0. -> 
-            start_with_bonus_state (zoom factor s) click button
-          | _ -> button x
-        end
+      | 'z' -> raise (Z s)
+      | 'c' -> c s
+      | 'e' -> e s
+      | 'y' -> y s
+      | x -> 
+        (fun () -> let str = Char.escaped x in 
+          begin
+            match float_of_string_opt str with 
+            | Some factor when factor > 0. -> 
+              start_with_bonus_state (zoom factor s) 
+            | _ -> s.button x
+          end) |> catch_z s
     end
 
-and start_with_bonus_state s click button = 
-  try 
-    redraw s;
-    go s click button
-  with | Z -> ()
+and start_with_bonus_state_with_redo (s : state) : unit =
+  redraw s;
+  go {s with last_point = None}
+
+and start_with_bonus_state (s : state) : unit = 
+  redraw s;
+  go {s with last_point = None; redo = None}
 
 let start_with_bonus_aux ll_c ur_c col fb color f iter click button im = 
   Graphics.set_color col;
@@ -154,12 +175,12 @@ let start_with_bonus_aux ll_c ur_c col fb color f iter click button im =
   let s = {ll_c; ur_c; started_drawing; 
            last_point = None; im; width;
            color; f; 
-           fb; iter; height; col} in
-  start_with_bonus_state s click button
+           fb; iter; height; col; click; button; redo = None} in
+  start_with_bonus_state s
 
 let start_with_bonus ll_c ur_c col fb color f iter click button im = 
   try start_with_bonus_aux ll_c ur_c col fb color f iter click button im with
-  | Q | Z -> ()
+  | Q | Z _ -> ()
 
 
 let start ll_cx ur_cx c fb fc f iter im = 
