@@ -2,30 +2,44 @@ Our program requires
 
 -CamlImages, which can be installed using
    opam install CamlImages
+   NOTE : You may need to update CamlImages, for instance using 
+   opam upgrade. We use CamlImages.graphics, added in a recent update.
+-Graphics, which can be installed using 
+   opam install graphics.
+   You will also need to be able to open an X11 window. With a Mac, this can be
+   done through the xquartz instructions on canvas. With windows on WSL, this 
+   can be accomplished by downloading a program called Xming, running it, and 
+   typing 
+   export DISPLAY=:0
+   into the terminal.
 
 Installation
 
 1. Download and extract the files
-2. Build the system
-   The command ``make fractal'' will build and start the system
-3. Follow the instructions on the screen to input 
-  -the desired name of the output file (do not put an extension, will be added as .bmp)
-   -the coefficients for a polynomial. Here are some suggestions for interesting images:
-     1 0 .25
-     1 0 .27
-     1 0 -.75
-     1 0 1
-     1 0 -1.5
-   -the number of iterations you would like to iterate for (100 is usually sufficient to get good images. )
-   -the width of the image (in pixels)
-   -the height of the image (in pixels)
-   -the lower left corner of the desired image (the real and complex parts, one after another, 
-      -2-2i is sufficient for polynomials with small coefficients, included the recommended above)
-   -the upper right corner of the desired image (the real and complex parts, one after another, 
-      2+2i is sufficient for polynomials with small coefficients, included the recommended above)
+2. Build the system. At the moment, the system is somewhat fragmented. Here are 
+   some useful make commands: 
+   -The command ``make fractal'' will build and start the main system,
+   asking for input on relevant fields to construct a system
+   -The command ``make mandelbrot'' will build and start a system that draws the
+   mandelbrot set. Clicking on a point will draw the associated Julia set. 
+   -The command ``make newton'' will give an example of a fractal created 
+   through Newton's method
+3. Whichever option you choose, perhaps after inputting information as 
+   prompted, a graphical window will appear (assuming graphics is configured).
+   You can now explore the fractal to your heart's content. At the moment, the
+   following key bindings are implemented:
+   q: quit the application. If this is used while looking at a Julia set from 
+      make mandelbrot, pressing q once will bring you back to the mandelbrot set 
+      and pressing q again will quit. 
+   z: undo last action 
+   y: redo last press of z. After leaving the window for a polynomial during 
+      make mandelbrot, this action cannot be redone 
+   e: double the number of iterations computed
+   c: zoom in by a factor of 20, centered on current mouse position
+   digits 1-9: zoom in by that factor, centered on current mouse position
 
  
 4. Look at output
-   -the image will be saved as file with the inputted name, with extension .bmp
+   -if make fractal is run, a .bmp image will appear in the current directory
 
 Congratulations! You have generated your own fractal.
