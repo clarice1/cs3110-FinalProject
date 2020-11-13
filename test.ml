@@ -1,4 +1,8 @@
 open OUnit2
+
+(******************************************************************************)
+(*Tests for Matrix*)
+(******************************************************************************)
 open Matrix
 
 (**Change to true if test cases involving larger matrices should be run *)
@@ -247,6 +251,9 @@ let matrix_tests = [
     string_option_int_matrix;
 ]
 
+(******************************************************************************)
+(*Tests for Polynomial*)
+(******************************************************************************)
 open Polynomial
 
 let eval_test 
@@ -341,40 +348,163 @@ let polynomial_tests = [
   eval_test "2(2 - 1)(2 + 1) = 6" three_roots {re = 2.; im = 0.} 
     {re = 6.; im = 0.};
 ]
+
+(******************************************************************************)
+(*Tests for ToImage*)
+(******************************************************************************)
 open ToImage
+open Complex
+
+(*testing colorize: plug in an "easier" function than julia_color e.g. every
+  other pixel is black, and match it against*)
+
+let black : Color.rgb = {r = 0; g = 0; b = 0}
+let red : Color.rgb = {r = 250; g = 0; b = 0}
+let blue : Color.rgb = {r = 0; g = 0; b = 250}
+let green : Color.rgb = {r = 0; g = 250; b = 0}
+
+let light_blue : Color.rgb = {r = 0; g = 0; b = 255 - ((500) * 255 / 5000) }
+let dark_red : Color.rgb = {r = 255 - ((3000) * 255 / 5000); g = 0; b = 0}
+let light_green : Color.rgb = {r = 0; g = 255 - ((300) * 255 / 2000); b = 0}
 
 let julia_color_test
     (name : string)
     (iter : int)
-    (col : col)
+    (col : Color.rgb)
     (coordinate : (int option * Complex.t))
     (expected_output : Color.rgb) : test = 
   name >:: (fun _ -> 
       assert_equal expected_output (julia_color iter col coordinate))
 
-let black : Color.rgb = {r = 0; g = 0; b = 0}
-let light_blue : Color.rgb = {r = 0; g = 0; b = 255 - ((500) * 255 / 5000) }
-let dark_red : Color.rgb = {r = 255 - ((3000) * 255 / 5000); g = 0; b = 0}
-let light_green : Color.rgb = {r = 0; g = 255 - ((300) * 255 / 2000); b = 0}
+let populate_black row col = black
+
+let small_matrix = init 10 10 populate_black
+
+(** [f_always_converges x] is a function that always returns black, which means
+    that every point on the complex plane converges. *)
+let f_always_converges (Some x, y) = black
+
+let black_screen : Images.t = failwith "TODO"
+
+let colorize_test name f m expected_output = 
+  name >:: (fun _ -> assert_equal expected_output (colorize f m))
 
 let toImage_tests = [
-  julia_color_test "Point is colored black" 5000 R (None, {re = 0.; im = 0.}) 
+  julia_color_test "Point is colored black" 
+    5000 
+    red
+    (None, {re = 0.; im = 0.}) 
     black;
-  julia_color_test "Point is colored with a light blue" 
-    5000 B (Some 500, {re = 2.; im = 1.;}) light_blue;
-  julia_color_test "Point is colored with a dark_red" 
-    5000 R (Some 3000, {re = 2.; im = 1.;}) dark_red;
-  julia_color_test "Point is colored with a dark_red" 
-    2000 G (Some 300, {re = 2.; im = 1.;}) light_green;
+  julia_color_test "Point is colored black" 
+    5000 
+    blue
+    (None, {re = 0.; im = 0.}) 
+    black;
+  julia_color_test "Point is colored black" 
+    5000 
+    green
+    (None, {re = 0.; im = 0.}) 
+    black;
 
+  julia_color_test "Point is colored black" 
+    5000 
+    light_blue
+    (None, {re = 0.; im = 0.}) 
+    black;
+
+  (*colorize_test "the function always converges, should be a black screen"
+    f_always_converges
+    small_matrix
+    black_screen*)
 ]
 
 
+(******************************************************************************)
+(*Tests for Main*)                                                        (*Comment these out for now*)
+(******************************************************************************)
+(*
+let complex_of_float_test name f expected_output = 
+  name >:: fun _ -> (assert_equal expected_output (Main.complex_of_float f))
+
+let lst_of_complex_floats_test name lst expected_output = 
+  name >:: fun _ -> (assert_equal expected_output (Main.lst_of_complex_floats lst))
+
+let string_of_rgb_test name str expected_output = 
+  name >:: fun _ -> (assert_equal expected_output (Main.string_of_rgb str))
+
+let string_of_rgb_exc_test name str expected_output = 
+  name >:: fun _ -> (assert_raises expected_output 
+                       (fun () -> Main.string_of_rgb str))
+
+let main_tests = [
+  (*Testing complex_of_float*)
+  complex_of_float_test "complex_of_float 0. should be {re = 0.; im = 0.}"
+    0.
+    {re = 0.; im = 0.};
+  complex_of_float_test "complex_of_float 1. should be {re = 0.; im = 0.}"
+    1.
+    {re = 1.; im = 0.};
+  complex_of_float_test "complex_of_float 0.1 should be {re = 0.1; im = 0.}"
+    0.1
+    {re = 0.1; im = 0.};
+  complex_of_float_test "complex_of_float -0.1 should be {re = -0.1; im = 0.}"
+    (-0.1)
+    {re = -0.1; im = 0.};
+
+  (*Testing lst_of_complex_floats*)
+  lst_of_complex_floats_test {|lst_of_complex_floats "0.1" should be 
+    [{re = 0.1; im = 0.}]|}
+    "0.1"
+    [{re = 0.1; im = 0.}]; 
+  lst_of_complex_floats_test {|lst_of_complex_floats "0.1 0.2" should be 
+    [{re = 0.1; im = 0.}; {re = 0.2; im = 0.}]|}
+    "0.1 0.2"
+    [{re = 0.1; im = 0.}; {re = 0.2; im = 0.}]; 
+  lst_of_complex_floats_test {|lst_of_complex_floats "0.1      0.2" should be 
+    [{re = 0.1; im = 0.}; {re = 0.2; im = 0.}]|}
+    "0.1       0.2"
+    [{re = 0.1; im = 0.}; {re = 0.2; im = 0.}]; 
+  lst_of_complex_floats_test {|lst_of_complex_floats "     0.1 0.2" should be 
+    [{re = 0.1; im = 0.}; {re = 0.2; im = 0.}]|}
+    "      0.1 0.2"
+    [{re = 0.1; im = 0.}; {re = 0.2; im = 0.}];
+  lst_of_complex_floats_test {|lst_of_complex_floats "0.1 0.2      " should be 
+    [{re = 0.1; im = 0.}; {re = 0.2; im = 0.}]|}
+    "0.1 0.2       "
+    [{re = 0.1; im = 0.}; {re = 0.2; im = 0.}];
+
+  (*testing string_of_rgb*)
+  string_of_rgb_test {|string_of_rgb "R" should be {b = 39; r = 234; g = 32}|}
+    "R"
+    {b = 39; r = 234; g = 32}; 
+  string_of_rgb_test {|string_of_rgb "V" should be {b = 241; r = 205; g = 132}|}
+    "R"
+    {b = 241; r = 205; g = 132};
+
+  (*testing string_of_rgb_exc_test*)
+  string_of_rgb_exc_test {|string_of_rgb "Q" should raise Color_not_found|}
+    "Q"
+    Main.Color_not_found;
+]
+*)
+
+
+(******************************************************************************)
+(*Tests for LineDrawer: We test this visually, so no unit tests here*)                                        
+(******************************************************************************)
+
+(******************************************************************************)
+(*Tests for Newton*)                                                      (*QUESTION: What is Newton?*)
+(******************************************************************************)
+
+
+
 let tests =
-  "test suite for A1"  >::: List.flatten [
+  "test suite for Final Project"  >::: List.flatten [
     matrix_tests;
     polynomial_tests;
     toImage_tests;
+    (*main_tests;*)
   ]
 
 let _ = run_test_tt_main tests

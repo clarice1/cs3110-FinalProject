@@ -4,15 +4,17 @@ open Matrix
 open ToImage
 open Graphics
 
-exception Color_not_found
+exception Bad_input
+
+(*let polynomial = from_list (lst_of_complex_floats seq)*)
 
 (** [complex_of_float f] is the complex representation of float [f], with [re]
     as [f] and [im] as 0. *)
 let complex_of_float f =
   {re = f; im = 0.}
 
-(** [lst_of_ints str] is the list of ints from string [str]
-    Requires: [str] contains only chars representing ints, separated by spaces
+(** [lst_of_complex_floats str] is the list of floats from string [str]
+    Requires: [str] contains only chars representing floats, separated by spaces
     Raises: [Invalid_argument str] if str is not formatted as specified above*)
 let lst_of_complex_floats str = 
   str
@@ -22,7 +24,8 @@ let lst_of_complex_floats str =
   |> List.map float_of_string
   |> List.map complex_of_float
 
-(** [string_of_rgb str] returns the rgb value of color [str]. *)
+(** [string_of_rgb str] returns the rgb value of color [str]. 
+    Requires: str is a capital letter representing one of ROYGBIV*)
 let string_of_rgb str = match str with
   | "R" -> let my_col : Color.rgb = {b = 39; r = 234; g = 32;} in my_col
   | "O" -> {b = 34; r = 230; g = 126;}
@@ -31,69 +34,111 @@ let string_of_rgb str = match str with
   | "B" -> {b = 221; r = 6; g = 82;}
   | "I" -> {b = 100; r = 27; g = 20;}
   | "V" -> {b = 241; r = 205; g = 132;}
-  | _ -> raise Color_not_found
+  | _ -> raise Bad_input
 
-(** [make_image lst] produces .bmp image representation of the Julia Set taken
+(** [int_type_checker input] is the corresponding int value of [input]
+    Raises: [Bad_input] if [input] is not well-formatted *)
+let int_type_checker input = 
+  try int_of_string input
+  with 
+  | Failure s -> raise Bad_input
+
+(** [float_type_checker input] is the corresponding float value of [input]
+    Raises: [Bad_input] if [input] is not well-formatted *)
+let float_type_checker input =
+  try float_of_string input
+  with 
+  | Failure s -> raise Bad_input
+
+(** [polynomial_input_type_checker input] is the corresponding list of complex 
+    numers (representing a polynomial) of [input]
+    Raises: [Bad_input] if [input] is not well-formatted *)
+let polynomial_input_type_checker input = 
+  try input |> lst_of_complex_floats |> from_list
+  with
+  | Invalid_argument s -> raise Bad_input
+  | Failure s -> raise Bad_input
+
+(** [get_good_input ask type_checker error_message] is the input converted to
+    its desired type. We prompt the user to enter an input via the string [ask],
+    and if the input is not well-formatted, we give the user the string 
+    [error_message], asking them to try again. [type_checker] is the function
+    that ensures the user's input is well-formatted. *)
+let rec get_good_input ask type_checker error_message =
+  print_endline ask;
+  print_string "> ";
+  let input = read_line()
+  in
+  try type_checker input 
+  with
+  | Bad_input -> begin
+      print_endline error_message;
+      get_good_input ask type_checker error_message
+    end
+
+(** [make_image lst] produces a window with an image  of the Julia Set taken
     by repeatedly applying the polynomial represented by [seq] *)
-let make_image seq =
-  print_endline "please enter the ROYGBIV color of the image";
-  print_string "> ";
-  let col = try (string_of_rgb (read_line ())) with
-      Color_not_found -> 
-      print_endline "Try a capital letter ROYGBIV"; 
-      print_string "> ";
-      string_of_rgb (read_line ())
+let make_image polynomial =
+  let col = get_good_input 
+      "Please enter the ROYGBIV color of the image"
+      string_of_rgb
+      "You did not enter the ROYGBIV color correctly, please try again"
   in 
-  print_endline "please enter the width of the image";
-  print_string "> ";
-  let width = int_of_string (read_line ())
+  let width = get_good_input 
+      "Please enter the width of the image"
+      int_type_checker
+      "You did not enter the width correctly (it is an int), please try again"
   in
-  print_endline "please enter the length of the image";
-  print_string "> "; 
-  let length = int_of_string (read_line ())
+  let length = get_good_input 
+      "Please enter the length of the image"
+      int_type_checker
+      "You did not enter the length correctly (it is an int), please try again"
   in
-  print_endline "please enter the number (int) of iterations you would like to check";
-  print_string "> ";
-  let iter = int_of_string (read_line ())
+  let iter = get_good_input 
+      "Please enter the number (int) of iterations you would like to check"
+      int_type_checker
+      "You did not enter the number of iterations correctly (it is an int), please try again"
   in 
-  print_endline "lower left coordinate real value? (preferrably a negative float)";
-  print_string "> ";
-  let llre = float_of_string (read_line ())
+  let llre = get_good_input 
+      "Please enter the lower left coordinate real value (preferrably a negative float)"
+      float_type_checker
+      "You did not enter the coordinate correctly (it is a float), please try again"
   in
-  print_endline "lower left coordinate imaginary value? (preferrably a negative float)";
-  print_string "> ";
-  let llim = float_of_string (read_line ())
+  let llim = get_good_input 
+      "Please enter the lower left coordinate imaginary value (preferrably a negative float)"
+      float_type_checker
+      "You did not enter the coordinate correctly (it is a float), please try again"
   in
-  print_endline "upper right coordinate real value? (preferrably a positive float)";
-  print_string "> ";
-  let urre = float_of_string (read_line ())
+  let urre = get_good_input 
+      "Please enter the upper right coordinate real value (preferrably a positive float)"
+      float_type_checker
+      "You did not enter the coordinate correctly (it is a float), please try again"
   in
-  print_endline "upper right coordinate imaginary value? (preferrably a positive float)";
-  print_string "> ";
-  let urim = float_of_string (read_line ())
+  let urim = get_good_input 
+      "Please enter the upper right coordinate imaginary value (preferrably a positive float)"
+      float_type_checker
+      "You did not enter the coordinate correctly (it is a float), please try again"
   in                                                     
   let matrix = cx_init {re = llre; im = llim} 
       {re = urre; im = urim} 
       length 
       width
   in
-  let polynomial = from_list (lst_of_complex_floats seq) 
-  in
-
   let im = colorize 
       (julia_color iter col) 
-      (iterate_with_stop (bounded polynomial) iter matrix) in
-
-  let str = " " ^ (string_of_int width) ^ "x" ^ (string_of_int length) in
+      (iterate_with_stop (bounded polynomial) iter matrix) 
+  in
+  let str = " " ^ (string_of_int width) ^ "x" ^ (string_of_int length) 
+  in
   Graphics.open_graph str;
-  let g = Graphic_image.of_image im in
+  let g = Graphic_image.of_image im 
+  in
   Graphics.draw_image g 0 0; 
   LineDrawer.start {re = llre; im = llim}
     {re = urre; im = urim} Graphics.red 
     (bounded polynomial)
     (fun (iter : int) -> (julia_color iter col))
     (eval polynomial) iter g;
-
   im
 
 (** [main ()] prompts for the client to input a sequence of numbers, then tells
@@ -105,18 +150,27 @@ let main () =
   print_endline "What do you want to name your image? (one word, no spaces)";
   print_string "> ";
   let name = read_line ()
+  (*Not used for now; we want to incorporate the name later *)     
   in
-  print_endline "Please enter a sequence of floats between 0. and 1. separated 
-                  by spaces only.\n";
+  let polynomial = get_good_input
+      "please enter a sequences of floats (perferably between 0. and 1. separated
+    by spaces only. \n
+    (e.g. 0.11 0.03 0.2020)\n"
+      polynomial_input_type_checker
+      "You did not enter the floats correctly. Please try again"
+  in 
+  ignore (make_image polynomial);
+  ()
+
+
+
+(*print_endline "Please enter a sequence of floats between 0. and 1. separated 
+                by spaces only.\n";
   print_endline "(e.g. 0.11 0.03 0.2020)\n";
   print_string  "> ";
   match read_line () with
   | exception End_of_file -> ()
-  | seq -> 
-    let im = make_image seq in
-    Bmp.save (name ^ ".bmp") [] im;
-
-    print_endline "you can find the .bmp file here. "
+  | seq -> ignore (make_image seq); ()*)
 
 (* Execute the user interface *)
 let () = main ()
