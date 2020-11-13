@@ -4,7 +4,6 @@ open Matrix
 open ToImage
 open Graphics
 
-exception Color_not_found
 exception Bad_input
 
 (*let polynomial = from_list (lst_of_complex_floats seq)*)
@@ -135,8 +134,11 @@ let make_image polynomial =
   let g = Graphic_image.of_image im 
   in
   Graphics.draw_image g 0 0; 
-  LineDrawer.start (0, 0) (width, length) {re = llre; im = llim}
-    {re = urre; im = urim} Graphics.red (eval polynomial) g;
+  LineDrawer.start {re = llre; im = llim}
+    {re = urre; im = urim} Graphics.red 
+    (bounded polynomial)
+    (fun (iter : int) -> (julia_color iter col))
+    (eval polynomial) iter g;
   im
 
 (** [main ()] prompts for the client to input a sequence of numbers, then tells
