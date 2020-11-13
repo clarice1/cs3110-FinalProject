@@ -85,8 +85,11 @@ let make_image seq =
   Graphics.open_graph str;
   let g = Graphic_image.of_image im in
   Graphics.draw_image g 0 0; 
-  LineDrawer.start (0, 0) (width, length) {re = llre; im = llim}
-    {re = urre; im = urim} Graphics.red (eval polynomial) g;
+  LineDrawer.start {re = llre; im = llim}
+    {re = urre; im = urim} Graphics.red 
+    (bounded polynomial)
+    (fun (iter : int) -> (julia_color iter col))
+    (eval polynomial) iter g;
 
   im
 
