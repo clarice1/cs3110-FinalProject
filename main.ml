@@ -159,8 +159,7 @@ let main () =
       polynomial_input_type_checker
       "You did not enter the floats correctly. Please try again"
   in 
-  ignore (make_image polynomial);
-  ()
+  Bmp.save (name ^ ".bmp") [] (make_image polynomial)
 
 
 
