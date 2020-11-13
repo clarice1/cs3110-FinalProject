@@ -33,13 +33,16 @@ let string_of_rgb str = match str with
   | "V" -> {b = 241; r = 205; g = 132;}
   | _ -> raise Color_not_found
 
-
 (** [make_image lst] produces .bmp image representation of the Julia Set taken
     by repeatedly applying the polynomial represented by [seq] *)
 let make_image seq =
   print_endline "please enter the ROYGBIV color of the image";
   print_string "> ";
-  let col = string_of_rgb (read_line ())
+  let col = try (string_of_rgb (read_line ())) with
+      Color_not_found -> 
+      print_endline "Try a capital letter ROYGBIV"; 
+      print_string "> ";
+      string_of_rgb (read_line ())
   in 
   print_endline "please enter the width of the image";
   print_string "> ";
