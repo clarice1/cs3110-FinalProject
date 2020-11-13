@@ -2,7 +2,7 @@
    and starts drawing a lines corresponding to where the point is mapped by 
    repeatedly applying [f]. [ll] and [ur] are the coordinates of the lower
    left and upper right corners of the window and [ll_cx] and [ur_cx] are
-   the corresponding complex values. [c] should bbe the desired drawing
+   the corresponding complex values. [c] should be the desired drawing
    color for lines and [im] is the image to be redrawn when the mouse moves.
    The graphics window should already be open.*)
 val start : int * int -> int * int -> Complex.t -> Complex.t -> 

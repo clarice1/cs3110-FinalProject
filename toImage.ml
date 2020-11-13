@@ -12,7 +12,8 @@ let gamma_correction coord_iter iter col =
   |> int_of_float
 
 let julia_color iter of_color coordinate = 
-  let black : Color.rgb = {r = 0; g = 0; b = 0} in
+  let black : Color.rgb = {r = 0; g = 0; b = 0} 
+  in
   if fst coordinate = None then black
   else 
     begin
@@ -24,7 +25,9 @@ let julia_color iter of_color coordinate =
         let my_col : Color.rgb = 
           {b = gamma_correction coord_iter iter blue; 
            r = gamma_correction coord_iter iter red; 
-           g = gamma_correction coord_iter iter green;} in my_col
+           g = gamma_correction coord_iter iter green;} 
+        in 
+        my_col
     end
 
 let colorize (f : ((int option * 'a) -> Color.rgb)) m =
