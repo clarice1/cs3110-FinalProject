@@ -33,7 +33,7 @@ Installation
       and pressing q again will quit. 
    z: undo last action. If there are no actions to undo, quit the application
    y: redo last press of z. The action of leaving the window for a polynomial 
-      during cannot be redone 
+      during make mandelbrot cannot be redone 
    e: double the number of iterations computed
    c: zoom in by a factor of 20, centered on current mouse position
    digits 1-9: zoom in by that factor, centered on current mouse position
