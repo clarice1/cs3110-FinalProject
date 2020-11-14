@@ -29,7 +29,9 @@ type state = {
   col : Graphics.color;
   click : Complex.t -> unit;
   button : char -> unit;
-  mutable redo : state option
+  mutable redo : state option;
+  name : string;
+  files_saved : int ref
 }
 
 (**The exception raised when ['q'] is pressed on the keyboard*)
@@ -172,6 +174,15 @@ and y s =
   | None -> () 
   | Some s' -> (fun () -> start_with_bonus_state_with_redo s') |> catch_z s
 
+(**[sb s] is the function that activates when ['s'] clicked in state [s]. 
+   Currently saves the contents of the screen as a .bmp file*)
+and sb s = 
+  let im = Graphics.get_image 0 0 s.width s.height in 
+  let camlim = Images.Rgb24 (Graphic_image.image_of im) in 
+  let name = s.name ^ " number " ^ string_of_int !(s.files_saved) ^ ".bmp"  in 
+  Bmp.save name [] camlim;
+  s.files_saved := !(s.files_saved) + 1
+
 (**[int_press s x] is the functions that activates when a key corresponding
    to a digit '1' - '9' is pressed. Currently zooms in by that amount,
    centered on the current mouse position*)
@@ -192,6 +203,7 @@ and key_reader s =
       | 'c' -> c s
       | 'e' -> e s
       | 'y' -> y s
+      | 's' -> sb s
       | x when '1' <= x && x <= '9' -> int_press s x
       | x -> s.button x
     end
@@ -204,22 +216,25 @@ and start_with_bonus_state (s : state) : unit =
   redraw s;
   go {s with last_point = None; redo = None}
 
-let start_with_bonus_aux ll_c ur_c col fb color f iter click button im = 
+let start_with_bonus_aux ll_c ur_c col fb color f iter click button name = 
   Graphics.set_color col;
   let width = Graphics.size_x () in 
   let height = Graphics.size_y () in
   let started_drawing = (Graphics.mouse_pos ()) in
+  let im = rec_im fb col iter ll_c ur_c color in 
   let s = {ll_c; ur_c; started_drawing; 
            last_point = None; im; width;
            color; f; 
-           fb; iter; height; col; click; button; redo = None} in
+           fb; iter; height; col; click; button; redo = None;
+           files_saved = ref 0; 
+           name} in
   start_with_bonus_state s
 
-let start_with_bonus ll_c ur_c col fb color f iter click button im = 
-  try start_with_bonus_aux ll_c ur_c col fb color f iter click button im with
+let start_with_bonus ll_c ur_c col fb color f iter click button name = 
+  try start_with_bonus_aux ll_c ur_c col fb color f iter click button name with
   | Q | Z _ -> ()
 
 
-let start ll_cx ur_cx c fb fc f iter im = 
+let start ll_cx ur_cx c fb fc f iter name = 
   start_with_bonus ll_cx ur_cx c (fun x y -> fb y) fc (fun x y -> f y) iter 
-    (fun x -> ()) (fun x -> ()) im
+    (fun x -> ()) (fun x -> ()) name

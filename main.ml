@@ -78,7 +78,7 @@ let rec get_good_input ask type_checker error_message =
 
 (** [make_image lst] produces a window with an image  of the Julia Set taken
     by repeatedly applying the polynomial represented by [seq] *)
-let make_image polynomial =
+let make_image polynomial name =
   let col = get_good_input 
       "Please enter the ROYGBIV color of the image"
       string_of_rgb
@@ -119,27 +119,14 @@ let make_image polynomial =
       float_type_checker
       "You did not enter the coordinate correctly (it is a float), please try again"
   in                                                     
-  let matrix = cx_init {re = llre; im = llim} 
-      {re = urre; im = urim} 
-      length 
-      width
-  in
-  let im = colorize 
-      (julia_color iter col) 
-      (iterate_with_stop (bounded polynomial) iter matrix) 
-  in
   let str = " " ^ (string_of_int width) ^ "x" ^ (string_of_int length) 
   in
   Graphics.open_graph str;
-  let g = Graphic_image.of_image im 
-  in
-  Graphics.draw_image g 0 0; 
   LineDrawer.start {re = llre; im = llim}
     {re = urre; im = urim} Graphics.red 
     (bounded polynomial)
     (fun (iter : int) -> (julia_color iter col))
-    (eval polynomial) iter g;
-  im
+    (eval polynomial) iter name
 
 (** [main ()] prompts for the client to input a sequence of numbers, then tells
     the client where to find the outputted .bmp image *)
@@ -159,7 +146,7 @@ let main () =
       polynomial_input_type_checker
       "You did not enter the floats correctly. Please try again"
   in 
-  Bmp.save (name ^ ".bmp") [] (make_image polynomial)
+  make_image polynomial name
 
 
 

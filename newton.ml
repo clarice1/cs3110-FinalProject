@@ -31,22 +31,16 @@ let newton_with_defs roots =
   newton_color (default_n default_colors (List.length roots)) roots
 
 let full_newton ll ur iter width height roots tolerance = 
-  let beginning_matrix = 
-    Matrix.cx_init ll ur width height in 
   let poly = Polynomial.from_roots roots in 
   let polyfun = poly |> Polynomial.eval in
   let diff = Polynomial.diff poly |> Polynomial.eval in 
   let f = newton_fun polyfun diff roots tolerance in 
-  let final_matrix = Matrix.iterate_with_stop f 100 beginning_matrix in 
   let color_fun = newton_with_defs roots tolerance in
-  let image = ToImage.colorize color_fun final_matrix in 
   Graphics.open_graph (" " ^ string_of_int width ^ "x" ^ string_of_int height);
-  let g = Graphic_image.of_image image in
-  Graphics.draw_image g 0 0;  
   LineDrawer.start ll ur
     Graphics.black 
-    (newton_fun polyfun diff roots tolerance)
-    (fun i -> newton_with_defs roots tolerance)
+    f
+    (fun i -> color_fun)
     (newton_fun_no_stop polyfun diff) 
     iter
-    g
+    "newton"
