@@ -12,11 +12,30 @@ val start : Complex.t -> Complex.t -> Graphics.color ->
   (int -> (int option * Complex.t) -> Color.rgb) ->
   (Complex.t -> Complex.t) -> int -> string -> unit
 
+(**[start_ex] is like [start] but an exception is raised when the user
+   presses ['z'] or ['q'] if there is no way to return. If inside another
+   lineDrawer program, the exception for ['z'] can be caught and used to
+   redo using the ['y'] key. *)
+val start_ex : Complex.t -> Complex.t -> Graphics.color -> 
+  (Complex.t -> Complex.t option) -> 
+  (int -> (int option * Complex.t) -> Color.rgb) ->
+  (Complex.t -> Complex.t) -> int -> string -> unit
+
 (**[start_with_bonus] is like [start], but the user may also specify the 
    drawing color, what happens when the mouse is clicked, 
    depending on the complex value clicked, and add additional key bindings.
    The function may also depend on the initial value.*)
 val start_with_bonus : Complex.t -> Complex.t -> Graphics.color -> 
+  (Complex.t -> Complex.t -> Complex.t option) -> 
+  (int -> (int option * Complex.t) -> Color.rgb) ->
+  (Complex.t -> Complex.t -> Complex.t)-> int ->
+  (Complex.t -> unit) -> (char -> unit)  -> string -> unit
+
+(**[start_bonus_ex] is like [start_with_bonus] but an exception is raised when 
+   the user presses ['z'] or ['q'] if there is no way to return. If inside another
+   lineDrawer program, the exception for ['z'] can be caught and used to
+   redo using the ['y'] key. *)
+val start_bonus_ex : Complex.t -> Complex.t -> Graphics.color -> 
   (Complex.t -> Complex.t -> Complex.t option) -> 
   (int -> (int option * Complex.t) -> Color.rgb) ->
   (Complex.t -> Complex.t -> Complex.t)-> int ->

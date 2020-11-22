@@ -46,6 +46,9 @@ let get i j m =
 (**[map m f] is the matrix obtained by applying [f] to each entry of [m]*)
 let map f = Array.map (Array.map f)
 
+let mapi f m = 
+  Array.mapi (fun i -> Array.mapi (fun j -> f i j)) m
+
 (**[iterate_fun f n x] is [f iter_num (f (iternum + 1) (...f iternum + n x)...)] 
    where [f] is applied [n] times
    Requires: [n >= 0]*)

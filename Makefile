@@ -1,4 +1,4 @@
-MODULES=matrix polynomial toImage main newton lineDrawer mandelbrot
+MODULES=matrix polynomial toImage main newton lineDrawer mandelbrot fromImage
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -6,8 +6,15 @@ TEST=test.byte
 MAIN=main.byte
 MANDELBROT=mandelbrot.byte
 NEWTON=newtonDrawer.byte
+IM=readImage.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 BW=black_and_white.byte
+
+default: build
+	utop
+
+build:
+	$(OCAMLBUILD) $(OBJECTS)
 
 mandelbrot:
 	$(OCAMLBUILD) $(MANDELBROT) && ./$(MANDELBROT)
@@ -15,15 +22,11 @@ mandelbrot:
 newton:
 	$(OCAMLBUILD) $(NEWTON) && ./$(NEWTON)
 
+im:
+	$(OCAMLBUILD) $(IM) && ./$(IM)
 
 zip:
 	zip ms1.zip *.ml* _tags Makefile *.txt
-
-default: build
-	utop
-
-build:
-	$(OCAMLBUILD) $(OBJECTS)
 
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
@@ -36,7 +39,8 @@ bw:
 
 clean:
 	ocamlbuild -clean
-	rm -rf doc.public doc.private *.bmp ms1.zip
+	rm ./*.bmp
+	rm -rf doc.public doc.private *.bmp ms1.zip 
 
 docs: docs-public docs-private
 	

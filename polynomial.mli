@@ -9,6 +9,16 @@
 (** [t] is the type of polynomial *)
 type t
 
+(**[bt] is the type of a polynomial with a cached upper bound after which
+   divergence is guaranteed*)
+type bt
+
+(**[bound p] caches a bound after which divergence is guaranteed*)
+val bound : t -> bt 
+
+(**[forget p] is [p] with the cached bound removed*)
+val forget : bt -> t
+
 (** [zero] is the zero polynomial *)
 val zero : t
 
@@ -32,6 +42,10 @@ val from_roots : Complex.t list -> t
     is guaranteed to diverge and [Some (eval p input)] if [p] is not guaranteed 
     to diverge *)
 val bounded : t -> Complex.t -> Complex.t option
+
+(**[bbounded] is like [bounded], but more efficient since the bound is already
+   cached*)
+val bbounded : bt -> Complex.t -> Complex.t option
 
 (** [from_list lst] is the polynomial with coefficients in [lst]. The 
     first element of [lst] is the coefficient of the highest degree of the 

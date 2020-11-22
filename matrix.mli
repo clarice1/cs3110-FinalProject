@@ -38,6 +38,10 @@ val cx_init : Complex.t -> Complex.t -> int -> int -> cx_t
    Raises: [Invalid_argument "(i, j)"] if there is no value for that index *)
 val get : int -> int -> 'a t -> 'a
 
+(**[mapi f m] is the matrix whose value at row [i], column [j] is 
+   [f i j (get i j m)]*)
+val mapi : (int -> int -> 'a -> 'b) -> 'a t -> 'b t
+
 (**[iterate f n m] is the matrix with the same number of rows and columns as [m]
    but whose value at row [i] column [j] is [f^n m(i, j)], i.e. the n-fold 
    composition of f with itself
