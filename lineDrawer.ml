@@ -3,6 +3,7 @@
    where the current drawing started from,
    where the current line drawn ends as a complex number,
    the image currently displayed in the graphics window,
+   the original (unrescaled) version of the image in the graphics window,
    the width and height of the image, 
    the function to pass into [Matrix.iterate_with_stop_2] 
    when recomputing is necessary (eg when zooming),
