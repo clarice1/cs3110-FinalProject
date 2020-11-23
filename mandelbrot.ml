@@ -1,6 +1,5 @@
 (**[string_of_complex z] is the string representation of [z]*)
-let string_of_complex (z : Complex.t) = 
-  string_of_float z.re ^ " + " ^ string_of_float z.im ^ "i"
+let string_of_complex = Parse.string_of_complex
 
 let poly c = Polynomial.from_list [Complex.one; Complex.zero; c]
 

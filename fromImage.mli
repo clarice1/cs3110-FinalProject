@@ -15,8 +15,9 @@ val black_vals : (Complex.t * Color.rgb) Matrix.t -> Complex.t array
 val color_matrix : Rgb24.t -> Complex.t -> Complex.t -> 
   (Complex.t * Color.rgb) Matrix.t
 
-(**[from_file file ll ur n iterations s] completes the entire process
-   starting with the image with name [file]. [file] should be the name 
-   of a .bmp file.*)
+(**[from_file file ll ur n iterations s coeff roots] completes the entire 
+   process starting with the image with name [file]. [file] should be the name 
+   of a .bmp file. The coefficients of the polynomial are printed to the file
+   [coeff] and the roots are printer to [roots]. *)
 val from_file : string -> Complex.t -> Complex.t -> int -> int -> float -> 
-  RootPolynomial.t
+  string -> string -> RootPolynomial.t

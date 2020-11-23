@@ -73,8 +73,7 @@ let cx_of_coord {width; height; ll_c; ur_c}
           (float_of_int (height)) *. (float_of_int y)}
 
 (**[string_of_complex z] is the string representation of [z]*)
-let string_of_complex (z : Complex.t) = 
-  string_of_float z.re ^ " + " ^ string_of_float z.im ^ "i"
+let string_of_complex = Parse.string_of_complex
 
 (**[string_of_coord s p] represents the complex value at coordinate [p]*)
 let string_of_coord s p = 

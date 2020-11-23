@@ -7,6 +7,8 @@ type bt = {
 
 let from_roots a lst = (a, lst)
 
+let roots (a, lst) = lst
+
 let to_poly ((a, roots) : t) : Polynomial.t = 
   Polynomial.mul (Polynomial.from_list [a]) (Polynomial.from_roots roots)
 

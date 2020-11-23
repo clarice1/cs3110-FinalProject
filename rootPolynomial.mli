@@ -8,6 +8,9 @@ type bt
 (**[from_roots a [z1,...,zn]] is [a(z-z1)...(z-zn)]*)
 val from_roots : Complex.t -> Complex.t list -> t
 
+(**[roots p] is the roots of [p]*)
+val roots : t -> Complex.t list
+
 (**[to_poly p] converts a root polynomial to the coefficient-based polynomial*)
 val to_poly : t -> Polynomial.t
 

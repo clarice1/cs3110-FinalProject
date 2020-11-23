@@ -1,4 +1,4 @@
-MODULES=matrix polynomial toImage main newton lineDrawer mandelbrot fromImage
+MODULES=matrix polynomial toImage main newton lineDrawer mandelbrot fromImage parse
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
