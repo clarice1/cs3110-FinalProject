@@ -58,7 +58,7 @@ let rec_im f col iter ll ur color width height =
 let recompute s = 
   let width, height = Graphics.size_x (), Graphics.size_y () in 
   let im = rec_im s.fb s.col s.iter s.ll_c s.ur_c s.color width height in 
-  {s with width = width; height = height; im = im}
+  {s with width = width; height = height; im = im; orig_im = im}
 
 
 (**[is_in_window s z] is [true] if and only if [z] is in bounds for the image*)
