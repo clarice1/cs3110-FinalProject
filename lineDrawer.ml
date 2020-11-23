@@ -42,9 +42,8 @@ exception Q
 exception Z of state
 
 (**[rec_im] recomutes the image corresponding to the inputted functions*)
-let rec_im f col iter ll ur color = 
+let rec_im f col iter ll ur color width height = 
   Graphics.set_color Graphics.white;
-  let (width, height) = Graphics.size_x (), Graphics.size_y () in 
   Graphics.fill_rect 0 0 width height;
   Graphics.set_color col;
   let beginning_matrix = 
@@ -55,8 +54,9 @@ let rec_im f col iter ll ur color =
 (**[recompute s] is the state with image recomputed according to the other
    parameters in [s]*)
 let recompute s = 
-  let im = rec_im s.fb s.col s.iter s.ll_c s.ur_c s.color in 
-  {s with width = Graphics.size_x (); height = Graphics.size_y (); im = im}
+  let width, height = Graphics.size_x (), Graphics.size_y () in 
+  let im = rec_im s.fb s.col s.iter s.ll_c s.ur_c s.color width height in 
+  {s with width = width; height = height; im = im}
 
 
 (**[is_in_window s z] is [true] if and only if [z] is in bounds for the image*)
@@ -146,8 +146,19 @@ and points_map s x mp =
   go {s with last_point = Some fx}
 
 (**[resize s] starts the graphic with the new window size*)
-and resize s= 
-  let s' = recompute s in 
+and resize s = 
+  let (width, height) = Graphics.size_x (), Graphics.size_y () in 
+  Graphics.set_color Graphics.white;
+  Graphics.fill_rect 0 0 width height;
+  Graphics.set_color s.col;
+  let new_im = 
+    s.im 
+    |> Graphic_image.image_of 
+    |> (fun im -> Rgb24.resize None im width height)
+    |> (fun im -> Images.Rgb24 im)
+    |> Graphic_image.of_image in 
+  let s' = {s with im = new_im; width = width; height = height; 
+                   last_point = None} in
   redraw s';
   go s'
 
@@ -229,7 +240,8 @@ let start_with_bonus_aux ll_c ur_c col fb color f iter click button name =
   let width = Graphics.size_x () in 
   let height = Graphics.size_y () in
   let started_drawing = (Graphics.mouse_pos ()) in
-  let im = rec_im fb col iter ll_c ur_c color in 
+  let im = rec_im fb col iter ll_c ur_c color 
+      (Graphics.size_x ()) (Graphics.size_y ()) in 
   let s = {ll_c; ur_c; started_drawing; 
            last_point = None; im; width;
            color; f; 
