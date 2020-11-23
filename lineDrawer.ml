@@ -66,13 +66,10 @@ let is_in_window {ll_c; ur_c} ({re; im} : Complex.t) =
   re > ll_c.re && re < ur_c.re && im > ll_c.im && im < ur_c.im
 
 (**[cx_of_coord s p] is the complex number corresponding to the point [p]*)
-let cx_of_coord {width; height; ll_c; ur_c} 
-    (x, y) = 
+let cx_of_coord {width; height; ll_c; ur_c} (x, y) = 
   Complex.add ll_c 
-    {re = (ur_c.re -. ll_c.re)/. 
-          (float_of_int (width)) *. (float_of_int x);
-     im = (ur_c.im -. ll_c.im)/. 
-          (float_of_int (height)) *. (float_of_int y)}
+    {re = (ur_c.re -. ll_c.re)/. (float_of_int width) *. (float_of_int x);
+     im = (ur_c.im -. ll_c.im)/. (float_of_int height) *. (float_of_int y)}
 
 (**[string_of_complex z] is the string representation of [z]*)
 let string_of_complex = Parse.string_of_complex
@@ -179,7 +176,7 @@ and zoom factor s =
    Currently increases iterations by a factor of 2.*)
 and e s = 
   (fun () -> recompute {s with iter = s.iter * 2; last_point = None} |> 
-             start_with_bonus_state) |> (catch_z s)
+             start_with_bonus_state) |> catch_z s
 
 (**[c s] is the function that activates when ['c'] is clicked in state [s].
    Currently zooms by a factor of 20 centered at current mouse position*)
@@ -238,20 +235,18 @@ and start_with_bonus_state (s : state) : unit =
   go {s with last_point = None; redo = None}
 
 let start_with_bonus_aux ll_c ur_c col fb color f iter click button name = 
-  Graphics.set_color col;
-  let width = Graphics.size_x () in 
-  let height = Graphics.size_y () in
-  let started_drawing = (Graphics.mouse_pos ()) in
-  let im = rec_im fb col iter ll_c ur_c color 
-      (Graphics.size_x ()) (Graphics.size_y ()) in 
-  let s = {ll_c; ur_c; started_drawing; 
-           last_point = None; im; orig_im = im;
-           width;
-           color; f; 
-           fb; iter; height; col; click; button; redo = None;
-           files_saved = ref 0; 
-           name} in
-  start_with_bonus_state s
+  try
+    Graphics.set_color col;
+    let width = Graphics.size_x () in 
+    let height = Graphics.size_y () in
+    let started_drawing = (Graphics.mouse_pos ()) in
+    let im = rec_im fb col iter ll_c ur_c color 
+        (Graphics.size_x ()) (Graphics.size_y ()) in 
+    let s = {ll_c; ur_c; started_drawing; last_point = None; im; orig_im = im;
+             width; color; f; fb; iter; height; col; click; button; redo = None;
+             files_saved = ref 0; name} in
+    start_with_bonus_state s with 
+  | Graphics.Graphic_failure _ -> raise Q
 
 let start_ex ll_cx ur_cx c fb fc f iter name = 
   start_with_bonus_aux ll_cx ur_cx c (fun x y -> fb y) fc (fun x y -> f y) iter 
