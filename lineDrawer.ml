@@ -20,6 +20,7 @@ type state = {
   started_drawing : int * int;
   last_point : Complex.t option;
   im : Graphics.image;
+  orig_im : Graphics.image;
   width : int;
   height : int;
   fb : Complex.t -> Complex.t -> Complex.t option;
@@ -152,7 +153,7 @@ and resize s =
   Graphics.fill_rect 0 0 width height;
   Graphics.set_color s.col;
   let new_im = 
-    s.im 
+    s.orig_im 
     |> Graphic_image.image_of 
     |> (fun im -> Rgb24.resize None im width height)
     |> (fun im -> Images.Rgb24 im)
@@ -243,7 +244,8 @@ let start_with_bonus_aux ll_c ur_c col fb color f iter click button name =
   let im = rec_im fb col iter ll_c ur_c color 
       (Graphics.size_x ()) (Graphics.size_y ()) in 
   let s = {ll_c; ur_c; started_drawing; 
-           last_point = None; im; width;
+           last_point = None; im; orig_im = im;
+           width;
            color; f; 
            fb; iter; height; col; click; button; redo = None;
            files_saved = ref 0; 
