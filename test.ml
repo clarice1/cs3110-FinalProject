@@ -355,9 +355,6 @@ let polynomial_tests = [
 open ToImage
 open Complex
 
-(*testing colorize: plug in an "easier" function than julia_color e.g. every
-  other pixel is black, and match it against*)
-
 let black : Color.rgb = {r = 0; g = 0; b = 0}
 let red : Color.rgb = {r = 250; g = 0; b = 0}
 let blue : Color.rgb = {r = 0; g = 0; b = 250}
@@ -367,6 +364,9 @@ let light_blue : Color.rgb = {r = 0; g = 0; b = 255 - ((500) * 255 / 5000) }
 let dark_red : Color.rgb = {r = 255 - ((3000) * 255 / 5000); g = 0; b = 0}
 let light_green : Color.rgb = {r = 0; g = 255 - ((300) * 255 / 2000); b = 0}
 
+(** [julia_color_test name iter col coodinate expected_output] is an OUnit test
+    named [name] that checks equivalence between [expected_output] and 
+    [julia_color iter col coordinate] *)
 let julia_color_test
     (name : string)
     (iter : int)
@@ -376,16 +376,17 @@ let julia_color_test
   name >:: (fun _ -> 
       assert_equal expected_output (julia_color iter col coordinate))
 
+(** [populate_black row col] paints the area at [row], [col] black *)
 let populate_black row col = black
 
-let small_matrix = init 10 10 populate_black
+let small_black_matrix = init 10 10 populate_black
 
 (** [f_always_converges x] is a function that always returns black, which means
     that every point on the complex plane converges. *)
 let f_always_converges (Some x, y) = black
 
-let black_screen : Images.t = failwith "TODO"
-
+(** [colorize_test name f m expected_output] is an OUnit test named [name] that
+    checks equivalence between [exected_output] and [colorize f m] *)
 let colorize_test name f m expected_output = 
   name >:: (fun _ -> assert_equal expected_output (colorize f m))
 
@@ -412,10 +413,17 @@ let toImage_tests = [
     (None, {re = 0.; im = 0.}) 
     black;
 
-  (*colorize_test "the function always converges, should be a black screen"
-    f_always_converges
-    small_matrix
-    black_screen*)
+  julia_color_test "Point is colored black" 
+    5000 
+    dark_red
+    (None, {re = 0.; im = 0.}) 
+    black;
+
+  julia_color_test "Point is colored black" 
+    5000 
+    light_green
+    (None, {re = 0.; im = 0.}) 
+    black;
 ]
 
 
@@ -494,9 +502,32 @@ let main_tests = [
 (******************************************************************************)
 
 (******************************************************************************)
-(*Tests for Newton*)                                                      (*QUESTION: What is Newton?*)
+(*Tests for Newton*)                                                      
 (******************************************************************************)
+open Newton
 
+let identity_f (x : Complex.t) : Complex.t = x
+
+let deriv_identity_f (x : Complex.t) = {re = 1.; im = 0.}
+
+let root_identity_f = [{re = 0.; im = 0.}]
+
+let tolerance_identity_f = 1.
+
+let newton_fun_test name f f' roots tolerance z expected_output = 
+  name >:: fun _ -> assert_equal expected_output 
+      (newton_fun f f' roots tolerance z)
+
+let newton_tests = [
+  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f 
+                  tolerance {re = 1.; im = 1.} should return None"
+    identity_f
+    deriv_identity_f
+    root_identity_f
+    tolerance_identity_f
+    {re = 0.; im = 0.}
+    None
+]
 
 
 let tests =
@@ -505,6 +536,7 @@ let tests =
     polynomial_tests;
     toImage_tests;
     (*main_tests;*)
+    newton_tests
   ]
 
 let _ = run_test_tt_main tests
