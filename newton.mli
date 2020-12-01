@@ -1,3 +1,10 @@
+(** 
+   Fractal application of Newton's Method.
+
+   This module uses Newton's method as the function applied repeaetedly to 
+   generate a unique fractal. Comes with full functionality of all our other
+   fractals (i.e. line drawing, resizing, zoom, etc.).
+*)
 
 
 (**[newton_fun f f' roots tolerance z] is [None] if [z] is within

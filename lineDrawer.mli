@@ -1,3 +1,14 @@
+(** 
+   Image manipulator to draw lines.
+
+   This module edits Graphics images to draw lines from one application
+   of a polynomial function to the next. That is, when we consider the repeated
+   application of a particular polynomial function, LineDrawer traces each 
+   output (in order) to visualize whether the function diverges or converges at
+   that particular point. 
+*)
+
+
 (**[start ll_cx ur_cx c fb fc f iter] reads user input on the location of the 
    mouse and starts drawing a lines corresponding to where the point is mapped 
    by repeatedly applying [f]. [ll_cx] and [ur_cx] are
