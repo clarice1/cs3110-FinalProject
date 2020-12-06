@@ -42,5 +42,5 @@ val set_lw : t -> int -> unit
 (** [set_curr g p] sets [p] as the current location of the mouse in [g]*)
 val set_curr : t -> int * int -> unit
 
-(** [use_gui g] applies the settings in [g] to a graphical window.*)
+(** [use_gui g] applies the settings in [g] to a graphical window. change*)
 val use_gui : t -> unit
