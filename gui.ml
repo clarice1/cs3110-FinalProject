@@ -1,6 +1,8 @@
 open Graphics
 
-
+(******************************************************************************)
+(*Graphics Context*)
+(******************************************************************************)
 type t = {
   mutable bcol : Graphics.color;
   mutable fcol : Graphics.color;
@@ -20,6 +22,7 @@ let make_default_context () = {
   x = 0;
   y = 0;
 }
+
 let get_bcol g = g.bcol
 let get_fcol g = g.fcol
 let get_font g = g.font
@@ -42,3 +45,89 @@ let use_gui g =
   let p = get_curr g in 
   Graphics.moveto (fst p) (snd p)
 
+
+(******************************************************************************)
+(*Events*)
+(******************************************************************************)
+type rich_event = 
+  | MouseDown | MouseUp | MouseDrag | MouseMove
+  | MouseEnter | MouseExit | Exposure 
+  | GotFocus | LostFocus | KeyPress | KeyRelease
+
+
+(******************************************************************************)
+(*Options*)
+(******************************************************************************)
+
+type opt_val =
+  | Copt of Graphics.color 
+  | Sopt of string 
+  | Iopt of int 
+  | Bopt of bool
+
+type lopt = (string * opt_val) list
+
+exception OptErr
+
+let get_color lo name default = 
+  try
+    match List.assoc name lo with 
+    | Copt c -> c 
+    | _  -> raise OptErr
+  with Not_found -> default
+
+let get_string lo name default = 
+  try
+    match List.assoc name lo with 
+    | Sopt s -> s 
+    | _  -> raise OptErr
+  with Not_found -> default
+
+let get_int lo name default = 
+  try 
+    match List.assoc name lo with 
+    | Iopt i -> i 
+    | _  -> raise OptErr
+  with Not_found -> default
+
+let get_bool lo name default = 
+  try
+    match List.assoc name lo with 
+    | Bopt b -> b 
+    | _  -> raise OptErr
+  with Not_found -> default
+(* Can we combine these into one function? Would we even want to (LOC) *)
+
+let set_gc gc lst_opt = 
+  set_bcol gc (get_color lst_opt "Background" (get_bcol gc));
+  set_fcol gc (get_color lst_opt "Foreground" (get_fcol gc));
+  set_font gc (get_string lst_opt "Font" (get_font gc));
+  set_font_size gc (get_int lst_opt "FontSize" (get_font_size gc));
+  set_lw gc (get_int lst_opt "LineWidth" (get_lw gc))
+
+let make_dc = make_default_context ()
+
+
+(******************************************************************************)
+(*Construction of Components*)
+(******************************************************************************)
+
+
+(******************************************************************************)
+(*Child Components*)
+(******************************************************************************)
+
+
+(******************************************************************************)
+(*Event Handling*)
+(******************************************************************************)
+
+
+(******************************************************************************)
+(*Defining Components*)
+(******************************************************************************)
+
+
+(******************************************************************************)
+(*Enriched Components*)
+(******************************************************************************)
