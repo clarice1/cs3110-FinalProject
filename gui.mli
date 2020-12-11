@@ -113,15 +113,127 @@ val make_dc : unit -> t
 (*Construction of Components*)
 (******************************************************************************)
 
+(** [component] is the type of a component that has a size, a position in the 
+    main window, the context in which it is used, a parent, and a child. 
+    [rich_status] is the type that handles event information, including keyboard
+    focus. *)
+type component and rich_status
+
+(** [get_gc c] accesses the data fields of component [c]. *)
+val get_gc : component -> t
+
+(** [is_container c]  *)
+val is_container : component -> bool
+
+(** [in_rect c (xp, yp)] checks that the mouse position applies to coordinate 
+    [(xp, yp)] within the rectangle. *)
+val in_rect : component -> int * int -> bool
+
+(** [display_rect c unit] fills the rectangle of component [c] with the 
+    background color. *)
+val display_rect : component -> unit -> unit
+
+(** [direct_layout c c1 lopt] places [c] [c1] relatively within their 
+    containers. *)
+val direct_layout : component -> component -> (string * opt_val) list -> unit
+
+(** [create_component iw ih] creates a component with width [iw] and height 
+    [ih]. *)
+val create_component : int -> int -> component 
+
+(** [empty_component] is the empty component. *)
+val empty_component : component
+
 
 (******************************************************************************)
 (*Child Components*)
 (******************************************************************************)
 
+(** [change_coord c (dx, dy)] applies a relative change to the coordinates 
+    [(dx, dy)] of component [c] and those of all its children. *)
+val change_coord : component -> int * int -> unit
+
+(** [add_component c c1 lopt] checks that the conditions for adding [c1] have 
+    been met and then joins [c] and [c1]. *)
+val add_component : component -> component -> lopt -> unit
+
+(** [remove_component c c1] changes the link between the parent [c] and the 
+    child [c1] and changes to the coordinates of the child and all its own 
+    children. *)
+val remove_component : component -> component -> unit
+
+(** [set_layout f c] if [c] has no children, the position is changed 
+    immediately. Otherwise, first we remove children, modify the container using
+    [f], and add the children back in. *)
+val set_layout : (component -> lopt -> unit) -> component -> unit
+
+(** [display c] gives [display] to the children of [c]. *)
+val display : component -> unit
+
 
 (******************************************************************************)
 (*Event Handling*)
 (******************************************************************************)
+
+(** [get_event e] gets the event [e]. *)
+val get_event : rich_status -> rich_event
+
+(** [get_mouse_x e] gets the x position of the mouse applied to [e]. *)
+val get_mouse_x : rich_status -> int
+
+(** [get_mouse_y e] gets the y position of the mouse applied to [e]. *)
+val get_mouse_y : rich_status -> int
+
+(** [get_key e] reads key value. *)
+val get_key : rich_status -> char
+
+(** [has_key_focus e c] returns [true] if [c] is the key focus of [e], return 
+    [false] otherwise. *)
+val has_key_focus : rich_status -> component -> bool
+
+(** [take_key_focus e c] updates the key focus of [e] with [c]. *)
+val take_key_focus : rich_status -> component -> unit
+
+(** [lose_key_focus e c] replaces the key focus of [e] with the empty 
+    component. *)
+val lose_key_focus : rich_status -> 'a -> unit
+
+(** [has_gen_focus e c] returns [true] if [c] is the gen focus of [e], return 
+    [false] otherwise. *)
+val has_gen_focus : rich_status -> component -> bool
+
+(** [take_gen_focus e c] updates the gen focus of [e] with [c]. *)
+val take_gen_focus : rich_status -> component -> unit
+
+(** [lose_gen_focus e c] replaces the gen focus of [e] with the empty 
+    component. *)
+val lose_gen_focus : rich_status -> 'a -> unit
+
+(** [send_event rs c] returns [true] if the event was handled and [false] if the
+    event was not handled. *)
+val send_event : rich_status -> component -> bool
+
+(** [compute_rich_event s0 s1] constructs a rich event out of [s0] and [s1]. *)
+val compute_rich_event : Graphics.status -> Graphics.status -> rich_event
+
+(** [send_new_events res0 res1] constructs a rich event out of [res0] and 
+    [res1]. *)
+val send_new_events : rich_status -> rich_status -> unit
+
+(** [initial_re] is the initial value for [rich_event]. *)
+val initial_re : rich_event
+
+(** [loop b_disp b_motion c] manages the sequences of interactions with a 
+    component, where [c] is the root of the component tree. *)
+val loop : bool -> bool -> component -> unit
+
+(** [make_click e x y] creates by hand status information corresponding to mouse
+    events. *)
+val make_click : rich_event -> int -> int -> rich_status
+
+(** [make_key e ch c] creates by hand status information corresponding to 
+    keyboard events.  *)
+val make_key : rich_event -> 'a -> char -> rich_status 
 
 
 (******************************************************************************)
