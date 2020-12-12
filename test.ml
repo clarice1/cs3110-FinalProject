@@ -428,7 +428,7 @@ let toImage_tests = [
 
 
 (******************************************************************************)
-(*Tests for Main*)                                                        (*Comment these out for now*)
+(*Tests for Main*)                                                     
 (******************************************************************************)
 (*
 let complex_of_float_test name f expected_output = 
@@ -513,20 +513,35 @@ let deriv_identity_f (x : Complex.t) = {re = 1.; im = 0.}
 let root_identity_f = [{re = 0.; im = 0.}]
 
 let tolerance_identity_f = 1.
-
+(** [newton_fun_test name f f' roots tolerance z expected_output] is an OUnit
+    test named [name] that asserts equality between [expected_output] and 
+    [newton_fun f f' roots tolerance z]*)
 let newton_fun_test name f f' roots tolerance z expected_output = 
   name >:: fun _ -> assert_equal expected_output 
       (newton_fun f f' roots tolerance z)
 
 let newton_tests = [
   newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f 
-                  tolerance {re = 1.; im = 1.} should return None"
+                  tolerance_identity_f {re = 0.; im = 0.} should return None"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
     {re = 0.; im = 0.}
-    None
+    None;
+  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
+                   tolerance_identity_f {re = 1.; im = 1. should return 
+                   [Some (Complex.sub {re = 1.; im = 1.} (Complex.div 
+                   (identity_f {re = 1.; im = 1.}) (deriv_identity_f {re = 1.; 
+                   im = 1.}))))]"
+    identity_f
+    deriv_identity_f
+    root_identity_f
+    tolerance_identity_f
+    {re = 1.; im = 1.}
+    (Some (Complex.sub {re = 1.; im = 1.} 
+             (Complex.div (identity_f {re = 1.; im = 1.}) 
+                (deriv_identity_f {re = 1.; im = 1.}))));
 ]
 
 
