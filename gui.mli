@@ -1,7 +1,14 @@
-(** The module Gui is a library that sits on top of the Graphics Library and 
-    helps us construct the interface for an application. There are _ sections, 
-    each given by headings. *)
+(** 
+   Graphical user interface for fractal production.
 
+   This module implements our funtionality in a graphic window (as opposed to 
+   working straight out of terminal).  
+*)
+
+
+(**[t] is the type containing the specifications of a Graphical
+   User Interface (GUI).*)
+type t 
 
 (******************************************************************************)
 (*Graphics Context*)
