@@ -1,3 +1,11 @@
+(** 
+   Graphical user interface for fractal production.
+
+   This module implements our funtionality in a graphic window (as opposed to 
+   working straight out of terminal).  
+*)
+
+
 (**[t] is the type containing the specifications of a Graphical
    User Interface (GUI).*)
 type t 

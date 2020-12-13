@@ -6,8 +6,6 @@ open Graphics
 
 exception Bad_input
 
-(*let polynomial = from_list (lst_of_complex_floats seq)*)
-
 (** [complex_of_float f] is the complex representation of float [f], with [re]
     as [f] and [im] as 0. *)
 let complex_of_float f =
@@ -147,16 +145,6 @@ let main () =
       "You did not enter the floats correctly. Please try again"
   in 
   make_image polynomial name
-
-
-
-(*print_endline "Please enter a sequence of floats between 0. and 1. separated 
-                by spaces only.\n";
-  print_endline "(e.g. 0.11 0.03 0.2020)\n";
-  print_string  "> ";
-  match read_line () with
-  | exception End_of_file -> ()
-  | seq -> ignore (make_image seq); ()*)
 
 (* Execute the user interface *)
 let () = main ()
