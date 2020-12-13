@@ -3,6 +3,7 @@
    where the current drawing started from,
    where the current line drawn ends as a complex number,
    the image currently displayed in the graphics window,
+   the original (unrescaled) version of the image in the graphics window,
    the width and height of the image, 
    the function to pass into [Matrix.iterate_with_stop_2] 
    when recomputing is necessary (eg when zooming),
@@ -20,6 +21,7 @@ type state = {
   started_drawing : int * int;
   last_point : Complex.t option;
   im : Graphics.image;
+  orig_im : Graphics.image;
   width : int;
   height : int;
   fb : Complex.t -> Complex.t -> Complex.t option;
@@ -29,7 +31,9 @@ type state = {
   col : Graphics.color;
   click : Complex.t -> unit;
   button : char -> unit;
-  mutable redo : state option
+  mutable redo : state option;
+  name : string;
+  files_saved : int ref
 }
 
 (**The exception raised when ['q'] is pressed on the keyboard*)
@@ -40,9 +44,8 @@ exception Q
 exception Z of state
 
 (**[rec_im] recomutes the image corresponding to the inputted functions*)
-let rec_im f col iter ll ur color = 
+let rec_im f col iter ll ur color width height = 
   Graphics.set_color Graphics.white;
-  let (width, height) = Graphics.size_x (), Graphics.size_y () in 
   Graphics.fill_rect 0 0 width height;
   Graphics.set_color col;
   let beginning_matrix = 
@@ -53,8 +56,9 @@ let rec_im f col iter ll ur color =
 (**[recompute s] is the state with image recomputed according to the other
    parameters in [s]*)
 let recompute s = 
-  let im = rec_im s.fb s.col s.iter s.ll_c s.ur_c s.color in 
-  {s with width = Graphics.size_x (); height = Graphics.size_y (); im = im}
+  let width, height = Graphics.size_x (), Graphics.size_y () in 
+  let im = rec_im s.fb s.col s.iter s.ll_c s.ur_c s.color width height in 
+  {s with width = width; height = height; im = im; orig_im = im}
 
 
 (**[is_in_window s z] is [true] if and only if [z] is in bounds for the image*)
@@ -62,17 +66,13 @@ let is_in_window {ll_c; ur_c} ({re; im} : Complex.t) =
   re > ll_c.re && re < ur_c.re && im > ll_c.im && im < ur_c.im
 
 (**[cx_of_coord s p] is the complex number corresponding to the point [p]*)
-let cx_of_coord {width; height; ll_c; ur_c} 
-    (x, y) = 
+let cx_of_coord {width; height; ll_c; ur_c} (x, y) = 
   Complex.add ll_c 
-    {re = (ur_c.re -. ll_c.re)/. 
-          (float_of_int (width)) *. (float_of_int x);
-     im = (ur_c.im -. ll_c.im)/. 
-          (float_of_int (height)) *. (float_of_int y)}
+    {re = (ur_c.re -. ll_c.re)/. (float_of_int width) *. (float_of_int x);
+     im = (ur_c.im -. ll_c.im)/. (float_of_int height) *. (float_of_int y)}
 
 (**[string_of_complex z] is the string representation of [z]*)
-let string_of_complex (z : Complex.t) = 
-  string_of_float z.re ^ " + " ^ string_of_float z.im ^ "i"
+let string_of_complex = Parse.string_of_complex
 
 (**[string_of_coord s p] represents the complex value at coordinate [p]*)
 let string_of_coord s p = 
@@ -127,20 +127,37 @@ let rec go s  =
         Graphics.moveto mp1 mp2;
         go {s with last_point = Some (cx_of_coord s mp)}
       | Some x -> 
-        let fx = s.f (cx_of_coord s mp) x in
-        if is_in_window s fx then
-          let (x1, x2) = coord_of_cx s fx in 
-          Graphics.lineto x1 x2; 
-          Unix.sleepf 0.2;
-        else ();
-        go {s with last_point = Some fx}
+        points_map s x mp
     else (
       redraw s;
       go {s with last_point = None; started_drawing = mp})
 
+(**[points_map s x mp] applies [s.f] to [cx_of_coord s mp] and [x] and, if it
+   is in window, draws a line to the next point. Operation of [go] then
+   continues with the last point updated*)
+and points_map s x mp =
+  let fx = s.f (cx_of_coord s mp) x in
+  if is_in_window s fx then
+    let (x1, x2) = coord_of_cx s fx in 
+    Graphics.lineto x1 x2; 
+    Unix.sleepf 0.2;
+  else ();
+  go {s with last_point = Some fx}
+
 (**[resize s] starts the graphic with the new window size*)
-and resize s= 
-  let s' = recompute s in 
+and resize s = 
+  let (width, height) = Graphics.size_x (), Graphics.size_y () in 
+  Graphics.set_color Graphics.white;
+  Graphics.fill_rect 0 0 width height;
+  Graphics.set_color s.col;
+  let new_im = 
+    s.orig_im 
+    |> Graphic_image.image_of 
+    |> (fun im -> Rgb24.resize None im width height)
+    |> (fun im -> Images.Rgb24 im)
+    |> Graphic_image.of_image in 
+  let s' = {s with im = new_im; width = width; height = height; 
+                   last_point = None} in
   redraw s';
   go s'
 
@@ -159,11 +176,13 @@ and zoom factor s =
    Currently increases iterations by a factor of 2.*)
 and e s = 
   (fun () -> recompute {s with iter = s.iter * 2; last_point = None} |> 
-             start_with_bonus_state) |> (catch_z s)
+             start_with_bonus_state) |> catch_z s
 
 (**[c s] is the function that activates when ['c'] is clicked in state [s].
    Currently zooms by a factor of 20 centered at current mouse position*)
 and c s = (fun () -> zoom 20. s |> start_with_bonus_state) |> catch_z s
+
+and v s = (fun () -> zoom 0.1 s |> start_with_bonus_state) |> catch_z s
 
 (**[y s] is the function that activates when ['y'] is clicked in state [s].
    Currently undoes most recent click of ['z']*)
@@ -171,6 +190,15 @@ and y s =
   match s.redo with 
   | None -> () 
   | Some s' -> (fun () -> start_with_bonus_state_with_redo s') |> catch_z s
+
+(**[sb s] is the function that activates when ['s'] clicked in state [s]. 
+   Currently saves the contents of the screen as a .bmp file*)
+and sb s = 
+  let im = Graphics.get_image 0 0 s.width s.height in 
+  let camlim = Images.Rgb24 (Graphic_image.image_of im) in 
+  let name = s.name ^ " number " ^ string_of_int !(s.files_saved) ^ ".bmp"  in 
+  Bmp.save name [] camlim;
+  s.files_saved := !(s.files_saved) + 1
 
 (**[int_press s x] is the functions that activates when a key corresponding
    to a digit '1' - '9' is pressed. Currently zooms in by that amount,
@@ -190,8 +218,10 @@ and key_reader s =
       | 'q' -> raise Q
       | 'z' -> raise (Z s)
       | 'c' -> c s
+      | 'v' -> v s
       | 'e' -> e s
       | 'y' -> y s
+      | 's' -> sb s
       | x when '1' <= x && x <= '9' -> int_press s x
       | x -> s.button x
     end
@@ -204,22 +234,30 @@ and start_with_bonus_state (s : state) : unit =
   redraw s;
   go {s with last_point = None; redo = None}
 
-let start_with_bonus_aux ll_c ur_c col fb color f iter click button im = 
-  Graphics.set_color col;
-  let width = Graphics.size_x () in 
-  let height = Graphics.size_y () in
-  let started_drawing = (Graphics.mouse_pos ()) in
-  let s = {ll_c; ur_c; started_drawing; 
-           last_point = None; im; width;
-           color; f; 
-           fb; iter; height; col; click; button; redo = None} in
-  start_with_bonus_state s
+let start_with_bonus_aux ll_c ur_c col fb color f iter click button name = 
+  try
+    Graphics.set_color col;
+    let width = Graphics.size_x () in 
+    let height = Graphics.size_y () in
+    let started_drawing = (Graphics.mouse_pos ()) in
+    let im = rec_im fb col iter ll_c ur_c color 
+        (Graphics.size_x ()) (Graphics.size_y ()) in 
+    let s = {ll_c; ur_c; started_drawing; last_point = None; im; orig_im = im;
+             width; color; f; fb; iter; height; col; click; button; redo = None;
+             files_saved = ref 0; name} in
+    start_with_bonus_state s with 
+  | Graphics.Graphic_failure _ -> raise Q
 
-let start_with_bonus ll_c ur_c col fb color f iter click button im = 
-  try start_with_bonus_aux ll_c ur_c col fb color f iter click button im with
+let start_ex ll_cx ur_cx c fb fc f iter name = 
+  start_with_bonus_aux ll_cx ur_cx c (fun x y -> fb y) fc (fun x y -> f y) iter 
+    (fun x -> ()) (fun x -> ()) name
+
+let start_with_bonus ll_c ur_c col fb color f iter click button name = 
+  try start_with_bonus_aux ll_c ur_c col fb color f iter click button name with
   | Q | Z _ -> ()
 
+let start_bonus_ex = start_with_bonus_aux
 
-let start ll_cx ur_cx c fb fc f iter im = 
+let start ll_cx ur_cx c fb fc f iter name = 
   start_with_bonus ll_cx ur_cx c (fun x y -> fb y) fc (fun x y -> f y) iter 
-    (fun x -> ()) (fun x -> ()) im
+    (fun x -> ()) (fun x -> ()) name

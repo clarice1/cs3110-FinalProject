@@ -9,7 +9,7 @@ open Matrix
 let do_big_test = false
 
 (** [pp_string s] pretty-prints string [s]. *)
-let pp_string s = "\"" ^ s ^ "\""
+let pp_string s = Parse.string_of_complex
 
 (** [pp_int] pretty-prints int [x]. *)
 let pp_int x = pp_string (string_of_int x)

@@ -4,6 +4,11 @@
 *)
 type t = Complex.t list
 
+type bt = {
+  poly : t;
+  bound : float
+}
+
 let zero = []
 
 let from_list lst = lst
@@ -72,5 +77,15 @@ let get_bound p =
       acc +. Complex.norm c
     in List.fold_left f 1. tl /. (Complex.norm hd) |> Float.max 1.
 
+let bound p = {
+  poly = p;
+  bound = get_bound p
+}
+
+let forget p = p.poly
+
 let bounded p z =
   if Complex.norm z > get_bound p then None else Some (eval p z)
+
+let bbounded p z = 
+  if Complex.norm z > p.bound then None else Some (eval p.poly z)
