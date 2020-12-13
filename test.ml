@@ -542,6 +542,48 @@ let newton_tests = [
     (Some (Complex.sub {re = 1.; im = 1.} 
              (Complex.div (identity_f {re = 1.; im = 1.}) 
                 (deriv_identity_f {re = 1.; im = 1.}))));
+
+  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
+                   tolerance_identity_f {re = 100.; im = 100. should return 
+                   [Some (Complex.sub {re = 100.; im = 100.} (Complex.div 
+                   (identity_f {re = 100.; im = 100.}) (deriv_identity_f 
+                   {re = 100.; im = 100.}))))]"
+    identity_f
+    deriv_identity_f
+    root_identity_f
+    tolerance_identity_f
+    {re = 100.; im = 100.}
+    (Some (Complex.sub {re = 100.; im = 100.} 
+             (Complex.div (identity_f {re = 100.; im = 100.}) 
+                (deriv_identity_f {re = 100.; im = 100.}))));
+
+  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
+                   tolerance_identity_f {re = -1.; im = -1. should return 
+                   [Some (Complex.sub {re = -1.; im = -1.} (Complex.div 
+                   (identity_f {re = -1.; im = -1.}) (deriv_identity_f 
+                   {re = -1.; im = -1.}))))]"
+    identity_f
+    deriv_identity_f
+    root_identity_f
+    tolerance_identity_f
+    {re = -1.; im = -1.}
+    (Some (Complex.sub {re = -1.; im = -1.} 
+             (Complex.div (identity_f {re = -1.; im = -1.}) 
+                (deriv_identity_f {re = -1.; im = -1.}))));
+
+  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
+                   tolerance_identity_f {re = 10000.; im = 10000. should return 
+                   [Some (Complex.sub {re = 10000.; im = 10000.} (Complex.div 
+                   (identity_f {re = 10000.; im = 10000.}) (deriv_identity_f 
+                   {re = 10000.; im = 10000.}))))]"
+    identity_f
+    deriv_identity_f
+    root_identity_f
+    tolerance_identity_f
+    {re = 10000.; im = 10000.}
+    (Some (Complex.sub {re = 10000.; im = 10000.} 
+             (Complex.div (identity_f {re = 10000.; im = 10000.}) 
+                (deriv_identity_f {re = 10000.; im = 10000.}))));
 ]
 
 
