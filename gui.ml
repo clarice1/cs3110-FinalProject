@@ -336,6 +336,189 @@ let make_key e ch c =
 (******************************************************************************)
 (*Defining Components*)
 (******************************************************************************)
+let display_init comp = 
+  Graphics.set_color (get_bcol (get_gc comp)); display_rect  comp ();
+  let gui= get_gc comp in 
+  use_gui gui;
+  let (a,b) = get_curr gui in 
+  Graphics.moveto (comp.x+a) (comp.y+b)
+let display_label lab comp () = 
+  display_init comp; Graphics.draw_string lab;;
+
+let create_label s lopt =
+  let gui = make_default_context () in   set_gc gui lopt; use_gui gui;
+  let (w,h) = Graphics.text_size s in 
+  let u = create_component w h  in 
+  u.mem <- (fun x -> false);  u.display <- display_label s  u;
+  u.info <- "Label"; u.gc <- gui;
+  u;;
+
+let create_panel b w h lopt =
+  let u = create_component w h   in 
+  u.container <- b;
+  u.info <- if b then "Panel container" else "Panel";
+  let gc = make_default_context () in set_gc gc lopt; u.gc <- gc;
+  u;;
+
+let center_layout comp comp1 lopt = 
+  comp1.x <- comp.x + ((comp.w -comp1.w) /2); 
+  comp1.y <- comp.y + ((comp.h -comp1.h) /2);;
+
+let open_main_window w h = 
+  Graphics.close_graph();
+  Graphics.open_graph (" "^(string_of_int w)^"x"^(string_of_int h));
+  let u = create_component  w h in
+  u.container <- true; 
+  u.info <- "Main Window"; 
+  u;;
+
+type button_state = 
+  { txt : string; 
+    mutable action :  button_state -> unit }
+
+let create_bs st = {txt = st; action = fun x -> ()}
+
+let set_bs_action bs f = bs.action <- f
+
+let get_bs_text bs = bs.txt;;
+
+let display_button  c bs  () =  
+  display_init c;  Graphics.draw_string (get_bs_text bs)
+
+let listener_button c bs  e = match get_event e with 
+    MouseDown -> bs.action bs; c.display (); true
+  | _ -> false;;
+
+let create_button s lopt     =
+  let bs = create_bs s in  
+  let gc = make_default_context () in 
+  set_gc gc lopt; use_gui gc; 
+  let w,h = Graphics.text_size (get_bs_text bs) in 
+  let u = create_component w h   in
+  u.display <- display_button u bs;
+  u.listener <- listener_button u bs;
+  u.info <- "Button";
+  u.gc <- gc;
+  u,bs;;
+
+(** The index ind shows which string is to be highlighted in the list of values. 
+    The sep and height fields describe in pixels the distance between 
+    two choices and the height of a choice. The action function takes an argument 
+    of type choice_state as an input and does its job using the index.*)
+type choice_state = 
+  { mutable ind : int; values : string array; mutable sep : int; 
+    mutable height : int; mutable action : choice_state -> unit }
+
+let create_cs sa = 
+  {ind = 0; values = sa; sep = 2; 
+   height = 1; action = fun x -> ()}
+
+let set_cs_action cs f = cs.action <- f
+let get_cs_text cs = cs.values.(cs.ind);;
+
+let display_choice comp cs  () = 
+  display_init comp;
+  let (x,y) = Graphics.current_point()  
+  and nb = Array.length cs.values in 
+  for i = 0 to nb-1 do 
+    Graphics.moveto x (y + i*(cs.height+ cs.sep));
+    Graphics.draw_string cs.values.(i)
+  done;
+  Graphics.set_color (get_fcol (get_gc comp));
+  Graphics.fill_rect x (y+ cs.ind*(cs.height+ cs.sep)) comp.w cs.height;
+  Graphics.set_color (get_bcol (get_gc comp));      
+  Graphics.moveto x  (y + cs.ind*(cs.height + cs.sep));
+  Graphics.draw_string cs.values.(cs.ind) ;;
+
+let listener_choice c cs e = match e.re with 
+    MouseUp -> 
+    let y = e.stat.Graphics.mouse_y in 
+    let cy = c.y in 
+    let i = (y - cy) / ( cs.height + cs.sep) in
+    cs.ind <- i; c.display ();
+    cs.action cs; true
+  |   _  -> false ;;
+
+let create_choice lc lopt  =
+  let sa =  (Array.of_list (List.rev lc)) in 
+  let cs = create_cs sa in 
+  let gc = make_default_context () in 
+  set_gc gc lopt;  use_gui gc;
+  let awh = Array.map (Graphics.text_size) cs.values in 
+  let w = Array.fold_right (fun (x,y) -> max x)  awh 0 
+  and h = Array.fold_right (fun (x,y) -> max y)  awh 0 in
+  let h1 = (h+cs.sep) * (Array.length sa) + cs.sep  in  
+  cs.height <- h;
+  let u = create_component w h1   in
+  u.display <- display_choice u cs;
+  u.listener <- listener_choice u cs ;
+  u.info <- "Choice "^ (string_of_int (Array.length cs.values));
+  u.gc <- gc;
+  u,cs;;
+
+type textfield_state = 
+  { txt : string; 
+    dir : bool; mutable ind1 : int; mutable ind2 : int; len : int;
+    mutable visible_cursor : bool; mutable cursor : char; 
+    mutable visible_echo : bool; mutable echo : char; 
+    mutable action : textfield_state -> unit } ;;
+
+let create_tfs txt size dir  = 
+  let l = String.length txt in
+  (if size < l then failwith "create_tfs");
+  let ind1 = if dir then 0 else size-1-l 
+  and ind2 = if dir then l else size-1 in 
+  let n_txt = (if dir then (txt^(String.make (size-l) ' '))
+               else ((String.make (size-l) ' ')^txt )) in
+  {txt = n_txt; dir=dir; ind1 = ind1; ind2 = ind2; len=size;
+   visible_cursor  = false;  cursor = ' '; visible_echo =  true; echo = ' ';
+   action= fun x -> ()};;
+
+let set_tfs_action tfs f = tfs.action <- f
+
+let set_tfs_cursor b c tfs =  tfs.visible_cursor <- b; tfs.cursor <- c  
+
+let set_tfs_echo b c tfs =  tfs.visible_echo <- b; tfs.echo <- c  
+
+let get_tfs_text tfs = 
+  if tfs.dir then String.sub tfs.txt tfs.ind1 (tfs.ind2 - tfs.ind1)
+  else String.sub tfs.txt (tfs.ind1+1) (tfs.ind2 - tfs.ind1);;
+
+let set_tfs_text tf tfs txt = 
+  let l = String.length txt in 
+  if l > tfs.len then failwith "set_tfs_text";
+  String.blit  (String.make tfs.len ' ') 0 tfs.txt 0 tfs.len;
+  if tfs.dir then (String.blit txt 0 tfs.txt 0 l;
+                   tfs.ind2 <- l )
+  else   ( String.blit txt 0 tfs.txt (tfs.len -l) l; 
+           tfs.ind1 <- tfs.len-l-1 );
+  tf.display ();; 
+
+let display_cursor c tfs = 
+  if tfs.visible_cursor then 
+    ( use_gui (get_gc c);
+      let (x,y) = Graphics.current_point() in 
+      let (a,b) = Graphics.text_size " " in 
+      let shift =  a *  (if tfs.dir then max (min (tfs.len-1) tfs.ind2)  0 
+                         else tfs.ind2) in  
+      Graphics.moveto (c.x+x + shift) (c.y+y);
+      Graphics.draw_char tfs.cursor);;
+
+let display_textfield c tfs  () = 
+  display_init c;
+  let s = String.make tfs.len ' ' 
+  and txt = get_tfs_text tfs in 
+  let nl = String.length txt in 
+  if (tfs.ind1 >= 0) && (not tfs.dir) then 
+    Graphics.draw_string (String.sub s 0 (tfs.ind1+1) );
+  if tfs.visible_echo  then (Graphics.draw_string (get_tfs_text tfs))
+  else Graphics.draw_string (String.make (String.length txt) tfs.echo);
+  if (nl > tfs.ind2) && (tfs.dir) 
+  then Graphics.draw_string (String.sub s tfs.ind2 (nl-tfs.ind2));
+  display_cursor c tfs;;
+
+
+
 
 
 (******************************************************************************)
