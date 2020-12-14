@@ -517,6 +517,50 @@ let display_textfield c tfs  () =
   then Graphics.draw_string (String.sub s tfs.ind2 (nl-tfs.ind2));
   display_cursor c tfs;;
 
+let listener_text_field u tfs e = 
+  match e.re with 
+    MouseDown -> take_key_focus e u ; true 
+  | KeyPress -> 
+    ( if Char.code (get_key e)  >= 32 then 
+        begin
+          ( if tfs.dir then 
+              ( ( if tfs.ind2 >= tfs.len then (
+                    String.blit tfs.txt 1 tfs.txt 0 (tfs.ind2-1); 
+                    tfs.ind2 <- tfs.ind2-1) );
+                tfs.txt.[tfs.ind2] <- get_key e;
+                tfs.ind2 <- tfs.ind2 +1 )
+            else 
+              ( String.blit tfs.txt 1 tfs.txt 0 (tfs.ind2); 
+                tfs.txt.[tfs.ind2] <- get_key e;
+                if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1
+              );                  
+          )
+        end
+      else ( 
+        ( match Char.code (get_key e) with 
+            13 -> tfs.action tfs
+          |  9 -> lose_key_focus e u
+          |  8 -> if (tfs.dir && (tfs.ind2 > 0)) 
+            then tfs.ind2 <- tfs.ind2 -1
+            else if (not tfs.dir) && (tfs.ind1 < tfs.len -1) 
+            then tfs.ind1 <- tfs.ind1+1                   
+          | _ -> ()
+        ))); u.display(); true
+  | _ -> false;;
+
+
+let create_text_field  txt size dir lopt  = 
+  let tfs = create_tfs txt size dir  
+  and l = String.length txt in
+  let gc = make_default_context () in 
+  set_gc gc lopt; use_gui gc;
+  let (w,h) = Graphics.text_size (tfs.txt) in 
+  let u = create_component w h   in
+  u.display <- display_textfield u tfs;
+  u.listener <-  listener_text_field u tfs ;
+  u.info <- "TextField"; u.gc <- gc;
+  u,tfs;;
+
 
 
 
