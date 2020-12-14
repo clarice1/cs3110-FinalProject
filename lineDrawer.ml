@@ -84,7 +84,7 @@ let redraw s =
   Graphics.draw_image s.im 0 0; 
   let (mp1, mp2) as mp = Graphics.mouse_pos () in
   let str = string_of_coord s mp in 
-  let (w, h) = Graphics.text_size (str) in
+  let (w, h) = Graphics.text_size str in
   Graphics.set_color Graphics.white;
   Graphics.fill_rect 0 0 w h;
   Graphics.moveto 0 0;
@@ -223,7 +223,7 @@ and key_reader s =
       | 'y' -> y s
       | 's' -> sb s
       | x when '1' <= x && x <= '9' -> int_press s x
-      | x -> s.button x
+      | x -> (fun () -> s.button x) |> catch_z s
     end
 
 and start_with_bonus_state_with_redo (s : state) : unit =

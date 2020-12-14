@@ -18,7 +18,7 @@ let lst_of_complex_floats str =
   str
   |> String.trim
   |> String.split_on_char ' '
-  |> List.filter (fun x -> x <> " ")
+  |> List.filter ((<>) " ")
   |> List.map float_of_string
   |> List.map complex_of_float
 

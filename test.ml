@@ -9,7 +9,7 @@ open Matrix
 let do_big_test = false
 
 (** [pp_string s] pretty-prints string [s]. *)
-let pp_string s = Parse.string_of_complex
+let pp_string s = "\"" ^ s ^ "\""
 
 (** [pp_int] pretty-prints int [x]. *)
 let pp_int x = pp_string (string_of_int x)
@@ -35,8 +35,7 @@ let pp_list pp_elt lst =
 let pp_listlist pp_elt lst = 
   pp_list (pp_list pp_elt) lst
 
-let str_complex (z : Complex.t) = 
-  pp_string (string_of_float z.re ^ " + "^ string_of_float z.im ^ "i")
+let str_complex = Parse.string_of_complex
 
 let str_poly p = pp_list str_complex (Polynomial.to_list p)
 
@@ -381,10 +380,6 @@ let populate_black row col = black
 
 let small_black_matrix = init 10 10 populate_black
 
-(** [f_always_converges x] is a function that always returns black, which means
-    that every point on the complex plane converges. *)
-let f_always_converges (Some x, y) = black
-
 (** [colorize_test name f m expected_output] is an OUnit test named [name] that
     checks equivalence between [exected_output] and [colorize f m] *)
 let colorize_test name f m expected_output = 
@@ -586,6 +581,37 @@ let newton_tests = [
                 (deriv_identity_f {re = 10000.; im = 10000.}))));
 ]
 
+(******************************************************************************)
+(*Tests for Parse*)
+(******************************************************************************)
+open Parse 
+
+let check_raise name ex f = 
+  name >:: (fun _ -> assert_raises ex f)
+
+let parse_tests = [
+  check_eq "Complex one" "1. + 0.i" (string_of_complex Complex.one) pp_string;
+  check_eq "1 from string 1" Complex.one (complex_of_string "1") str_complex;
+  check_eq "1 from string 1+0i" Complex.one (complex_of_string "1+0i") 
+    str_complex;
+  check_eq "1 from string 1 + 0.i" Complex.one (complex_of_string "1 + 0.i") 
+    str_complex;
+  check_eq "7 + 46i from string" {re = 7.; im = 46.} 
+    (complex_of_string "7+ 46i") str_complex;
+  check_eq "i from string" {re = 0.; im = 1.} (complex_of_string "i") 
+    str_complex;
+  check_raise "7i8 is not a complex number" (Failure "invalid") 
+    (fun () -> complex_of_string "7i8");
+  check_raise "hello is not a complex number" (Failure "float_of_string") 
+    (fun () -> complex_of_string "hello");
+  check_eq {|complex numbers from string|} 
+    [Complex.one; Complex.i; Complex.zero; Complex.one; {re = 7.; im = 0.26}]
+    (lst_cx "1+ 0 i, 0+1.i,0., 1, 7+ 0.26  i") (pp_list str_complex)
+
+
+
+]
+
 
 let tests =
   "test suite for Final Project"  >::: List.flatten [
@@ -593,7 +619,8 @@ let tests =
     polynomial_tests;
     toImage_tests;
     (*main_tests;*)
-    newton_tests
+    newton_tests;
+    parse_tests
   ]
 
 let _ = run_test_tt_main tests
