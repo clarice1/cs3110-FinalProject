@@ -487,10 +487,10 @@ let get_tfs_text tfs =
 let set_tfs_text tf tfs txt = 
   let l = String.length txt in 
   if l > tfs.len then failwith "set_tfs_text";
-  String.blit  (String.make tfs.len ' ') 0 tfs.txt 0 tfs.len;
-  if tfs.dir then (String.blit txt 0 tfs.txt 0 l;
+  String.blit  (String.make tfs.len ' ') 0 (Bytes.of_string tfs.txt) 0 tfs.len;
+  if tfs.dir then (String.blit txt 0 (Bytes.of_string tfs.txt) 0 l;
                    tfs.ind2 <- l )
-  else   ( String.blit txt 0 tfs.txt (tfs.len -l) l; 
+  else   ( String.blit txt 0 (Bytes.of_string tfs.txt) (tfs.len -l) l; 
            tfs.ind1 <- tfs.len-l-1 );
   tf.display ();; 
 
@@ -525,13 +525,13 @@ let listener_text_field u tfs e =
         begin
           ( if tfs.dir then 
               ( ( if tfs.ind2 >= tfs.len then (
-                    String.blit tfs.txt 1 tfs.txt 0 (tfs.ind2-1); 
+                    String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2-1); 
                     tfs.ind2 <- tfs.ind2-1) );
-                tfs.txt.[tfs.ind2] <- get_key e;
+                (Bytes.of_string tfs.txt).[tfs.ind2] <- get_key e;
                 tfs.ind2 <- tfs.ind2 +1 )
             else 
-              ( String.blit tfs.txt 1 tfs.txt 0 (tfs.ind2); 
-                tfs.txt.[tfs.ind2] <- get_key e;
+              ( String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2); 
+                (Bytes.of_string tfs.txt).[tfs.ind2] <- get_key e;
                 if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1
               );                  
           )
