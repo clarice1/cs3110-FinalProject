@@ -106,7 +106,7 @@ let set_gc gc lst_opt =
   set_font_size gc (get_int lst_opt "FontSize" (get_font_size gc));
   set_lw gc (get_int lst_opt "LineWidth" (get_lw gc))
 
-let make_dc = make_default_context ()
+let make_dc () = make_default_context ()
 
 
 (******************************************************************************)
@@ -364,6 +364,19 @@ let center_layout comp comp1 lopt =
   comp1.x <- comp.x + ((comp.w -comp1.w) /2); 
   comp1.y <- comp.y + ((comp.h -comp1.h) /2);;
 
+let grid_layout (a, b)  c c1 lopt = 
+  let px = get_int lopt "Col" 0
+  and py = get_int lopt "Row" 0 in 
+  if (px >= 0) && (px < a) && ( py >=0) && (py < b) then 
+    let lw = c.w /a 
+    and lh = c.h /b in 
+    if (c1.w > lw) || (c1.h > lh) then 
+      failwith "grid_placement: too big component"
+    else 
+      c1.x <- c.x + px * lw + (lw - c1.w)/2;
+    c1.y <- c.y + py * lh + (lh - c1.h)/2;
+  else  failwith "grid_placement: bad position";;
+
 let open_main_window w h = 
   Graphics.close_graph();
   Graphics.open_graph (" "^(string_of_int w)^"x"^(string_of_int h));
@@ -527,11 +540,11 @@ let listener_text_field u tfs e =
               ( ( if tfs.ind2 >= tfs.len then (
                     String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2-1); 
                     tfs.ind2 <- tfs.ind2-1) );
-                (Bytes.of_string tfs.txt).[tfs.ind2] <- get_key e;
+                Bytes.set (Bytes.of_string tfs.txt) tfs.ind2 (get_key e);
                 tfs.ind2 <- tfs.ind2 +1 )
             else 
               ( String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2); 
-                (Bytes.of_string tfs.txt).[tfs.ind2] <- get_key e;
+                Bytes.set (Bytes.of_string tfs.txt) tfs.ind2 (get_key e);
                 if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1
               );                  
           )
@@ -550,8 +563,7 @@ let listener_text_field u tfs e =
 
 
 let create_text_field  txt size dir lopt  = 
-  let tfs = create_tfs txt size dir  
-  and l = String.length txt in
+  let tfs = create_tfs txt size dir in
   let gc = make_default_context () in 
   set_gc gc lopt; use_gui gc;
   let (w,h) = Graphics.text_size (tfs.txt) in 

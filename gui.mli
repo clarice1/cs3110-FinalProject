@@ -8,7 +8,6 @@
 
 (**[t] is the type containing the specifications of a Graphical
    User Interface (GUI).*)
-type t 
 
 (******************************************************************************)
 (*Graphics Context*)
@@ -45,8 +44,8 @@ val get_font_size : t -> int
 (** [get_lw g] is the length/witdth of [g]. *)
 val get_lw : t -> int
 
-(** [get_cur g] is the current position of the mouse on [g]. *)
-val get_cur : t -> int * int
+(** [get_curr g] is the current position of the mouse on [g]. *)
+val get_curr : t -> int * int
 
 (** [set_bcol g c] sets [c] as the background color of [g]. *)
 val set_bcol : t -> Graphics.color -> unit
@@ -118,8 +117,8 @@ val get_int : ('a * opt_val) list -> 'a -> int -> int
 val get_bool : ('a * opt_val) list -> 'a -> bool -> bool
 (* Could factor these out into a helper *)
 
-(** [set_gui gc lst_opt] creates a graphics context from [lopt]. *)
-val set_gui : t -> (string * opt_val) list -> unit
+(** [set_gc gc lst_opt] creates a graphics context from [lopt]. *)
+val set_gc : t -> (string * opt_val) list -> unit
 
 (** [make_dc] IS THIS A NECESSARY FUNCTION? I will check *)
 val make_dc : unit -> t
@@ -237,7 +236,7 @@ val compute_rich_event : Graphics.status -> Graphics.status -> rich_event
 val send_new_events : rich_status -> rich_status -> unit
 
 (** [initial_re] is the initial value for [rich_event]. *)
-val initial_re : rich_event
+val initial_re : rich_status
 
 (** [loop b_disp b_motion c] manages the sequences of interactions with a 
     component, where [c] is the root of the component tree. *)
@@ -295,7 +294,6 @@ val get_bs_text : button_state -> string
 (** [display_button comp bs ()] displays the button on the screen *)
 val display_button : component -> button_state -> unit -> unit
 
-val listener_buttton : component -> button_state -> rich_status -> bool
 
 (** [create_button st lopt] creates a button in a component. *)
 val create_button : string -> (string * opt_val) list -> component * button_state 
@@ -322,7 +320,7 @@ val listener_choice : component -> choice_state -> rich_status -> bool
 
 (** [create_choice lc lopt] creates a component with the list 
     of possible choices.  *)
-val create_choice : (string * opt_val) list -> component * choice_state
+val create_choice : string list -> (string * opt_val) list -> component * choice_state
 
 (** [create_tfs txt size dir] creates the internal state of textfields. *)
 val create_tfs : string -> int -> bool -> textfield_state
@@ -331,10 +329,10 @@ val create_tfs : string -> int -> bool -> textfield_state
 val set_tfs_action : textfield_state -> (textfield_state -> unit) -> unit
 
 (** [set_tfs_cursor tfs b c] sets the bool of visible cursor and the cursor.*)
-val set_tfs_cursor : textfield_state -> bool -> char -> unit
+val set_tfs_cursor : bool -> char -> textfield_state -> unit
 
 (** [set_tfs_echo tfs b c] sets the bool of visible echo and the echo. *)
-val set_tfs_echo : textfield_state -> bool -> char -> unit
+val set_tfs_echo : bool -> char -> textfield_state -> unit
 
 (** [get_tfs_text tfs] gets the text in the textfield state*)
 val get_tfs_text : textfield_state -> string
