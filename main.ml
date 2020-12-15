@@ -151,10 +151,32 @@ open Gui
    let () = main () *)
 let m = open_main_window 420 150
 
+type state_conv = 
+  { mutable a:float; mutable b:float; mutable dir : bool;
+    fa : float; fb : float } ;;
+let e =  6.55957074
+let fe = { a =0.0; b=0.0; dir = true; fa = e; fb = 1./. e};;
+let calculate fe = 
+  if fe.dir then fe.b <- fe.a /. fe.fa else fe.a <- fe.b /. fe.fb
+let action_dir fe cs = match get_cs_text cs with 
+    "->" -> fe.dir <- true
+  | "<-" -> fe.dir <- false
+  | _ -> failwith "action_dir";;
+let action_go fe tf_fr tf_eu tfs_fr tfs_eu  x = 
+  if fe.dir then 
+    let r = float_of_string (get_tfs_text tfs_fr) in 
+    fe.a <- r; calculate fe; 
+    let sr = Printf.sprintf "%.2f" fe.b in 
+    set_tfs_text tf_eu tfs_eu  sr
+  else 
+    let r = float_of_string (get_tfs_text tfs_eu) in
+    fe.b <- r; calculate fe;
+    let sr = Printf.sprintf "%.2f" fe.a in 
+    set_tfs_text tf_fr tfs_fr sr;;
+
 let create_conv w h fe = 
   let gray1 = (Graphics.rgb 120 120 120) in 
   let m = open_main_window w h
-  and  p = create_panel true (w-4) (h-4) []
   and  l1 = create_label "Francs" ["Font", courier_bold_24;
                                    "Background", Copt gray1]
   and l2 = create_label "Euros" ["Font", courier_bold_24;
@@ -167,6 +189,25 @@ let create_conv w h fe =
   let gc = get_gc m in
   set_bcol gc gray1;
   set_layout (grid_layout (3,2) m ) m;
+  let tb1 = create_border tf1  []
+  and tb2 = create_border tf2  []  
+  and bc = create_border c  [] 
+  and bb = 
+    create_border  b  
+      ["Border_size", Iopt 4; "Relief", Sopt "Bot";
+       "Background", Copt gray1; "Background2", Copt Graphics.black] 
+  in
+  set_cs_action cs (action_dir fe);
+  set_bs_action bs (action_go fe tf1 tf2 tfs1 tfs2);
   add_component m l1 ["Col",Iopt 0;"Row",Iopt 1];
   add_component m l2 ["Col",Iopt 2;"Row",Iopt 1];
+  add_component m bc ["Col",Iopt 1;"Row",Iopt 1];
+  add_component m tb1 ["Col",Iopt 0;"Row",Iopt 0];
+  add_component m tb2 ["Col",Iopt 2;"Row",Iopt 0];
+  add_component m bb  ["Col",Iopt 1;"Row",Iopt 0];
+  m,bs,tf1,tf2;;
+
+let (m,c,t1,t2) = create_conv 420 150 fe ;; 
+display m ;;
+
 

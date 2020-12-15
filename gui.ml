@@ -577,6 +577,48 @@ let create_text_field  txt size dir lopt  =
   u.info <- "TextField"; u.gc <- gc;
   u,tfs;;
 
+type border_state = 
+  {mutable relief : string; mutable line : bool;
+   mutable bg2 : Graphics.color; mutable size : int};;
+
+let create_border_state lopt = 
+  {relief = get_string lopt "Relief" "Flat";
+   line = get_bool lopt "Outlined" false;
+   bg2 = get_color lopt "Background2" Graphics.black;
+   size = get_int lopt "Border_size" 2};;
+
+let display_border bs c1 c () = 
+  let x1 = c.x  and y1 = c.y in
+  let x2 = x1+c.w-1 and y2 = y1+c.h-1 in 
+  let ix1 = c1.x and iy1 =  c1.y in
+  let ix2 = ix1+c1.w-1 and iy2 = iy1+c1.h-1 in 
+  let border1 g = Graphics.set_color g;
+    Graphics.fill_poly [| (x1,y1);(ix1,iy1);(ix2,iy1);(x2,y1) |] ;
+    Graphics.fill_poly [| (x2,y1);(ix2,iy1);(ix2,iy2);(x2,y2) |] 
+  in
+  let border2 g =  Graphics.set_color g;
+    Graphics.fill_poly [| (x1,y2);(ix1,iy2);(ix2,iy2);(x2,y2) |] ;
+    Graphics.fill_poly [| (x1,y1);(ix1,iy1);(ix1,iy2);(x1,y2) |] 
+  in
+  display_rect c ();
+  if bs.line then (Graphics.set_color (get_fcol (get_gc c));
+                   draw_rect x1 y1 c.w c.h);
+  let b1_col = get_bcol ( get_gc c)  
+  and b2_col = bs.bg2 in 
+  match bs.relief with 
+    "Top" ->  (border1 b1_col; border2 b2_col)
+  |  "Bot" -> (border1 b2_col; border2 b1_col) 
+  |  "Flat" ->  (border1 b1_col; border2 b1_col)
+  |  s -> failwith ("display_border: unknown relief: "^s) 
+
+let create_border c lopt = 
+  let bs = create_border_state lopt in  
+  let p = create_panel true (c.w + 2 * bs.size) 
+      (c.h + 2 * bs.size) lopt in 
+  set_layout (center_layout p) p;
+  p.display <- display_border bs c p;
+  add_component p c []; p;;
+
 
 
 

@@ -359,8 +359,23 @@ val display_textfield : component -> textfield_state -> unit -> unit
     click in the input zone. *)
 val listener_text_field : component -> textfield_state -> rich_status -> bool
 
+(** *)
 val create_text_field : string ->int -> bool -> 
   (string * opt_val) list -> component * textfield_state
+
+
 (******************************************************************************)
 (*Enriched Components*)
 (******************************************************************************)
+type border_state = 
+  {mutable relief : string; mutable line : bool;
+   mutable bg2 : Graphics.color; mutable size : int};;
+
+(**[create_border_state lopt] creates a border state. *)
+val create_border_state : (string * opt_val) list -> border_state
+
+(** [display_border bs c1 c ()] shows the borders of the window. *)
+val display_border : border_state -> component -> component -> unit -> unit
+
+(** [create_border c lopt] creates the border for the window. *)
+val create_border : component -> (string * opt_val) list -> component
