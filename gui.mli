@@ -18,6 +18,15 @@ type t
    (GUI). *)
 type t 
 
+(** [button_state] is the type representing a button in our GUI.*)
+type button_state
+
+(** [choice_state] is the type representing a set of choices in our GUI.*)
+type choice_state
+
+(**[textfield_state] is the type representing text string inputs. *)
+type textfield_state
+
 (** [make_default_context] sets default GUI settings for a GUI window. *)
 val make_default_context: unit -> t
 
@@ -246,8 +255,106 @@ val make_key : rich_event -> 'a -> char -> rich_status
 (******************************************************************************)
 (*Defining Components*)
 (******************************************************************************)
+(** [display_init comp] erases the graphical region and selects the color of the
+    label*)
+val display_init : component -> unit
 
+(** [display_label lab comp] returns the graphical component [comp] with label
+    [lab].*)
+val display_label : string -> component -> unit -> unit
 
+(** [create_label lab plist] creates a componenet with label [lab].*)
+val create_label : string -> (string * opt_val) list -> component
+
+(** [create_panel b w h lopt] creates a panel that a graphical area 
+    that can be a container *)
+val create_panel : bool -> int -> int -> (string * opt_val) list -> component
+
+(** [center_layout comp comp1 lopt] places a component on the center of a 
+    container. *)
+val center_layout : component -> component -> 'a -> unit
+
+(** [grid_layout (a,b) comp comp1 lopt ] divides a container into a grid
+    where each box has the same size.*)
+val grid_layout : int * int -> component -> component -> 
+  (string * opt_val) list -> unit
+
+(**[open_main_window int int] opens main window where all the components 
+   will be in with width [w] and height [h]. *)
+val open_main_window : int -> int -> component
+
+(** [create_bs st] creates a button state with *)
+val create_bs : string -> button_state
+
+(** [set_bs_action bs] changes the action function of the button. *)
+val set_bs_action : button_state -> (button_state -> unit) -> unit 
+
+(** [get_bs_text bs] retrieves the text of the button.*)
+val get_bs_text : button_state -> string
+
+(** [display_button comp bs ()] displays the button on the screen *)
+val display_button : component -> button_state -> unit -> unit
+
+val listener_buttton : component -> button_state -> rich_status -> bool
+
+(** [create_button st lopt] creates a button in a component. *)
+val create_button : string -> (string * opt_val) list -> component * button_state 
+
+(** [listener_button comp bs e] activates the action function when the button
+    is pressed. *)
+val listener_button : component -> button_state -> rich_status -> bool
+
+(** [create_cs st_a] creates a choice state with choices [st_a].*)
+val create_cs : string array -> choice_state
+
+(** [set_cs_action bs f] changes the action function of the choice.*)
+val set_cs_action : choice_state -> (choice_state -> unit) -> unit
+
+(** [get_cs_text cs] retrieves the text of the choice state*)
+val get_cs_text : choice_state -> string
+
+(** [display_choice comp cs ()] shows the list of possible choices.*)
+val display_choice : component -> choice_state -> unit -> unit
+
+(** [listener_choice comp cs ] activates the action function when the choice 
+    is pressed.*)
+val listener_choice : component -> choice_state -> rich_status -> bool
+
+(** [create_choice lc lopt] creates a component with the list 
+    of possible choices.  *)
+val create_choice : (string * opt_val) list -> component * choice_state
+
+(** [create_tfs txt size dir] creates the internal state of textfields. *)
+val create_tfs : string -> int -> bool -> textfield_state
+
+(** [set_tfs_action] sets the action function for a textfield state.  *)
+val set_tfs_action : textfield_state -> (textfield_state -> unit) -> unit
+
+(** [set_tfs_cursor tfs b c] sets the bool of visible cursor and the cursor.*)
+val set_tfs_cursor : textfield_state -> bool -> char -> unit
+
+(** [set_tfs_echo tfs b c] sets the bool of visible echo and the echo. *)
+val set_tfs_echo : textfield_state -> bool -> char -> unit
+
+(** [get_tfs_text tfs] gets the text in the textfield state*)
+val get_tfs_text : textfield_state -> string
+
+(** [set_tfs_text comp tfs txt] changes the text within the state of the text
+    field. *)
+val set_tfs_text : component -> textfield_state -> string -> unit
+
+(** [display_cursor comp tfs] shows where the cursor is on the screen. *)
+val display_cursor : component -> textfield_state -> unit
+
+(** [display_textfield comp tfs ()] displays textfield.*)
+val display_textfield : component -> textfield_state -> unit -> unit
+
+(** [listener_text_field comp tfs e] captures the focus achieved by a mouse
+    click in the input zone. *)
+val listener_text_field : component -> textfield_state -> rich_status -> bool
+
+val create_text_field : string ->int -> bool -> 
+  (string * opt_val) list -> component * textfield_state
 (******************************************************************************)
 (*Enriched Components*)
 (******************************************************************************)
