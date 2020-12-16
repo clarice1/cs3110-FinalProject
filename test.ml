@@ -507,78 +507,114 @@ let deriv_identity_f (x : Complex.t) = {re = 1.; im = 0.}
 
 let root_identity_f = [{re = 0.; im = 0.}]
 
+let x3minx = 
+  from_list [Complex.one; Complex.zero; Complex.(neg one); Complex.zero] 
+  |> Polynomial.eval
+
+let diffx3minx = 
+  from_list [{re = 3.; im = 0.}; Complex.zero; Complex.(neg one)]
+  |> Polynomial.eval
+
+let rootx3minx = [Complex.one; 
+                  Complex.zero;
+                  Complex.(neg one)]
+
 let tolerance_identity_f = 1.
 (** [newton_fun_test name f f' roots tolerance z expected_output] is an OUnit
     test named [name] that asserts equality between [expected_output] and 
     [newton_fun f f' roots tolerance z]*)
 let newton_fun_test name f f' roots tolerance z expected_output = 
-  name >:: fun _ -> assert_equal expected_output 
-      (newton_fun f f' roots tolerance z)
+  name >:: fun _ -> assert_equal 
+      expected_output 
+      (newton_fun f f' roots tolerance z) 
+      ~printer:(function 
+          |None -> "none"
+          |Some v -> str_complex v)
+
 
 let newton_tests = [
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f 
-                  tolerance_identity_f {re = 0.; im = 0.} should return None"
+  newton_fun_test 
+    "Newton's method on the identity starting at 0 has converged"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
     {re = 0.; im = 0.}
     None;
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
-                   tolerance_identity_f {re = 1.; im = 1. should return 
-                   [Some (Complex.sub {re = 1.; im = 1.} (Complex.div 
-                   (identity_f {re = 1.; im = 1.}) (deriv_identity_f {re = 1.; 
-                   im = 1.}))))]"
+
+  newton_fun_test 
+    "Newton's method on the identity starting at 1+1i goes to 0 immediately"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
     {re = 1.; im = 1.}
-    (Some (Complex.sub {re = 1.; im = 1.} 
-             (Complex.div (identity_f {re = 1.; im = 1.}) 
-                (deriv_identity_f {re = 1.; im = 1.}))));
+    (Some Complex.zero);
 
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
-                   tolerance_identity_f {re = 100.; im = 100. should return 
-                   [Some (Complex.sub {re = 100.; im = 100.} (Complex.div 
-                   (identity_f {re = 100.; im = 100.}) (deriv_identity_f 
-                   {re = 100.; im = 100.}))))]"
+  newton_fun_test 
+    "Newton's method on the identity starting at 100+100i goes to 0 immediately"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
     {re = 100.; im = 100.}
-    (Some (Complex.sub {re = 100.; im = 100.} 
-             (Complex.div (identity_f {re = 100.; im = 100.}) 
-                (deriv_identity_f {re = 100.; im = 100.}))));
+    (Some Complex.zero);
 
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
-                   tolerance_identity_f {re = -1.; im = -1. should return 
-                   [Some (Complex.sub {re = -1.; im = -1.} (Complex.div 
-                   (identity_f {re = -1.; im = -1.}) (deriv_identity_f 
-                   {re = -1.; im = -1.}))))]"
+  newton_fun_test 
+    "Newton's method on the identity starting at -1-i goes to 0 immediately"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
     {re = -1.; im = -1.}
-    (Some (Complex.sub {re = -1.; im = -1.} 
-             (Complex.div (identity_f {re = -1.; im = -1.}) 
-                (deriv_identity_f {re = -1.; im = -1.}))));
+    (Some Complex.zero);
 
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
-                   tolerance_identity_f {re = 10000.; im = 10000. should return 
-                   [Some (Complex.sub {re = 10000.; im = 10000.} (Complex.div 
-                   (identity_f {re = 10000.; im = 10000.}) (deriv_identity_f 
-                   {re = 10000.; im = 10000.}))))]"
+  newton_fun_test 
+    "Newton's method on the identity starting at 10k+10ki goes to 0 immediately"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
     {re = 10000.; im = 10000.}
-    (Some (Complex.sub {re = 10000.; im = 10000.} 
-             (Complex.div (identity_f {re = 10000.; im = 10000.}) 
-                (deriv_identity_f {re = 10000.; im = 10000.}))));
+    (Some Complex.zero);
+
+  newton_fun_test
+    "Newton's method on x^3-x starting at i for one step"
+    x3minx
+    diffx3minx
+    rootx3minx
+    0.01
+    Complex.i 
+    (Some {re = 0.; im = 0.5});
+
+  newton_fun_test 
+    "Newton's method on x^3-x starting at 1+i"
+    x3minx
+    diffx3minx
+    rootx3minx
+    0.01
+    Complex.(add one i)
+    (let x = Complex.(add one i) in 
+     (Some Complex.(sub x (div (x3minx x) (diffx3minx x) ))));
+
+  newton_fun_test
+    "0.001 is within 0.1 of 0"
+    x3minx
+    diffx3minx
+    rootx3minx
+    0.01
+    {re = 0.001; im = 0.}
+    None;
+
+  newton_fun_test
+    "Newton's method on x^3-x starting at 0.1"
+    x3minx
+    diffx3minx
+    rootx3minx
+    0.1
+    {re = 0.1; im = 0.}
+    (Some {re = 0.1 -. (0.1 ** 3. -. 0.1) /. (3. *. 0.1 ** 2. -. 1.); im = 0.})
+
 ]
 
 (******************************************************************************)

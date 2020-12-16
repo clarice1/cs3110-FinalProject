@@ -1,4 +1,5 @@
-let newton_fun_no_stop f f' z = Complex.(sub z (div (f z) (f' z)))
+let newton_fun_no_stop f f' z = 
+  Complex.(sub z (div (f z) (f' z)))
 
 let newton_fun f f' roots tolerance z =
   if List.exists (fun c -> Complex.(norm (sub c z) < tolerance)) roots 

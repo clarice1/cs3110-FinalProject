@@ -3,7 +3,7 @@ let string_of_complex (z : Complex.t) =
 
 (**[cx_of_singletons str] is the complex number representing [str]. 
    Raises: [Failure] if [str] is of the form [f] or [f ^ "i"], where [f] is a 
-   valid input to [float_of_string]*)
+   valid input to [float_of_string] or empty*)
 let cx_of_singleton str : Complex.t = 
   match String.split_on_char 'i' (String.trim str) with 
   | [f] -> {re = float_of_string f; im = 0.}
