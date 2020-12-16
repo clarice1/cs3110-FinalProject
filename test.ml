@@ -520,16 +520,33 @@ let rootx3minx = [Complex.one;
                   Complex.(neg one)]
 
 let tolerance_identity_f = 1.
+
+let cmp z1 z2 = Complex.norm (Complex.sub z1 z2) < 1e-15
+
 (** [newton_fun_test name f f' roots tolerance z expected_output] is an OUnit
     test named [name] that asserts equality between [expected_output] and 
     [newton_fun f f' roots tolerance z]*)
 let newton_fun_test name f f' roots tolerance z expected_output = 
-  name >:: fun _ -> assert_equal 
+  name >:: fun _ ->
+    assert_equal
       expected_output 
       (newton_fun f f' roots tolerance z) 
       ~printer:(function 
-          |None -> "none"
+          |None -> "None"
           |Some v -> str_complex v)
+      ~cmp:(fun z w -> 
+          match z, w with
+          | Some a, Some b -> cmp a b 
+          | Some a, None | None, Some a -> false
+          | None, None -> true)
+
+let newton_fun_test_no_stop name f f' z expected_output = 
+  name >:: fun _ ->
+    assert_equal
+      expected_output
+      (newton_fun_no_stop f f' z)
+      ~printer:str_complex
+      ~cmp:cmp
 
 
 let newton_tests = [
@@ -539,8 +556,15 @@ let newton_tests = [
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
-    {re = 0.; im = 0.}
+    Complex.zero
     None;
+
+  newton_fun_test_no_stop 
+    "Newton's method on the identity starting at 0 goes to 0"
+    identity_f
+    deriv_identity_f
+    Complex.zero
+    Complex.zero;
 
   newton_fun_test 
     "Newton's method on the identity starting at 1+1i goes to 0 immediately"
@@ -551,6 +575,13 @@ let newton_tests = [
     {re = 1.; im = 1.}
     (Some Complex.zero);
 
+  newton_fun_test_no_stop
+    "Newton's method on the identity starting at 1+1i goes to 0 no stop"
+    identity_f
+    deriv_identity_f
+    {re = 1.; im = 1.}
+    Complex.zero;
+
   newton_fun_test 
     "Newton's method on the identity starting at 100+100i goes to 0 immediately"
     identity_f
@@ -560,14 +591,19 @@ let newton_tests = [
     {re = 100.; im = 100.}
     (Some Complex.zero);
 
-  newton_fun_test 
-    "Newton's method on the identity starting at -1-i goes to 0 immediately"
+  newton_fun_test_no_stop
+    "Newton's method on the identity starting at 100+100i goes to 0 no stop"
     identity_f
     deriv_identity_f
-    root_identity_f
-    tolerance_identity_f
+    {re = 100.; im = 100.}
+    Complex.zero;
+
+  newton_fun_test_no_stop
+    "Newton's method on the identity starting at -1-i goes to 0 no stop"
+    identity_f
+    deriv_identity_f
     {re = -1.; im = -1.}
-    (Some Complex.zero);
+    Complex.zero;
 
   newton_fun_test 
     "Newton's method on the identity starting at 10k+10ki goes to 0 immediately"
@@ -578,6 +614,13 @@ let newton_tests = [
     {re = 10000.; im = 10000.}
     (Some Complex.zero);
 
+  newton_fun_test_no_stop
+    "Newton's method on the identity starting at 10k+10ki goes to 0 no stop"
+    identity_f
+    deriv_identity_f
+    {re = 10000.; im = 10000.}
+    Complex.zero;
+
   newton_fun_test
     "Newton's method on x^3-x starting at i for one step"
     x3minx
@@ -586,6 +629,13 @@ let newton_tests = [
     0.01
     Complex.i 
     (Some {re = 0.; im = 0.5});
+
+  newton_fun_test_no_stop
+    "Newton's method on x^3-x starting at i for one step no stop"
+    x3minx
+    diffx3minx
+    Complex.i 
+    {re = 0.; im = 0.5};
 
   newton_fun_test 
     "Newton's method on x^3-x starting at 1+i"
@@ -597,6 +647,14 @@ let newton_tests = [
     (let x = Complex.(add one i) in 
      (Some Complex.(sub x (div (x3minx x) (diffx3minx x) ))));
 
+  newton_fun_test_no_stop
+    "Newton's method on x^3-x starting at 1+i no stop"
+    x3minx
+    diffx3minx
+    Complex.(add one i)
+    (let x = Complex.(add one i) in 
+     (Complex.(sub x (div (x3minx x) (diffx3minx x)))));
+
   newton_fun_test
     "0.001 is within 0.1 of 0"
     x3minx
@@ -606,6 +664,13 @@ let newton_tests = [
     {re = 0.001; im = 0.}
     None;
 
+  newton_fun_test_no_stop
+    "Newton of x^3-x starting at 0.001"
+    x3minx
+    diffx3minx
+    {re = 0.001; im = 0.}
+    {re = 0.001 -. (0.001 ** 3. -. 0.001) /. (3. *. 0.001 ** 2. -. 1.); im = 0.};
+
   newton_fun_test
     "Newton's method on x^3-x starting at 0.1"
     x3minx
@@ -613,7 +678,14 @@ let newton_tests = [
     rootx3minx
     0.1
     {re = 0.1; im = 0.}
-    (Some {re = 0.1 -. (0.1 ** 3. -. 0.1) /. (3. *. 0.1 ** 2. -. 1.); im = 0.})
+    (Some {re = 0.1 -. (0.1 ** 3. -. 0.1) /. (3. *. 0.1 ** 2. -. 1.); im = 0.});
+
+  newton_fun_test_no_stop
+    "Newton's method on x^3-x starting at 0.1 no stop"
+    x3minx
+    diffx3minx
+    {re = 0.1; im = 0.}
+    {re = 0.1 -. (0.1 ** 3. -. 0.1) /. (3. *. 0.1 ** 2. -. 1.); im = 0.}
 
 ]
 
