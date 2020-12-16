@@ -205,6 +205,17 @@ let matrix_tests = [
          | _ -> failwith "impossible"))
     string_option_int_matrix;
 
+  check_eq "add index to 0123"
+    (Matrix.init 2 2 (fun x y -> 
+         match x, y with 
+         | 0, 0 -> 0
+         | 1, 0 -> 2
+         | 0, 1 -> 3
+         | 1, 1 -> 5
+         | _ -> failwith "impossible"))
+    (Matrix.mapi (fun i j x -> i + j + x) matrix_0123) 
+    (str_matrix string_of_int);
+
   if do_big_test then 
     begin
       iterate_with_stop_check 
@@ -712,6 +723,9 @@ let parse_tests = [
     (fun () -> complex_of_string "7i8");
   check_raise "hello is not a complex number" (Failure "float_of_string") 
     (fun () -> complex_of_string "hello");
+  check_raise "the empty string is not a complex number" 
+    (Failure "float_of_string") 
+    (fun () -> complex_of_string "");
   check_raise {|"hello" is not a complex number|} (Failure "float_of_string") 
     (fun () -> complex_of_string {|"hello"|});
   check_raise "1    i is not a complex number" (Failure "float_of_string")
