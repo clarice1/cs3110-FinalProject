@@ -604,11 +604,16 @@ let parse_tests = [
     (fun () -> complex_of_string "7i8");
   check_raise "hello is not a complex number" (Failure "float_of_string") 
     (fun () -> complex_of_string "hello");
+  check_raise {|"hello" is not a complex number|} (Failure "float_of_string") 
+    (fun () -> complex_of_string {|"hello"|});
   check_raise "1    i is not a complex number" (Failure "float_of_string")
     (fun () -> complex_of_string "1    i");
   check_eq {|complex numbers from string|} 
     [Complex.one; Complex.i; Complex.zero; Complex.one; {re = 7.; im = 0.26}]
-    (lst_cx "1+ 0i, 0+1.i,0., 1, 7+ 0.26i") (pp_list str_complex)
+    (lst_cx "1+ 0i, 0+1.i,0., 1, 7+ 0.26i") (pp_list str_complex);
+  check_eq "empty list" [] (lst_cx "") (pp_list str_complex);
+  check_raise "bad number in list" (Failure "float_of_string") 
+    (fun () -> lst_cx {|1+7i, "hello"|});
 
 ]
 

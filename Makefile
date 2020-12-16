@@ -39,7 +39,7 @@ bw:
 
 clean:
 	ocamlbuild -clean
-	rm ./*.bmp
+	rm -rf ./*.bmp
 	rm -rf doc.public doc.private *.bmp ms1.zip 
 
 docs: docs-public docs-private
