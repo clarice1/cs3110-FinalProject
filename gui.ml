@@ -351,7 +351,11 @@ let create_label s lopt =
   let u = create_component w h  in 
   u.mem <- (fun x -> false);  u.display <- display_label s  u;
   u.info <- "Label"; u.gc <- gui;
-  u;;
+  u
+
+let courier_bold_24 = Sopt "*courier-bold-r-normal-*24*"
+
+let courier_bold_18 = Sopt "*courier-bold-r-normal-*18*"
 
 let create_panel b w h lopt =
   let u = create_component w h   in 

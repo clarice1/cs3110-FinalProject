@@ -151,3 +151,22 @@ open Gui
    let () = main () *)
 let m = open_main_window 420 150
 
+let create_conv w h fe = 
+  let gray1 = (Graphics.rgb 120 120 120) in 
+  let m = open_main_window w h
+  and  p = create_panel true (w-4) (h-4) []
+  and  l1 = create_label "Francs" ["Font", courier_bold_24;
+                                   "Background", Copt gray1]
+  and l2 = create_label "Euros" ["Font", courier_bold_24;
+                                 "Background", Copt gray1]
+  and c,cs = create_choice ["->"; "<-"] ["Font", courier_bold_18]
+  and tf1,tfs1 = create_text_field  "0" 10 false ["Font", courier_bold_18]
+  and tf2,tfs2 = create_text_field "0" 10 false ["Font", courier_bold_18]
+  and b,bs = create_button " Go " ["Font", courier_bold_24]
+  in 
+  let gc = get_gc m in
+  set_bcol gc gray1;
+  set_layout (grid_layout (3,2) m ) m;
+  add_component m l1 ["Col",Iopt 0;"Row",Iopt 1];
+  add_component m l2 ["Col",Iopt 2;"Row",Iopt 1];
+

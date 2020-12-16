@@ -83,10 +83,14 @@ type rich_event
 (******************************************************************************)
 
 (** [opt_val] is the type of values of options for creating components. *)
-type opt_val
+type opt_val = 
+  | Copt of Graphics.color 
+  | Sopt of string 
+  | Iopt of int 
+  | Bopt of bool
 
 (** [lopt] is the type of a list of [opt_val]. *)
-type lopt
+type lopt = (string * opt_val) list
 
 (** [get_color lo name default] is the decoding function for integers. If 
     [name] belongs to [lo] then return the value associated with [name]. 
@@ -264,6 +268,10 @@ val display_label : string -> component -> unit -> unit
 
 (** [create_label lab plist] creates a componenet with label [lab].*)
 val create_label : string -> (string * opt_val) list -> component
+
+val courier_bold_18 : opt_val
+
+val courier_bold_24 : opt_val
 
 (** [create_panel b w h lopt] creates a panel that a graphical area 
     that can be a container *)
