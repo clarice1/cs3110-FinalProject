@@ -359,6 +359,65 @@ let polynomial_tests = [
     {re = 6.; im = 0.};
 ]
 
+let f = QCheck.Gen.map2 (fun r im  : Complex.t -> {re = r; im = im}) 
+    QCheck.Gen.float QCheck.Gen.float
+        |> QCheck.make ~print:str_complex
+
+
+let lst = [Complex.zero; Complex.one; Complex.i; Complex.(neg one); 
+           Complex.(neg i)]
+
+let within_e z1 z2 = 
+  Complex.norm (Complex.sub z1 z2) < Complex.norm z1 /. 1e9
+
+
+let within_e_opt z1 z2 = 
+  match z1, z2 with 
+  | None, None -> true
+  | None, Some _ | Some _, None -> false 
+  | Some v1, Some v2 -> within_e v1 v2
+
+let p1 = Polynomial.from_roots lst
+
+let p2 = RootPolynomial.from_roots Complex.one lst
+
+let poly_test_aux comp a b = 
+  QCheck.Test.make ~count:1_000 f 
+    (fun z -> comp (a z) (b z))
+  |> QCheck_ounit.to_ounit2_test
+
+let poly_test = poly_test_aux within_e
+
+let poly_test_opt = poly_test_aux within_e_opt
+
+let rand_poly_tests = 
+  poly_test (Polynomial.eval p1) (RootPolynomial.eval p2)
+
+let rand_poly_bounded_tests = 
+  poly_test_opt (Polynomial.bounded p1) 
+    (RootPolynomial.bbounded (RootPolynomial.bound p2))
+
+let rand_poly_bbounded_tests = 
+  poly_test_opt (Polynomial.bbounded (Polynomial.bound p1)) 
+    (RootPolynomial.bbounded (RootPolynomial.bound p2))
+
+let rand_poly_convert_tests = 
+  poly_test (Polynomial.eval p1) 
+    (Polynomial.eval (RootPolynomial.to_poly p2))
+
+let rand_mul_tests = 
+  poly_test 
+    (fun z -> Complex.mul (Polynomial.eval p1 z) (RootPolynomial.eval p2 z))
+    (Polynomial.eval (Polynomial.mul p1 (RootPolynomial.to_poly p2)))
+
+let rand_p_tests = [
+  rand_poly_tests;
+  rand_poly_bounded_tests;
+  rand_poly_bbounded_tests;
+  rand_poly_convert_tests;
+  rand_mul_tests
+]
+
 (******************************************************************************)
 (*Tests for ToImage*)
 (******************************************************************************)
@@ -747,7 +806,8 @@ let tests =
     toImage_tests;
     (*main_tests;*)
     newton_tests;
-    parse_tests
+    parse_tests;
+    rand_p_tests
   ]
 
 let _ = run_test_tt_main tests
