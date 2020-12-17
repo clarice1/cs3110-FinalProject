@@ -106,7 +106,7 @@ let set_gc gc lst_opt =
   set_font_size gc (get_int lst_opt "FontSize" (get_font_size gc));
   set_lw gc (get_int lst_opt "LineWidth" (get_lw gc))
 
-let make_dc = make_default_context ()
+let make_dc () = make_default_context ()
 
 
 (******************************************************************************)
@@ -336,6 +336,291 @@ let make_key e ch c =
 (******************************************************************************)
 (*Defining Components*)
 (******************************************************************************)
+let display_init comp = 
+  Graphics.set_color (get_bcol (get_gc comp)); display_rect  comp ();
+  let gui= get_gc comp in 
+  use_gui gui;
+  let (a,b) = get_curr gui in 
+  Graphics.moveto (comp.x+a) (comp.y+b)
+let display_label lab comp () = 
+  display_init comp; Graphics.draw_string lab;;
+
+let create_label s lopt =
+  let gui = make_default_context () in   set_gc gui lopt; use_gui gui;
+  let (w,h) = Graphics.text_size s in 
+  let u = create_component w h  in 
+  u.mem <- (fun x -> false);  u.display <- display_label s  u;
+  u.info <- "Label"; u.gc <- gui;
+  u
+
+let courier_bold_24 = Sopt "*courier-bold-r-normal-*24*"
+
+let courier_bold_18 = Sopt "*courier-bold-r-normal-*18*"
+
+let create_panel b w h lopt =
+  let u = create_component w h   in 
+  u.container <- b;
+  u.info <- if b then "Panel container" else "Panel";
+  let gc = make_default_context () in set_gc gc lopt; u.gc <- gc;
+  u;;
+
+let center_layout comp comp1 lopt = 
+  comp1.x <- comp.x + ((comp.w -comp1.w) /2); 
+  comp1.y <- comp.y + ((comp.h -comp1.h) /2);;
+
+let grid_layout (a, b)  c c1 lopt = 
+  let px = get_int lopt "Col" 0
+  and py = get_int lopt "Row" 0 in 
+  if (px >= 0) && (px < a) && ( py >=0) && (py < b) then 
+    let lw = c.w /a 
+    and lh = c.h /b in 
+    if (c1.w > lw) || (c1.h > lh) then 
+      failwith "grid_placement: too big component"
+    else 
+      c1.x <- c.x + px * lw + (lw - c1.w)/2;
+    c1.y <- c.y + py * lh + (lh - c1.h)/2;
+  else  failwith "grid_placement: bad position";;
+
+let open_main_window w h = 
+  Graphics.close_graph();
+  Graphics.open_graph (" "^(string_of_int w)^"x"^(string_of_int h));
+  let u = create_component  w h in
+  u.container <- true; 
+  u.info <- "Main Window"; 
+  u;;
+
+type button_state = 
+  { txt : string; 
+    mutable action :  button_state -> unit }
+
+let create_bs st = {txt = st; action = fun x -> ()}
+
+let set_bs_action bs f = bs.action <- f
+
+let get_bs_text bs = bs.txt;;
+
+let display_button  c bs  () =  
+  display_init c;  Graphics.draw_string (get_bs_text bs)
+
+let listener_button c bs  e = match get_event e with 
+    MouseDown -> bs.action bs; c.display (); true
+  | _ -> false;;
+
+let create_button s lopt     =
+  let bs = create_bs s in  
+  let gc = make_default_context () in 
+  set_gc gc lopt; use_gui gc; 
+  let w,h = Graphics.text_size (get_bs_text bs) in 
+  let u = create_component w h   in
+  u.display <- display_button u bs;
+  u.listener <- listener_button u bs;
+  u.info <- "Button";
+  u.gc <- gc;
+  u,bs;;
+
+(** The index ind shows which string is to be highlighted in the list of values. 
+    The sep and height fields describe in pixels the distance between 
+    two choices and the height of a choice. The action function takes an argument 
+    of type choice_state as an input and does its job using the index.*)
+type choice_state = 
+  { mutable ind : int; values : string array; mutable sep : int; 
+    mutable height : int; mutable action : choice_state -> unit }
+
+let create_cs sa = 
+  {ind = 0; values = sa; sep = 2; 
+   height = 1; action = fun x -> ()}
+
+let set_cs_action cs f = cs.action <- f
+let get_cs_text cs = cs.values.(cs.ind);;
+
+let display_choice comp cs  () = 
+  display_init comp;
+  let (x,y) = Graphics.current_point()  
+  and nb = Array.length cs.values in 
+  for i = 0 to nb-1 do 
+    Graphics.moveto x (y + i*(cs.height+ cs.sep));
+    Graphics.draw_string cs.values.(i)
+  done;
+  Graphics.set_color (get_fcol (get_gc comp));
+  Graphics.fill_rect x (y+ cs.ind*(cs.height+ cs.sep)) comp.w cs.height;
+  Graphics.set_color (get_bcol (get_gc comp));      
+  Graphics.moveto x  (y + cs.ind*(cs.height + cs.sep));
+  Graphics.draw_string cs.values.(cs.ind) ;;
+
+let listener_choice c cs e = match e.re with 
+    MouseUp -> 
+    let y = e.stat.Graphics.mouse_y in 
+    let cy = c.y in 
+    let i = (y - cy) / ( cs.height + cs.sep) in
+    cs.ind <- i; c.display ();
+    cs.action cs; true
+  |   _  -> false ;;
+
+let create_choice lc lopt  =
+  let sa =  (Array.of_list (List.rev lc)) in 
+  let cs = create_cs sa in 
+  let gc = make_default_context () in 
+  set_gc gc lopt;  use_gui gc;
+  let awh = Array.map (Graphics.text_size) cs.values in 
+  let w = Array.fold_right (fun (x,y) -> max x)  awh 0 
+  and h = Array.fold_right (fun (x,y) -> max y)  awh 0 in
+  let h1 = (h+cs.sep) * (Array.length sa) + cs.sep  in  
+  cs.height <- h;
+  let u = create_component w h1   in
+  u.display <- display_choice u cs;
+  u.listener <- listener_choice u cs ;
+  u.info <- "Choice "^ (string_of_int (Array.length cs.values));
+  u.gc <- gc;
+  u,cs;;
+
+type textfield_state = 
+  { txt : string; 
+    dir : bool; mutable ind1 : int; mutable ind2 : int; len : int;
+    mutable visible_cursor : bool; mutable cursor : char; 
+    mutable visible_echo : bool; mutable echo : char; 
+    mutable action : textfield_state -> unit } ;;
+
+let create_tfs txt size dir  = 
+  let l = String.length txt in
+  (if size < l then failwith "create_tfs");
+  let ind1 = if dir then 0 else size-1-l 
+  and ind2 = if dir then l else size-1 in 
+  let n_txt = (if dir then (txt^(String.make (size-l) ' '))
+               else ((String.make (size-l) ' ')^txt )) in
+  {txt = n_txt; dir=dir; ind1 = ind1; ind2 = ind2; len=size;
+   visible_cursor  = false;  cursor = ' '; visible_echo =  true; echo = ' ';
+   action= fun x -> ()};;
+
+let set_tfs_action tfs f = tfs.action <- f
+
+let set_tfs_cursor b c tfs =  tfs.visible_cursor <- b; tfs.cursor <- c  
+
+let set_tfs_echo b c tfs =  tfs.visible_echo <- b; tfs.echo <- c  
+
+let get_tfs_text tfs = 
+  if tfs.dir then String.sub tfs.txt tfs.ind1 (tfs.ind2 - tfs.ind1)
+  else String.sub tfs.txt (tfs.ind1+1) (tfs.ind2 - tfs.ind1);;
+
+let set_tfs_text tf tfs txt = 
+  let l = String.length txt in 
+  if l > tfs.len then failwith "set_tfs_text";
+  String.blit  (String.make tfs.len ' ') 0 (Bytes.of_string tfs.txt) 0 tfs.len;
+  if tfs.dir then (String.blit txt 0 (Bytes.of_string tfs.txt) 0 l;
+                   tfs.ind2 <- l )
+  else   ( String.blit txt 0 (Bytes.of_string tfs.txt) (tfs.len -l) l; 
+           tfs.ind1 <- tfs.len-l-1 );
+  tf.display ();; 
+
+let display_cursor c tfs = 
+  if tfs.visible_cursor then 
+    ( use_gui (get_gc c);
+      let (x,y) = Graphics.current_point() in 
+      let (a,b) = Graphics.text_size " " in 
+      let shift =  a *  (if tfs.dir then max (min (tfs.len-1) tfs.ind2)  0 
+                         else tfs.ind2) in  
+      Graphics.moveto (c.x+x + shift) (c.y+y);
+      Graphics.draw_char tfs.cursor);;
+
+let display_textfield c tfs  () = 
+  display_init c;
+  let s = String.make tfs.len ' ' 
+  and txt = get_tfs_text tfs in 
+  let nl = String.length txt in 
+  if (tfs.ind1 >= 0) && (not tfs.dir) then 
+    Graphics.draw_string (String.sub s 0 (tfs.ind1+1) );
+  if tfs.visible_echo  then (Graphics.draw_string (get_tfs_text tfs))
+  else Graphics.draw_string (String.make (String.length txt) tfs.echo);
+  if (nl > tfs.ind2) && (tfs.dir) 
+  then Graphics.draw_string (String.sub s tfs.ind2 (nl-tfs.ind2));
+  display_cursor c tfs;;
+
+let listener_text_field u tfs e = 
+  match e.re with 
+    MouseDown -> take_key_focus e u ; true 
+  | KeyPress -> 
+    ( if Char.code (get_key e)  >= 32 then 
+        begin
+          ( if tfs.dir then 
+              ( ( if tfs.ind2 >= tfs.len then (
+                    String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2-1); 
+                    tfs.ind2 <- tfs.ind2-1) );
+                Bytes.set (Bytes.of_string tfs.txt) tfs.ind2 (get_key e);
+                tfs.ind2 <- tfs.ind2 +1 )
+            else 
+              ( String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2); 
+                Bytes.set (Bytes.of_string tfs.txt) tfs.ind2 (get_key e);
+                if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1
+              );                  
+          )
+        end
+      else ( 
+        ( match Char.code (get_key e) with 
+            13 -> tfs.action tfs
+          |  9 -> lose_key_focus e u
+          |  8 -> if (tfs.dir && (tfs.ind2 > 0)) 
+            then tfs.ind2 <- tfs.ind2 -1
+            else if (not tfs.dir) && (tfs.ind1 < tfs.len -1) 
+            then tfs.ind1 <- tfs.ind1+1                   
+          | _ -> ()
+        ))); u.display(); true
+  | _ -> false;;
+
+
+let create_text_field  txt size dir lopt  = 
+  let tfs = create_tfs txt size dir in
+  let gc = make_default_context () in 
+  set_gc gc lopt; use_gui gc;
+  let (w,h) = Graphics.text_size (tfs.txt) in 
+  let u = create_component w h   in
+  u.display <- display_textfield u tfs;
+  u.listener <-  listener_text_field u tfs ;
+  u.info <- "TextField"; u.gc <- gc;
+  u,tfs;;
+
+type border_state = 
+  {mutable relief : string; mutable line : bool;
+   mutable bg2 : Graphics.color; mutable size : int};;
+
+let create_border_state lopt = 
+  {relief = get_string lopt "Relief" "Flat";
+   line = get_bool lopt "Outlined" false;
+   bg2 = get_color lopt "Background2" Graphics.black;
+   size = get_int lopt "Border_size" 2};;
+
+let display_border bs c1 c () = 
+  let x1 = c.x  and y1 = c.y in
+  let x2 = x1+c.w-1 and y2 = y1+c.h-1 in 
+  let ix1 = c1.x and iy1 =  c1.y in
+  let ix2 = ix1+c1.w-1 and iy2 = iy1+c1.h-1 in 
+  let border1 g = Graphics.set_color g;
+    Graphics.fill_poly [| (x1,y1);(ix1,iy1);(ix2,iy1);(x2,y1) |] ;
+    Graphics.fill_poly [| (x2,y1);(ix2,iy1);(ix2,iy2);(x2,y2) |] 
+  in
+  let border2 g =  Graphics.set_color g;
+    Graphics.fill_poly [| (x1,y2);(ix1,iy2);(ix2,iy2);(x2,y2) |] ;
+    Graphics.fill_poly [| (x1,y1);(ix1,iy1);(ix1,iy2);(x1,y2) |] 
+  in
+  display_rect c ();
+  if bs.line then (Graphics.set_color (get_fcol (get_gc c));
+                   draw_rect x1 y1 c.w c.h);
+  let b1_col = get_bcol ( get_gc c)  
+  and b2_col = bs.bg2 in 
+  match bs.relief with 
+    "Top" ->  (border1 b1_col; border2 b2_col)
+  |  "Bot" -> (border1 b2_col; border2 b1_col) 
+  |  "Flat" ->  (border1 b1_col; border2 b1_col)
+  |  s -> failwith ("display_border: unknown relief: "^s) 
+
+let create_border c lopt = 
+  let bs = create_border_state lopt in  
+  let p = create_panel true (c.w + 2 * bs.size) 
+      (c.h + 2 * bs.size) lopt in 
+  set_layout (center_layout p) p;
+  p.display <- display_border bs c p;
+  add_component p c []; p;;
+
+
+
 
 
 (******************************************************************************)

@@ -8,7 +8,6 @@
 
 (**[t] is the type containing the specifications of a Graphical
    User Interface (GUI).*)
-type t 
 
 (******************************************************************************)
 (*Graphics Context*)
@@ -17,6 +16,15 @@ type t
 (**[t] is the type containing the specifications of a Graphical User Interface 
    (GUI). *)
 type t 
+
+(** [button_state] is the type representing a button in our GUI.*)
+type button_state
+
+(** [choice_state] is the type representing a set of choices in our GUI.*)
+type choice_state
+
+(**[textfield_state] is the type representing text string inputs. *)
+type textfield_state
 
 (** [make_default_context] sets default GUI settings for a GUI window. *)
 val make_default_context: unit -> t
@@ -36,8 +44,8 @@ val get_font_size : t -> int
 (** [get_lw g] is the length/witdth of [g]. *)
 val get_lw : t -> int
 
-(** [get_cur g] is the current position of the mouse on [g]. *)
-val get_cur : t -> int * int
+(** [get_curr g] is the current position of the mouse on [g]. *)
+val get_curr : t -> int * int
 
 (** [set_bcol g c] sets [c] as the background color of [g]. *)
 val set_bcol : t -> Graphics.color -> unit
@@ -75,10 +83,14 @@ type rich_event
 (******************************************************************************)
 
 (** [opt_val] is the type of values of options for creating components. *)
-type opt_val
+type opt_val = 
+  | Copt of Graphics.color 
+  | Sopt of string 
+  | Iopt of int 
+  | Bopt of bool
 
 (** [lopt] is the type of a list of [opt_val]. *)
-type lopt
+type lopt = (string * opt_val) list
 
 (** [get_color lo name default] is the decoding function for integers. If 
     [name] belongs to [lo] then return the value associated with [name]. 
@@ -109,8 +121,8 @@ val get_int : ('a * opt_val) list -> 'a -> int -> int
 val get_bool : ('a * opt_val) list -> 'a -> bool -> bool
 (* Could factor these out into a helper *)
 
-(** [set_gui gc lst_opt] creates a graphics context from [lopt]. *)
-val set_gui : t -> (string * opt_val) list -> unit
+(** [set_gc gc lst_opt] creates a graphics context from [lopt]. *)
+val set_gc : t -> (string * opt_val) list -> unit
 
 (** [make_dc] IS THIS A NECESSARY FUNCTION? I will check *)
 val make_dc : unit -> t
@@ -228,7 +240,7 @@ val compute_rich_event : Graphics.status -> Graphics.status -> rich_event
 val send_new_events : rich_status -> rich_status -> unit
 
 (** [initial_re] is the initial value for [rich_event]. *)
-val initial_re : rich_event
+val initial_re : rich_status
 
 (** [loop b_disp b_motion c] manages the sequences of interactions with a 
     component, where [c] is the root of the component tree. *)
@@ -246,8 +258,124 @@ val make_key : rich_event -> 'a -> char -> rich_status
 (******************************************************************************)
 (*Defining Components*)
 (******************************************************************************)
+(** [display_init comp] erases the graphical region and selects the color of the
+    label*)
+val display_init : component -> unit
+
+(** [display_label lab comp] returns the graphical component [comp] with label
+    [lab].*)
+val display_label : string -> component -> unit -> unit
+
+(** [create_label lab plist] creates a componenet with label [lab].*)
+val create_label : string -> (string * opt_val) list -> component
+
+val courier_bold_18 : opt_val
+
+val courier_bold_24 : opt_val
+
+(** [create_panel b w h lopt] creates a panel that a graphical area 
+    that can be a container *)
+val create_panel : bool -> int -> int -> (string * opt_val) list -> component
+
+(** [center_layout comp comp1 lopt] places a component on the center of a 
+    container. *)
+val center_layout : component -> component -> 'a -> unit
+
+(** [grid_layout (a,b) comp comp1 lopt ] divides a container into a grid
+    where each box has the same size.*)
+val grid_layout : int * int -> component -> component -> 
+  (string * opt_val) list -> unit
+
+(**[open_main_window int int] opens main window where all the components 
+   will be in with width [w] and height [h]. *)
+val open_main_window : int -> int -> component
+
+(** [create_bs st] creates a button state with *)
+val create_bs : string -> button_state
+
+(** [set_bs_action bs] changes the action function of the button. *)
+val set_bs_action : button_state -> (button_state -> unit) -> unit 
+
+(** [get_bs_text bs] retrieves the text of the button.*)
+val get_bs_text : button_state -> string
+
+(** [display_button comp bs ()] displays the button on the screen *)
+val display_button : component -> button_state -> unit -> unit
+
+
+(** [create_button st lopt] creates a button in a component. *)
+val create_button : string -> (string * opt_val) list -> component * button_state 
+
+(** [listener_button comp bs e] activates the action function when the button
+    is pressed. *)
+val listener_button : component -> button_state -> rich_status -> bool
+
+(** [create_cs st_a] creates a choice state with choices [st_a].*)
+val create_cs : string array -> choice_state
+
+(** [set_cs_action bs f] changes the action function of the choice.*)
+val set_cs_action : choice_state -> (choice_state -> unit) -> unit
+
+(** [get_cs_text cs] retrieves the text of the choice state*)
+val get_cs_text : choice_state -> string
+
+(** [display_choice comp cs ()] shows the list of possible choices.*)
+val display_choice : component -> choice_state -> unit -> unit
+
+(** [listener_choice comp cs ] activates the action function when the choice 
+    is pressed.*)
+val listener_choice : component -> choice_state -> rich_status -> bool
+
+(** [create_choice lc lopt] creates a component with the list 
+    of possible choices.  *)
+val create_choice : string list -> (string * opt_val) list -> component * choice_state
+
+(** [create_tfs txt size dir] creates the internal state of textfields. *)
+val create_tfs : string -> int -> bool -> textfield_state
+
+(** [set_tfs_action] sets the action function for a textfield state.  *)
+val set_tfs_action : textfield_state -> (textfield_state -> unit) -> unit
+
+(** [set_tfs_cursor tfs b c] sets the bool of visible cursor and the cursor.*)
+val set_tfs_cursor : bool -> char -> textfield_state -> unit
+
+(** [set_tfs_echo tfs b c] sets the bool of visible echo and the echo. *)
+val set_tfs_echo : bool -> char -> textfield_state -> unit
+
+(** [get_tfs_text tfs] gets the text in the textfield state*)
+val get_tfs_text : textfield_state -> string
+
+(** [set_tfs_text comp tfs txt] changes the text within the state of the text
+    field. *)
+val set_tfs_text : component -> textfield_state -> string -> unit
+
+(** [display_cursor comp tfs] shows where the cursor is on the screen. *)
+val display_cursor : component -> textfield_state -> unit
+
+(** [display_textfield comp tfs ()] displays textfield.*)
+val display_textfield : component -> textfield_state -> unit -> unit
+
+(** [listener_text_field comp tfs e] captures the focus achieved by a mouse
+    click in the input zone. *)
+val listener_text_field : component -> textfield_state -> rich_status -> bool
+
+(** *)
+val create_text_field : string ->int -> bool -> 
+  (string * opt_val) list -> component * textfield_state
 
 
 (******************************************************************************)
 (*Enriched Components*)
 (******************************************************************************)
+type border_state = 
+  {mutable relief : string; mutable line : bool;
+   mutable bg2 : Graphics.color; mutable size : int};;
+
+(**[create_border_state lopt] creates a border state. *)
+val create_border_state : (string * opt_val) list -> border_state
+
+(** [display_border bs c1 c ()] shows the borders of the window. *)
+val display_border : border_state -> component -> component -> unit -> unit
+
+(** [create_border c lopt] creates the border for the window. *)
+val create_border : component -> (string * opt_val) list -> component
