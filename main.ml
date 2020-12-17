@@ -208,6 +208,7 @@ let create_conv w h fe =
   m,bs,tf1,tf2;;
 
 let (m,c,t1,t2) = create_conv 420 150 fe ;; 
-display m ;;
+
+let () = loop false false m
 
 
