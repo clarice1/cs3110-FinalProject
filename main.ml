@@ -175,23 +175,36 @@ let action_dir s cs =
 
 let err = "Could not parse this input"
 
-let get_input f field comp s = 
+(**[valid_dim s] is [s] if [s] corresponds to a valid dimension. Otherwise,
+   raises [Failure]*)
+let valid_dim s = 
+  match String.split_on_char 'x' s with 
+  | [width; height] -> ignore (int_of_string width + int_of_string height); s
+  | _ -> failwith "bad"
+
+(**[wipe_labels lst] changes all labels in [lst] to [""]*)
+let wipe_labels = List.iter (fun x -> change_label_text x "") 
+
+(**[get_input f field comp] is [f (get_tfs_text field)] if this is valid, 
+   changing the label text of [comp] if not. *)
+let get_input f field comp = 
   try f (get_tfs_text field) 
-  with | Failure _ -> change_label_text comp err; failwith s
+  with | Failure _ -> change_label_text comp err; failwith "bad input"
 
 let action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
-    coeffs_err ll_err ur_err iter_err x= 
-  try raise 
-        (Succeeded 
-           {color = s.col; 
-            coeffs = get_input Parse.lst_cx tfs_coeffs coeffs_err "coeffs";
-            ll = get_input Parse.complex_of_string tfs_ll ll_err "ll";
-            ur = get_input Parse.complex_of_string tfs_ur ur_err "ur";
-            iter = get_input int_of_string  tfs_iter iter_err "iter";
-            dim = get_tfs_text tfs_dim;
-            name = get_tfs_text tfs_name
-           })
-  with | Failure s -> print_endline s
+    coeffs_err ll_err ur_err iter_err dim_err x= 
+  try wipe_labels [coeffs_err; dim_err; ll_err; ur_err; iter_err];
+    raise 
+      (Succeeded 
+         {color = s.col; 
+          coeffs = get_input Parse.lst_cx tfs_coeffs coeffs_err;
+          dim = get_input valid_dim tfs_dim dim_err;
+          ll = get_input Parse.complex_of_string tfs_ll ll_err;
+          ur = get_input Parse.complex_of_string tfs_ur ur_err;
+          iter = get_input int_of_string  tfs_iter iter_err;
+          name = get_tfs_text tfs_name
+         })
+  with | Failure _ -> ()
 
 let create_input w h s = 
   let gray1 = (Graphics.rgb 120 120 120) in 
@@ -214,7 +227,7 @@ let create_input w h s =
   and tf_dim, tfs_dim = create_text_field "500x500" 20 false []
   and dim_err = create_label err []
   and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
-  and tf_name, tfs_name = create_text_field "" 20 false []
+  and tf_name, tfs_name = create_text_field "fractal" 20 false []
   and b, bs = create_button " Go " []
   in 
   change_label_text coeff_err "";
@@ -291,9 +304,10 @@ let create_input w h s =
   add_component big_pan_2 b ["Row", Iopt 0];
   set_col big_pan_2;
 
+  set_cs_action cs (action_dir s);
   set_bs_action bs 
     (action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
-       coeff_err ll_err ur_err iter_err);
+       coeff_err ll_err ur_err iter_err dim_err);
 
   set_layout (grid_layout (1,2) m) m;
   add_component m big_pan ["Row", Iopt 1];
@@ -304,7 +318,20 @@ let create_input w h s =
 
 let m = create_input 700 700 st
 
-let () = loop true false m
+let () = try loop true false m
+  with 
+  | Graphic_failure _ -> ()
+  | Succeeded s -> 
+    Graphics.close_graph ();
+    Graphics.open_graph (" " ^ s.dim);
+    let poly = Polynomial.from_list s.coeffs in
+    LineDrawer.start s.ll s.ur 
+      Graphics.red
+      (Polynomial.bounded poly)
+      (fun iter -> julia_color iter s.color)
+      (Polynomial.eval poly)
+      s.iter 
+      s.name
 
 (*let create_conv w h fe = 
   and  l1 = create_label "Francs" [
