@@ -332,7 +332,8 @@ let mainb _ = try loop true false main_drawer
       (fun iter -> julia_color iter s.color)
       (Polynomial.eval poly)
       s.iter 
-      s.name
+      s.name;
+    raise (Graphic_failure "Linedrawer completed")
 
 let create_control w h = 
   let m = open_main_window w h in
