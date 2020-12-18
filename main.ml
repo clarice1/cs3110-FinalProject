@@ -206,8 +206,11 @@ let action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name
          })
   with | Failure _ -> ()
 
+let gray1 = (Graphics.rgb 120 120 120)
+
+let set_col comp = set_bcol (get_gc comp) gray1
+
 let create_input w h s = 
-  let gray1 = (Graphics.rgb 120 120 120) in 
   let m = open_main_window w h
   and l_color = create_label "color:" ["Background", Copt gray1]
   and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
@@ -236,7 +239,6 @@ let create_input w h s =
   change_label_text iter_err "";
   change_label_text dim_err "";
 
-  let set_col comp = set_bcol (get_gc comp) gray1 in
   let rbox_opts = ["Relief", Sopt "Top"; 
                    "Background", Copt Graphics.red; 
                    "Border_size", Iopt 4] in
@@ -342,6 +344,7 @@ let create_control w h =
   add_component m newton_b ["Col", Iopt 1];
   add_component m mandelbrot ["Col", Iopt 2];
   set_bs_action main_bs mainb;
+  set_col m;
   m
 
 let landing = (create_control 700 700)
@@ -351,9 +354,9 @@ let () = try loop false false landing with | Graphic_failure _ -> ()
 
 (*let create_conv w h fe = 
   and  l1 = create_label "Francs" [
-    "Background", Copt gray1]
+  "Background", Copt gray1]
   and l2 = create_label "Euros" [
-    "Background", Copt gray1]
+  "Background", Copt gray1]
   and c,cs = create_choice ["->"; "<-"] []
   and tf1,tfs1 = create_text_field  "0" 10 false []
   and tf2,tfs2 = create_text_field "0" 10 false []
@@ -367,8 +370,8 @@ let () = try loop false false landing with | Graphic_failure _ -> ()
   and bc = create_border c  [] 
   and bb = 
   create_border  b  
-    ["Border_size", Iopt 4; "Relief", Sopt "Bot";
-     "Background", Copt gray1; "Background2", Copt Graphics.black] 
+  ["Border_size", Iopt 4; "Relief", Sopt "Bot";
+   "Background", Copt gray1; "Background2", Copt Graphics.black] 
   in
   set_cs_action cs (action_dir fe);
   set_bs_action bs (action_go fe tf1 tf2 tfs1 tfs2);
@@ -382,6 +385,6 @@ let () = try loop false false landing with | Graphic_failure _ -> ()
 
   let (m,c,t1,t2) = create_conv 420 150 fe 
 
-  let () = loop false false m*)
+  let () = loop false false m *)
 
 
