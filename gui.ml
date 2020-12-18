@@ -240,7 +240,6 @@ let rec send_event rs c =
         else false )
     else List.exists (fun sun -> send_event rs sun) c.children
   | _  -> c.listener rs
-(*val send_event : rich_status -> component -> bool = <fun>*)
 
 let compute_rich_event s0 s1  = 
   if s0.Graphics.button <> s1.Graphics.button then            
@@ -254,9 +253,6 @@ let compute_rich_event s0 s1  =
       if s1.Graphics.button then MouseDrag else MouseMove
     end
   else raise Not_found
-(*val compute_rich_event : Graphics.status -> Graphics.status -> rich_event =
-  <fun>*)
-
 
 let send_new_events res0 res1 = 
   if res0.key_focus <> res1.key_focus then 
@@ -270,7 +266,6 @@ let send_new_events res0 res1 =
       ignore(send_event  {res1 with re = MouseExit} res0.last); 
       ignore(send_event  {res1 with re = MouseEnter} res1.last )
     end
-(*val send_new_events : rich_status -> rich_status -> unit = <fun>*)
 
 let initial_re = 
   { re = Exposure; 
