@@ -153,15 +153,20 @@ let m = open_main_window 420 150
 
 type state_conv = 
   { mutable a:float; mutable b:float; mutable dir : bool;
-    fa : float; fb : float } ;;
+    fa : float; fb : float } 
+
 let e =  6.55957074
-let fe = { a =0.0; b=0.0; dir = true; fa = e; fb = 1./. e};;
+
+let fe = { a =0.0; b=0.0; dir = true; fa = e; fb = 1./. e}
+
 let calculate fe = 
   if fe.dir then fe.b <- fe.a /. fe.fa else fe.a <- fe.b /. fe.fb
+
 let action_dir fe cs = match get_cs_text cs with 
     "->" -> fe.dir <- true
   | "<-" -> fe.dir <- false
-  | _ -> failwith "action_dir";;
+  | _ -> failwith "action_dir"
+
 let action_go fe tf_fr tf_eu tfs_fr tfs_eu  x = 
   if fe.dir then 
     let r = float_of_string (get_tfs_text tfs_fr) in 
@@ -177,14 +182,14 @@ let action_go fe tf_fr tf_eu tfs_fr tfs_eu  x =
 let create_conv w h fe = 
   let gray1 = (Graphics.rgb 120 120 120) in 
   let m = open_main_window w h
-  and  l1 = create_label "Francs" ["Font", courier_bold_24;
-                                   "Background", Copt gray1]
-  and l2 = create_label "Euros" ["Font", courier_bold_24;
-                                 "Background", Copt gray1]
-  and c,cs = create_choice ["->"; "<-"] ["Font", courier_bold_18]
-  and tf1,tfs1 = create_text_field  "0" 10 false ["Font", courier_bold_18]
-  and tf2,tfs2 = create_text_field "0" 10 false ["Font", courier_bold_18]
-  and b,bs = create_button " Go " ["Font", courier_bold_24]
+  and  l1 = create_label "Francs" [
+      "Background", Copt gray1]
+  and l2 = create_label "Euros" [
+      "Background", Copt gray1]
+  and c,cs = create_choice ["->"; "<-"] []
+  and tf1,tfs1 = create_text_field  "0" 10 false []
+  and tf2,tfs2 = create_text_field "0" 10 false []
+  and b,bs = create_button " Go " []
   in 
   let gc = get_gc m in
   set_bcol gc gray1;
