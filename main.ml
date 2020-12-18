@@ -157,7 +157,7 @@ type state_conv =
 
 let e =  6.55957074
 
-let fe = { a =0.0; b=0.0; dir = true; fa = e; fb = 1./. e}
+let fe = { a =0.0; b=0.0; dir = false; fa = e; fb = 1./. e}
 
 let calculate fe = 
   if fe.dir then fe.b <- fe.a /. fe.fa else fe.a <- fe.b /. fe.fb
