@@ -340,6 +340,7 @@ let display_init comp =
   use_gui gui;
   let (a,b) = get_curr gui in 
   Graphics.moveto (comp.x+a) (comp.y+b)
+
 let display_label lab comp () = 
   display_init comp; Graphics.draw_string lab;;
 
@@ -347,9 +348,11 @@ let create_label s lopt =
   let gui = make_default_context () in   set_gc gui lopt; use_gui gui;
   let (w,h) = Graphics.text_size s in 
   let u = create_component w h  in 
-  u.mem <- (fun x -> false);  u.display <- display_label s  u;
+  u.mem <- (fun x -> false);  u.display <- display_label s u;
   u.info <- "Label"; u.gc <- gui;
   u
+
+let change_label_text u s = u.display <- display_label s u 
 
 let courier_bold_24 = Sopt "*courier-bold-r-normal-*24*"
 
