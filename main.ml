@@ -316,11 +316,10 @@ let create_input w h s =
   set_bcol (get_gc m) gray1;
   m
 
-let m = create_input 700 700 st
+let main_drawer = create_input 700 700 st
 
-let () = try loop true false m
+let mainb _ = try loop true false main_drawer
   with 
-  | Graphic_failure _ -> ()
   | Succeeded s -> 
     Graphics.close_graph ();
     Graphics.open_graph (" " ^ s.dim);
@@ -332,6 +331,23 @@ let () = try loop true false m
       (Polynomial.eval poly)
       s.iter 
       s.name
+
+let create_control w h = 
+  let m = open_main_window w h in
+  let main_b, main_bs = create_button " Main " [] 
+  and newton_b, newton_bs = create_button " Newton " []
+  and mandelbrot, mandelbrot_bs = create_button " Mandelbrot " [] in 
+  set_layout (grid_layout (3, 1) m) m; 
+  add_component m main_b [];
+  add_component m newton_b ["Col", Iopt 1];
+  add_component m mandelbrot ["Col", Iopt 2];
+  set_bs_action main_bs mainb;
+  m
+
+let landing = (create_control 700 700)
+
+let () = try loop false false landing with | Graphic_failure _ -> ()
+
 
 (*let create_conv w h fe = 
   and  l1 = create_label "Francs" [
