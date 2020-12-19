@@ -552,29 +552,6 @@ let succ (s  : success) =
     s.iter 
     s.name
 
-let succ_m s = Graphics.close_graph ();
-  Graphics.open_graph (" " ^ s.dim);
-  let poly c = Polynomial.from_list [Complex.one; Complex.zero; c] in
-
-  let color_z2pc c = 
-    let poly = poly c in
-    LineDrawer.start_ex {re = -2.; im = -2.}
-      {re = 2.; im = 2.} Graphics.red (Polynomial.bounded poly) 
-      (fun i -> ToImage.julia_color i {r = 0; b = 255; g = 0})
-      (Polynomial.eval poly) 100 (Parse.string_of_complex c) in
-
-  LineDrawer.start_with_bonus 
-    {re = -2.; im = -2.}
-    {re = 2.; im = 2.} 
-    Graphics.red
-    (fun (c : Complex.t) -> Polynomial.bounded (poly c))
-    (fun i -> ToImage.julia_color i {r = 0; b = 255; g = 0})
-    (fun c z -> Complex.add (Complex.mul z z) c)
-    100
-    color_z2pc
-    (fun x -> ())
-    s.name
-
 let () = try loop false false landing with 
   | Graphic_failure _ -> ()
   | Succeeded s -> succ s
@@ -582,7 +559,7 @@ let () = try loop false false landing with
     Graphics.close_graph ();
     Graphics.open_graph (" " ^ s.dim);
     Newton.full_newton s.ll s.ur s.iter s.coeffs s.tol
-  | Succmandelbrot s -> succ_m s
+  | Succmandelbrot s -> Mandelbrot.run (" " ^ s.dim) s.color
 
 
 (*let create_conv w h fe = 
