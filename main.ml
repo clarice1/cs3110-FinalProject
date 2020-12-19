@@ -269,26 +269,28 @@ let create_err () =
   let l = create_label err [] in 
   change_label_text l ""; l
 
+let l_bg = ["Background", Copt gray1]
+
 let create_input w h s = 
   let m = open_main_window w h
-  and l_color = create_label "color:" ["Background", Copt gray1]
+  and l_color = create_label "color:" l_bg
   and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
-  and l_coeffs = create_label "coefficients:" ["Background", Copt gray1]
+  and l_coeffs = create_label "coefficients:" l_bg
   and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 true []
   and coeff_err = create_err ()
-  and l_ll = create_label "lower left coordinate:" ["Background", Copt gray1]
+  and l_ll = create_label "lower left coordinate:" l_bg
   and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 true []
   and ll_err = create_err ()
-  and l_ur = create_label "upper right coordinate:" ["Background", Copt gray1]
+  and l_ur = create_label "upper right coordinate:" l_bg
   and tf_ur, tfs_ur = create_text_field "2 + 2i" 20 true []
   and ur_err = create_err ()
-  and l_iter = create_label "number of iterations:" ["Background", Copt gray1]
+  and l_iter = create_label "number of iterations:" l_bg
   and tf_iter, tfs_iter = create_text_field "100" 20 true []
   and iter_err = create_err ()
-  and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
+  and l_dim = create_label "dimensions of window:" l_bg
   and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_err ()
-  and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
+  and l_name = create_label "name for saving images:" l_bg 
   and tf_name, tfs_name = create_text_field "fractal" 20 true []
   and b, bs = create_button " Go " []
   in 
@@ -352,12 +354,12 @@ let create_input w h s =
 
 let create_input_mandelbrot w h s = 
   let m = open_main_window w h
-  and l_color = create_label "color:" ["Background", Copt gray1]
+  and l_color = create_label "color:" l_bg
   and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
-  and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
+  and l_dim = create_label "dimensions of window:" l_bg
   and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_err ()
-  and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
+  and l_name = create_label "name for saving images:" l_bg 
   and tf_name, tfs_name = create_text_field "mandelbrot" 20 true []
   and b, bs = create_button " Go " []
   in 
@@ -414,24 +416,24 @@ let create_input_mandelbrot w h s =
 
 let create_input_newton w h s = 
   let m = open_main_window w h
-  and l_coeffs = create_label "roots:" ["Background", Copt gray1]
+  and l_coeffs = create_label "roots:" l_bg
   and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 true []
   and coeff_err = create_err ()
-  and l_ll = create_label "lower left coordinate:" ["Background", Copt gray1]
+  and l_ll = create_label "lower left coordinate:" l_bg
   and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 true []
   and ll_err = create_err ()
-  and l_ur = create_label "upper right coordinate:" ["Background", Copt gray1]
+  and l_ur = create_label "upper right coordinate:" l_bg
   and tf_ur, tfs_ur = create_text_field "2 + 2i" 20 true []
   and ur_err = create_err ()
-  and l_iter = create_label "number of iterations:" ["Background", Copt gray1]
+  and l_iter = create_label "number of iterations:" l_bg
   and tf_iter, tfs_iter = create_text_field "100" 20 true []
   and iter_err = create_err ()
-  and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
+  and l_dim = create_label "dimensions of window:" l_bg
   and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_err ()
-  and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
+  and l_name = create_label "name for saving images:" l_bg 
   and tf_name, tfs_name = create_text_field "fractal" 20 true []
-  and l_tolerance = create_label "tolerance:" ["Background", Copt gray1]
+  and l_tolerance = create_label "tolerance:" l_bg
   and tf_tolerance, tfs_tolerance = create_text_field "0.01" 20 true []
   and tol_err = create_err ()
   and b, bs = create_button " Go " []
@@ -494,18 +496,49 @@ let create_input_newton w h s =
   set_bcol (get_gc m) gray1;
   m
 
+let create_input_from_image w h s= 
+  let m = open_main_window w h 
+  and lfile = create_label "file to load:" l_bg 
+  and tf_file, tfs_file = create_text_field "bmp examples/cat1.bmp" 20 true [] 
+  and rf_err = create_err ()
+  and l_coeff = create_label "file for storing coefficients:" l_bg 
+  and tf_coeff, tfs_coeff = create_text_field 
+      "cat/cat1 coefficients.txt" 20 true [] 
+  and l_roots = create_label "file for storing roots:" l_bg 
+  and tf_roots, tfs_roots = create_text_field "cat/cat1 roots.txt" 20 true [] 
+  and l_dim = create_label "dimensions of window:" l_bg
+  and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
+  and dim_err = create_err () 
+  and l_name = create_label "name for saving images:" l_bg
+  and tf_name, tfs_name = create_text_field "cat/kitty" 20 true []
+  and name_err = create_err () 
+  and l_deg = create_label "degree of polynomial:" l_bg
+  and tf_deg, tfs_deg = create_text_field "400" 20 true []
+  and deg_err = create_err () 
+  and l_iter = create_label "iterations in constructing polynomial:" l_bg
+  and tf_iter, tfs_iter = create_text_field "10000" 20 true []
+  and iter_err = create_err ()
+  and l_it_draw = create_label "iterations in drawing image:" l_bg
+  and tf_it_draw, tfs_it_draw = create_text_field "30" 20 true []
+  and it_draw_err = create_err ()
+  and l_s = create_label "s value:" l_bg 
+  and tf_s, tfs_s = create_text_field "0.0025" 20 true []
+  and s_err = create_err () in
 
-let main_drawer = create_input 700 700 st
+  m
 
-let main_drawer_mandelbrot = create_input_mandelbrot 700 700 st
 
-let main_drawer_newton = create_input_newton 700 700 st
+let main_drawer () = create_input 700 700 st
 
-let mainb _ = loop true false main_drawer
+let main_drawer_mandelbrot () = create_input_mandelbrot 700 700 st
 
-let mandelbrot _ = loop true false main_drawer_mandelbrot
+let main_drawer_newton () = create_input_newton 700 700 st
 
-let newton _ = loop true false main_drawer_newton
+let mainb _ = loop true false (main_drawer ())
+
+let mandelbrot _ = loop true false (main_drawer_mandelbrot ())
+
+let newton _ = loop true false (main_drawer_newton ())
 
 let create_control w h = 
   let m = open_main_window w h in
