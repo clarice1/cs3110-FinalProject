@@ -269,6 +269,11 @@ val display_label : string -> component -> unit -> unit
 (** [create_label lab plist] creates a componenet with label [lab].*)
 val create_label : string -> (string * opt_val) list -> component
 
+(**[change_label_text u s] changes the text of [u] to be [s]. 
+   Requires: [u] is a label*)
+val change_label_text : component -> string -> unit
+
+
 val courier_bold_18 : opt_val
 
 val courier_bold_24 : opt_val

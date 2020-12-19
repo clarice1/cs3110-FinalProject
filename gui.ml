@@ -244,9 +244,9 @@ let rec send_event rs c =
 let compute_rich_event s0 s1  = 
   if s0.Graphics.button <> s1.Graphics.button then            
     begin
-      if s0.Graphics.button then MouseDown else MouseUp 
+      if s1.Graphics.button then MouseDown else MouseUp 
     end
-  else if s1.Graphics.keypressed then KeyPress                   
+  else if s1.Graphics.keypressed then KeyPress                
   else if (s0.Graphics.mouse_x <> s1.Graphics.mouse_x  ) ||  
           (s0.Graphics.mouse_y <> s1.Graphics.mouse_y  ) then
     begin
@@ -256,24 +256,13 @@ let compute_rich_event s0 s1  =
 (*val compute_rich_event : Graphics.status -> Graphics.status -> rich_event =
   <fun>*)
 
-let rec diff r1 r2 = 
-  r1.info <> r2.info || 
-  r1.x <> r2.x || 
-  r1.y <> r2.y || 
-  r1.w <> r2.w ||
-  r1.h <> r2.h ||
-  r1.gc <> r2.gc ||
-  r1.container <> r2.container ||
-  r1.layout_options <> r2.layout_options || 
-  List.fold_left2 (fun acc a b -> acc || diff a b) false r1.children r2.children
-
 let send_new_events res0 res1 = 
-  if diff res0.key_focus res1.key_focus  then 
+  if res0.key_focus != res1.key_focus  then 
     begin
       ignore(send_event  {res1 with re = LostFocus} res0.key_focus); 
       ignore(send_event  {res1 with re = GotFocus} res1.key_focus) 
     end;
-  if diff res0.last res1.last && (( res1.re = MouseMove) || (res1.re = MouseDrag)) then
+  if res0.last != res1.last && (( res1.re = MouseMove) || (res1.re = MouseDrag)) then
     begin
       ignore(send_event  {res1 with re = MouseExit} res0.last); 
       ignore(send_event  {res1 with re = MouseEnter} res1.last )
@@ -349,6 +338,7 @@ let display_init comp =
   use_gui gui;
   let (a,b) = get_curr gui in 
   Graphics.moveto (comp.x+a) (comp.y+b)
+
 let display_label lab comp () = 
   display_init comp; Graphics.draw_string lab;;
 
@@ -356,9 +346,11 @@ let create_label s lopt =
   let gui = make_default_context () in   set_gc gui lopt; use_gui gui;
   let (w,h) = Graphics.text_size s in 
   let u = create_component w h  in 
-  u.mem <- (fun x -> false);  u.display <- display_label s  u;
+  u.mem <- (fun x -> false);  u.display <- display_label s u;
   u.info <- "Label"; u.gc <- gui;
   u
+
+let change_label_text u s = u.display <- display_label s u 
 
 let courier_bold_24 = Sopt "*courier-bold-r-normal-*24*"
 
@@ -481,7 +473,7 @@ let create_choice lc lopt  =
   u,cs;;
 
 type textfield_state = 
-  { txt : string; 
+  { mutable txt : string; 
     dir : bool; mutable ind1 : int; mutable ind2 : int; len : int;
     mutable visible_cursor : bool; mutable cursor : char; 
     mutable visible_echo : bool; mutable echo : char; 
@@ -511,12 +503,21 @@ let get_tfs_text tfs =
 let set_tfs_text tf tfs txt = 
   let l = String.length txt in 
   if l > tfs.len then failwith "set_tfs_text";
-  String.blit  (String.make tfs.len ' ') 0 (Bytes.of_string tfs.txt) 0 tfs.len;
-  if tfs.dir then (String.blit txt 0 (Bytes.of_string tfs.txt) 0 l;
-                   tfs.ind2 <- l )
-  else   ( String.blit txt 0 (Bytes.of_string tfs.txt) (tfs.len -l) l; 
-           tfs.ind1 <- tfs.len-l-1 );
-  tf.display ();; 
+  let b = Bytes.of_string tfs.txt in
+  String.blit  (String.make tfs.len ' ') 0 b 0 tfs.len;
+  tfs.txt <- Bytes.to_string b;
+  if tfs.dir then 
+    (
+      let b = Bytes.of_string tfs.txt in
+      String.blit txt 0 b 0 l;
+      tfs.txt <- Bytes.to_string b;
+      tfs.ind2 <- l )
+  else   ( 
+    let b = Bytes.of_string tfs.txt in
+    String.blit txt 0 b (tfs.len -l) l;
+    tfs.txt <- Bytes.to_string b; 
+    tfs.ind1 <- tfs.len-l-1 );
+  tf.display ()
 
 let display_cursor c tfs = 
   if tfs.visible_cursor then 
@@ -541,6 +542,15 @@ let display_textfield c tfs  () =
   then Graphics.draw_string (String.sub s tfs.ind2 (nl-tfs.ind2));
   display_cursor c tfs;;
 
+
+let bt_set tfs e = 
+  let b = Bytes.of_string tfs.txt in 
+  Bytes.set b tfs.ind2 (get_key e); Bytes.to_string b
+
+let blt tfs ind = 
+  let b = Bytes.of_string tfs.txt in 
+  String.blit tfs.txt 1 b 0 ind; Bytes.to_string b
+
 let listener_text_field u tfs e = 
   match e.re with 
     MouseDown -> take_key_focus e u ; true 
@@ -548,14 +558,14 @@ let listener_text_field u tfs e =
     ( if Char.code (get_key e)  >= 32 then 
         begin
           ( if tfs.dir then 
-              ( ( if tfs.ind2 >= tfs.len then (
-                    String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2-1); 
+              ( ( ( if tfs.ind2 >= tfs.len then (
+                    tfs.txt <- blt tfs (tfs.ind2 - 1); 
                     tfs.ind2 <- tfs.ind2-1) );
-                Bytes.set (Bytes.of_string tfs.txt) tfs.ind2 (get_key e);
-                tfs.ind2 <- tfs.ind2 +1 )
+                    tfs.txt <- bt_set tfs e;
+                    tfs.ind2 <- tfs.ind2 +1 ))
             else 
-              ( String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2); 
-                Bytes.set (Bytes.of_string tfs.txt) tfs.ind2 (get_key e);
+              ( tfs.txt <- blt tfs tfs.ind2; 
+                tfs.txt <- bt_set tfs e;
                 if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1
               );                  
           )
