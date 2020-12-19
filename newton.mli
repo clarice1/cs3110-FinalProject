@@ -32,6 +32,7 @@ val newton_with_defs : Complex.t list -> float ->
 (**[full_newton ll ur iter width height roots tolerance] 
    manages all of Newton's method for an image of width [width], height 
    [height], [iter] many iterations on
-   a polynomial with roots in [roots]. There should be at most 8 roots.*)
-val full_newton : Complex.t -> Complex.t -> int -> int -> int ->
+   a polynomial with roots in [roots]. There should be at most 8 roots. The
+   graphics window should already be initialized to the desired dimensions.*)
+val full_newton : Complex.t -> Complex.t -> int ->
   Complex.t list -> float -> unit

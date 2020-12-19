@@ -4,7 +4,6 @@ open Matrix
 open ToImage
 open Graphics
 open Gui
-open Mandelbrot
 
 (**exception Bad_input
 
@@ -150,7 +149,6 @@ open Mandelbrot
 
    (* Execute the user interface *)
    let () = main () *)
-let m = open_main_window 420 150
 
 type state = 
   {mutable col : Color.rgb}
@@ -162,6 +160,8 @@ type success = {color : Color.rgb; coeffs : Complex.t list; ll : Complex.t;
                 ur : Complex.t; iter : int; dim : string; name : string}
 
 exception Succeeded of success
+
+exception NewtonSucceeded of success
 
 type succmandelbrot = {color : Color.rgb; dim : string; name : string}
 
@@ -197,10 +197,10 @@ let get_input f field comp =
   with | Failure _ -> change_label_text comp err; failwith "bad input"
 
 let action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
-    coeffs_err ll_err ur_err iter_err dim_err x= 
+    coeffs_err ll_err ur_err iter_err dim_err ex x = 
   try wipe_labels [coeffs_err; dim_err; ll_err; ur_err; iter_err];
     raise 
-      (Succeeded 
+      (ex 
          {color = s.col; 
           coeffs = get_input Parse.lst_cx tfs_coeffs coeffs_err;
           dim = get_input valid_dim tfs_dim dim_err;
@@ -326,7 +326,7 @@ let create_input w h s =
   set_cs_action cs (action_dir s);
   set_bs_action bs 
     (action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
-       coeff_err ll_err ur_err iter_err dim_err);
+       coeff_err ll_err ur_err iter_err dim_err (fun s -> Succeeded s));
 
   set_layout (grid_layout (1,2) m) m;
   add_component m big_pan ["Row", Iopt 1];
@@ -340,10 +340,10 @@ let create_input_mandelbrot w h s =
   and l_color = create_label "color:" ["Background", Copt gray1]
   and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
   and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
-  and tf_dim, tfs_dim = create_text_field "500x500" 20 false []
+  and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_label err []
   and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
-  and tf_name, tfs_name = create_text_field "mandelbrot" 20 false []
+  and tf_name, tfs_name = create_text_field "mandelbrot" 20 true []
   and b, bs = create_button " Go " []
   in 
   change_label_text dim_err "";
@@ -399,22 +399,22 @@ let create_input_mandelbrot w h s =
 let create_input_newton w h s = 
   let m = open_main_window w h
   and l_coeffs = create_label "roots:" ["Background", Copt gray1]
-  and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 false []
+  and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 true []
   and coeff_err = create_label err []
   and l_ll = create_label "lower left coordinate:" ["Background", Copt gray1]
-  and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 false []
+  and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 true []
   and ll_err = create_label err []
   and l_ur = create_label "upper right coordinate:" ["Background", Copt gray1]
-  and tf_ur, tfs_ur = create_text_field "2 + 2i" 20 false []
+  and tf_ur, tfs_ur = create_text_field "2 + 2i" 20 true []
   and ur_err = create_label err []
   and l_iter = create_label "number of iterations:" ["Background", Copt gray1]
-  and tf_iter, tfs_iter = create_text_field "100" 20 false []
+  and tf_iter, tfs_iter = create_text_field "100" 20 true []
   and iter_err = create_label err []
   and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
-  and tf_dim, tfs_dim = create_text_field "500x500" 20 false []
+  and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_label err []
   and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
-  and tf_name, tfs_name = create_text_field "fractal" 20 false []
+  and tf_name, tfs_name = create_text_field "fractal" 20 true []
   and b, bs = create_button " Go " []
   in 
   change_label_text coeff_err "";
@@ -487,7 +487,7 @@ let create_input_newton w h s =
 
   set_bs_action bs 
     (action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
-       coeff_err ll_err ur_err iter_err dim_err);
+       coeff_err ll_err ur_err iter_err dim_err (fun s -> NewtonSucceeded s));
 
   set_layout (grid_layout (1,2) m) m;
   add_component m big_pan ["Row", Iopt 1];
@@ -503,53 +503,11 @@ let main_drawer_mandelbrot = create_input_mandelbrot 700 700 st
 
 let main_drawer_newton = create_input_newton 700 700 st
 
-let mainb _ = try loop true false main_drawer
-  with 
-  | Succeeded s -> 
-    Graphics.close_graph ();
-    Graphics.open_graph (" " ^ s.dim);
-    let poly = Polynomial.from_list s.coeffs in
-    LineDrawer.start s.ll s.ur 
-      Graphics.red
-      (Polynomial.bounded poly)
-      (fun iter -> julia_color iter s.color)
-      (Polynomial.eval poly)
-      s.iter 
-      s.name;
-    raise (Graphic_failure "Linedrawer completed")
+let mainb _ = loop true false main_drawer
 
-let mandelbrot _ = try loop true false main_drawer_mandelbrot
-  with 
-  | Succmandelbrot s -> 
-    Graphics.close_graph ();
-    Graphics.open_graph (" " ^ s.dim);
-    LineDrawer.start_with_bonus {re = -2.; im = -2.}
-      {re = 2.; im = 2.} 
-      Graphics.red
-      (fun c -> Polynomial.bounded (poly c))
-      (fun i -> ToImage.julia_color i s.color)
-      (fun c z -> Complex.add (Complex.mul z z) c)
-      100
-      color_z2pc
-      (fun x -> ())
-      s.name
+let mandelbrot _ = loop true false main_drawer_mandelbrot
 
-let newton _ = try loop true false main_drawer_newton
-  with 
-  | Succeeded s -> 
-    Graphics.close_graph ();
-    Graphics.open_graph (" " ^ s.dim);
-    LineDrawer.start_with_bonus {re = -2.; im = -2.}
-      {re = 2.; im = 2.} 
-      Graphics.red
-      (fun c -> Polynomial.bounded (poly c))
-      (fun i -> ToImage.julia_color i s.color)
-      (fun c z -> Complex.add (Complex.mul z z) c)
-      100
-      color_z2pc
-      (fun x -> ())
-      s.name
-
+let newton _ = loop true false main_drawer_newton
 
 let create_control w h = 
   let m = open_main_window w h in
@@ -559,7 +517,7 @@ let create_control w h =
   set_layout (grid_layout (3, 1) m) m; 
   add_component m (create_border main_b []) [];
   add_component m (create_border newton_b []) ["Col", Iopt 1];
-  add_component m (create_border mandelbrot []) ["Col", Iopt 2];
+  add_component m (create_border mandelbrot_b []) ["Col", Iopt 2];
   set_bs_action main_bs mainb;
   set_bs_action mandelbrot_bs mandelbrot;
   set_bs_action newton_bs newton;
@@ -568,7 +526,49 @@ let create_control w h =
 
 let landing = create_control 700 700
 
-let () = try loop false false landing with | Graphic_failure _ -> ()
+let succ (s  : success) = 
+  Graphics.close_graph ();
+  Graphics.open_graph (" " ^ s.dim);
+  let poly = Polynomial.from_list s.coeffs in
+  LineDrawer.start s.ll s.ur 
+    Graphics.red
+    (Polynomial.bounded poly)
+    (fun iter -> julia_color iter s.color)
+    (Polynomial.eval poly)
+    s.iter 
+    s.name
+
+let succ_m s = Graphics.close_graph ();
+  Graphics.open_graph (" " ^ s.dim);
+  let poly c = Polynomial.from_list [Complex.one; Complex.zero; c] in
+
+  let color_z2pc c = 
+    let poly = poly c in
+    LineDrawer.start_ex {re = -2.; im = -2.}
+      {re = 2.; im = 2.} Graphics.red (Polynomial.bounded poly) 
+      (fun i -> ToImage.julia_color i {r = 0; b = 255; g = 0})
+      (Polynomial.eval poly) 100 (Parse.string_of_complex c) in
+
+  LineDrawer.start_with_bonus 
+    {re = -2.; im = -2.}
+    {re = 2.; im = 2.} 
+    Graphics.red
+    (fun (c : Complex.t) -> Polynomial.bounded (poly c))
+    (fun i -> ToImage.julia_color i {r = 0; b = 255; g = 0})
+    (fun c z -> Complex.add (Complex.mul z z) c)
+    100
+    color_z2pc
+    (fun x -> ())
+    s.name
+
+let () = try loop false false landing with 
+  | Graphic_failure _ -> ()
+  | Succeeded s -> succ s
+  | NewtonSucceeded s -> 
+    Graphics.close_graph ();
+    Graphics.open_graph (" " ^ s.dim);
+    Newton.full_newton s.ll s.ur s.iter s.coeffs 0.001
+  | Succmandelbrot s -> succ_m s
 
 
 (*let create_conv w h fe = 
