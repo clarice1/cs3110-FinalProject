@@ -161,7 +161,11 @@ type success = {color : Color.rgb; coeffs : Complex.t list; ll : Complex.t;
 
 exception Succeeded of success
 
-exception NewtonSucceeded of success
+type newton_success = 
+  {color : Color.rgb; coeffs : Complex.t list; ll : Complex.t;
+   ur : Complex.t; iter : int; dim : string; name : string; tol : float}
+
+exception NewtonSucceeded of newton_success
 
 type succmandelbrot = {color : Color.rgb; dim : string; name : string}
 
@@ -211,6 +215,22 @@ let action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name
          })
   with | Failure _ -> ()
 
+let action_go_newton s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
+    tfs_tol coeffs_err ll_err ur_err iter_err dim_err tol_err x = 
+  try wipe_labels [coeffs_err; dim_err; ll_err; ur_err; iter_err; tol_err];
+    raise 
+      (NewtonSucceeded 
+         {color = s.col; 
+          coeffs = get_input Parse.lst_cx tfs_coeffs coeffs_err;
+          dim = get_input valid_dim tfs_dim dim_err;
+          ll = get_input Parse.complex_of_string tfs_ll ll_err;
+          ur = get_input Parse.complex_of_string tfs_ur ur_err;
+          iter = get_input int_of_string  tfs_iter iter_err;
+          name = get_tfs_text tfs_name;
+          tol = get_input float_of_string tfs_tol tol_err
+         })
+  with | Failure _ -> ()
+
 let action_go_mandelbrot s tfs_dim tfs_name 
     dim_err x= 
   try wipe_labels [dim_err;];
@@ -225,6 +245,24 @@ let action_go_mandelbrot s tfs_dim tfs_name
 let gray1 = (Graphics.rgb 120 120 120)
 
 let set_col comp = set_bcol (get_gc comp) gray1
+
+let rbox_opts = ["Relief", Sopt "Top"; 
+                 "Background", Copt Graphics.red; 
+                 "Border_size", Iopt 4]
+
+let add_3 panel el1 el2 el3 = 
+  set_layout (grid_layout (1, 3) panel) panel;
+  add_component panel (create_border el1 []) ["Row", Iopt 2];
+  add_component panel (create_border el2 rbox_opts) ["Row", Iopt 1];
+  add_component panel el3 ["Row", Iopt 0];
+  set_col panel;
+  set_col el3
+
+let dpan pan1 pan2 pan3 = 
+  set_layout (grid_layout (1, 2) pan1) pan1;
+  add_component pan1 pan2 ["Row", Iopt 0];
+  add_component pan1 pan3 ["Row", Iopt 1];
+  set_col pan1
 
 let create_input w h s = 
   let m = open_main_window w h
@@ -255,18 +293,6 @@ let create_input w h s =
   change_label_text iter_err "";
   change_label_text dim_err "";
 
-  let rbox_opts = ["Relief", Sopt "Top"; 
-                   "Background", Copt Graphics.red; 
-                   "Border_size", Iopt 4] in
-
-  let add_3 panel el1 el2 el3 = 
-    set_layout (grid_layout (1, 3) panel) panel;
-    add_component panel (create_border el1 []) ["Row", Iopt 2];
-    add_component panel (create_border el2 rbox_opts) ["Row", Iopt 1];
-    add_component panel el3 ["Row", Iopt 0];
-    set_col panel;
-    set_col el3 in
-
   let name_panel = create_panel true 180 100 [] in
   set_layout (grid_layout (1, 3) name_panel) name_panel;
   add_component name_panel (create_border l_name []) ["Row", Iopt 2];
@@ -275,12 +301,6 @@ let create_input w h s =
 
   let ll_panel = create_panel true 180 100 [] in
   add_3 ll_panel l_ll tf_ll ll_err;
-
-  let dpan pan1 pan2 pan3 = 
-    set_layout (grid_layout (1, 2) pan1) pan1;
-    add_component pan1 pan2 ["Row", Iopt 0];
-    add_component pan1 pan3 ["Row", Iopt 1];
-    set_col pan1 in
 
   let iter_panel = create_panel true 180 100 [] in 
   add_3 iter_panel l_iter tf_iter iter_err;
@@ -415,6 +435,9 @@ let create_input_newton w h s =
   and dim_err = create_label err []
   and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
   and tf_name, tfs_name = create_text_field "fractal" 20 true []
+  and l_tolerance = create_label "tolerance:" ["Background", Copt gray1]
+  and tf_tolerance, tfs_tolerance = create_text_field "0.01" 20 true []
+  and tol_err = create_label err []
   and b, bs = create_button " Go " []
   in 
   change_label_text coeff_err "";
@@ -422,18 +445,7 @@ let create_input_newton w h s =
   change_label_text ur_err "";
   change_label_text iter_err "";
   change_label_text dim_err "";
-
-  let rbox_opts = ["Relief", Sopt "Top"; 
-                   "Background", Copt Graphics.red; 
-                   "Border_size", Iopt 4] in
-
-  let add_3 panel el1 el2 el3 = 
-    set_layout (grid_layout (1, 3) panel) panel;
-    add_component panel (create_border el1 []) ["Row", Iopt 2];
-    add_component panel (create_border el2 rbox_opts) ["Row", Iopt 1];
-    add_component panel el3 ["Row", Iopt 0];
-    set_col panel;
-    set_col el3 in
+  change_label_text tol_err "";
 
   let name_panel = create_panel true 180 100 [] in
   set_layout (grid_layout (1, 3) name_panel) name_panel;
@@ -444,21 +456,14 @@ let create_input_newton w h s =
   let ll_panel = create_panel true 180 100 [] in
   add_3 ll_panel l_ll tf_ll ll_err;
 
-  let dpan pan1 pan2 pan3 = 
-    set_layout (grid_layout (1, 2) pan1) pan1;
-    add_component pan1 pan2 ["Row", Iopt 0];
-    add_component pan1 pan3 ["Row", Iopt 1];
-    set_col pan1 in
-
   let iter_panel = create_panel true 180 100 [] in 
   add_3 iter_panel l_iter tf_iter iter_err;
 
   let ur_panel = create_panel true 180 100 [] in 
   add_3 ur_panel l_ur tf_ur ur_err;
 
-
   let big_pan = create_panel true 600 250 [] in
-  set_layout (grid_layout (3, 1) big_pan) big_pan;
+  set_layout (grid_layout (2, 1) big_pan) big_pan;
   set_col big_pan;
 
   let name_iter_panel = create_panel true 180 200 [] in 
@@ -472,22 +477,31 @@ let create_input_newton w h s =
   let coeff_panel = create_panel true 450 100 [] in
   add_3 coeff_panel l_coeffs tf_coeffs coeff_err;
 
-  let dim_panel = create_panel true 200 100 [] in 
+  let dim_panel = create_panel true 180 100 [] in 
   add_3 dim_panel l_dim tf_dim dim_err;
+
+  let tol_panel = create_panel true 180 100 [] in 
+  add_3 tol_panel l_tolerance tf_tolerance tol_err;
+
+  let dim_tol_panel = create_panel true 450 100 [] in 
+  set_layout (grid_layout (2, 1) dim_tol_panel) dim_tol_panel;
+  add_component dim_tol_panel dim_panel ["Row", Iopt 0];
+  add_component dim_tol_panel tol_panel ["Col", Iopt 1];
+  set_col dim_tol_panel;
 
   set_bcol (get_gc coeff_panel) gray1;
   set_bcol (get_gc coeff_err) gray1;
 
   let big_pan_2 = create_panel true 600 300 [] in
   set_layout (grid_layout (1, 3) big_pan_2) big_pan_2;
-  add_component big_pan_2 dim_panel ["Row", Iopt 2];
+  add_component big_pan_2 dim_tol_panel ["Row", Iopt 2];
   add_component big_pan_2 coeff_panel ["Row", Iopt 1];
   add_component big_pan_2 b ["Row", Iopt 0];
   set_col big_pan_2;
 
   set_bs_action bs 
-    (action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
-       coeff_err ll_err ur_err iter_err dim_err (fun s -> NewtonSucceeded s));
+    (action_go_newton s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
+       tfs_tolerance coeff_err ll_err ur_err iter_err dim_err tol_err);
 
   set_layout (grid_layout (1,2) m) m;
   add_component m big_pan ["Row", Iopt 1];
@@ -567,7 +581,7 @@ let () = try loop false false landing with
   | NewtonSucceeded s -> 
     Graphics.close_graph ();
     Graphics.open_graph (" " ^ s.dim);
-    Newton.full_newton s.ll s.ur s.iter s.coeffs 0.001
+    Newton.full_newton s.ll s.ur s.iter s.coeffs s.tol
   | Succmandelbrot s -> succ_m s
 
 
