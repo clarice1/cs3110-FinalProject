@@ -276,6 +276,11 @@ let create_input w h s =
   let ll_panel = create_panel true 180 100 [] in
   add_3 ll_panel l_ll tf_ll ll_err;
 
+  let dpan pan1 pan2 pan3 = 
+    set_layout (grid_layout (1, 2) pan1) pan1;
+    add_component pan1 pan2 ["Row", Iopt 0];
+    add_component pan1 pan3 ["Row", Iopt 1];
+    set_col pan1 in
 
   let iter_panel = create_panel true 180 100 [] in 
   add_3 iter_panel l_iter tf_iter iter_err;
@@ -295,9 +300,11 @@ let create_input w h s =
   set_col big_pan;
 
   let name_iter_panel = create_panel true 180 200 [] in 
+  dpan name_iter_panel name_panel iter_panel;
   add_component big_pan name_iter_panel [];
 
   let ll_ur_panel = create_panel true 180 200 [] in 
+  dpan ll_ur_panel ll_panel ur_panel;
   add_component big_pan ll_ur_panel ["Col", Iopt 1];
 
   let coeff_panel = create_panel true 450 100 [] in
@@ -357,12 +364,6 @@ let create_input_mandelbrot w h s =
   add_component name_panel (create_border l_name []) ["Row", Iopt 2];
   add_component name_panel (create_border tf_name rbox_opts) ["Row", Iopt 1];
   set_col name_panel;
-
-  let dpan pan1 pan2 pan3 = 
-    set_layout (grid_layout (1, 2) pan1) pan1;
-    add_component pan1 pan2 ["Row", Iopt 0];
-    add_component pan1 pan3 ["Row", Iopt 1];
-    set_col pan1 in
 
   let color_panel = create_panel true 50 250 [] in
   set_layout (grid_layout (1, 2) color_panel) color_panel;
