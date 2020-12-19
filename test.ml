@@ -768,6 +768,8 @@ let check_raise name ex f =
   name >:: (fun _ -> assert_raises ex f)
 
 let parse_tests = [
+  check_eq "Complex neg i" {re = 1.; im = -1.} (complex_of_string "1+ -i") 
+    str_complex;
   check_eq "Complex one" "1. + 0.i" (string_of_complex Complex.one) pp_string;
   check_eq "1 from string 1" Complex.one (complex_of_string "1") str_complex;
   check_eq "1 from string 1+0i" Complex.one (complex_of_string "1+0i") 

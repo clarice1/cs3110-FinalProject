@@ -8,6 +8,7 @@ let cx_of_singleton str : Complex.t =
   match String.split_on_char 'i' (String.trim str) with 
   | [f] -> {re = float_of_string f; im = 0.}
   | [""; ""] -> Complex.i
+  | ["-"; ""] -> {re = 0.; im = -1.}
   | [f; ""] -> {re = 0.; im = float_of_string f}
   | _ -> failwith "invalid"
 
