@@ -276,7 +276,7 @@ let create_input w h s =
   and l_color = create_label "color:" l_bg
   and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
   and l_coeffs = create_label "coefficients:" l_bg
-  and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 true []
+  and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.26" 70 true []
   and coeff_err = create_err ()
   and l_ll = create_label "lower left coordinate:" l_bg
   and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 true []
@@ -499,13 +499,13 @@ let create_input_newton w h s =
 let create_input_from_image w h s= 
   let m = open_main_window w h 
   and lfile = create_label "file to load:" l_bg 
-  and tf_file, tfs_file = create_text_field "bmp examples/cat1.bmp" 20 true [] 
+  and tf_file, tfs_file = create_text_field "bmp examples/cat1.bmp" 21 true [] 
   and rf_err = create_err ()
   and l_coeff = create_label "file for storing coefficients:" l_bg 
   and tf_coeff, tfs_coeff = create_text_field 
-      "cat/cat1 coefficients.txt" 20 true [] 
+      "cat/coefficients.txt" 20 true [] 
   and l_roots = create_label "file for storing roots:" l_bg 
-  and tf_roots, tfs_roots = create_text_field "cat/cat1 roots.txt" 20 true [] 
+  and tf_roots, tfs_roots = create_text_field "cat/roots.txt" 20 true [] 
   and l_dim = create_label "dimensions of window:" l_bg
   and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_err () 
@@ -515,15 +515,60 @@ let create_input_from_image w h s=
   and l_deg = create_label "degree of polynomial:" l_bg
   and tf_deg, tfs_deg = create_text_field "400" 20 true []
   and deg_err = create_err () 
-  and l_iter = create_label "iterations in constructing polynomial:" l_bg
+  and l_iter = create_label "computing iterations:" l_bg
   and tf_iter, tfs_iter = create_text_field "10000" 20 true []
   and iter_err = create_err ()
-  and l_it_draw = create_label "iterations in drawing image:" l_bg
+  and l_it_draw = create_label "drawing iterations:" l_bg
   and tf_it_draw, tfs_it_draw = create_text_field "30" 20 true []
   and it_draw_err = create_err ()
   and l_s = create_label "s value:" l_bg 
   and tf_s, tfs_s = create_text_field "0.0025" 20 true []
-  and s_err = create_err () in
+  and s_err = create_err () 
+  and l_color = create_label "color:" l_bg
+  and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
+  and b, bs = create_button " Go " [] in
+
+  let file_panel = add_3 lfile tf_file rf_err 220 100 
+  and deg_panel = add_3 l_deg tf_deg deg_err 220 100 
+  and dim_panel = add_3 l_dim tf_dim dim_err 220 100 
+  and s_panel = add_3 l_s tf_s s_err 220 100 
+  and iter_pan_1 = add_3 l_iter tf_iter iter_err 220 100 
+  and iter_pan_2 = add_3 l_it_draw tf_it_draw it_draw_err 220 100
+  and coeff_panel = add_3 l_coeff tf_coeff (create_err ()) 300 100
+  and roots_panel = add_3 l_roots tf_roots (create_err ()) 300 100
+  and name_panel = add_3 l_name tf_name name_err 300 100
+
+  in 
+  let file_s_panel = add_3 file_panel s_panel iter_pan_1 230 330
+  and deg_dim_panel = add_3 deg_panel dim_panel iter_pan_2 230 330 in
+
+  let color_panel = create_panel true 50 250 [] in
+  set_layout (grid_layout (1, 2) color_panel) color_panel;
+  add_component color_panel (create_border l_color []) ["Row", Iopt 1];
+  add_component color_panel (create_border c []) ["Row", Iopt 0];
+  set_col color_panel;
+
+  let big_pan = create_panel true 700 350 [] in 
+  set_layout (grid_layout (3, 1) big_pan) big_pan;
+  add_component big_pan file_s_panel [];
+  add_component big_pan deg_dim_panel ["Col", Iopt 1];
+  add_component big_pan color_panel ["Col", Iopt 2];
+  set_col big_pan;
+
+  let big_pan_2 = create_panel true 700 350 [] in
+  set_layout (grid_layout (2, 2) big_pan_2) big_pan_2;
+  add_component big_pan_2 coeff_panel [];
+  add_component big_pan_2 roots_panel ["Row", Iopt 1];
+  add_component big_pan_2 name_panel ["Row", Iopt 1; "Col", Iopt 1];
+  add_component big_pan_2 b ["Col", Iopt 1];
+
+  set_col big_pan_2;
+
+  set_layout (grid_layout (1, 2) m) m;
+  add_component m big_pan ["Row", Iopt 1];
+  add_component m big_pan_2 [];
+
+  set_col m;
 
   m
 
@@ -544,14 +589,19 @@ let create_control w h =
   let m = open_main_window w h in
   let main_b, main_bs = create_button " Main " [] 
   and newton_b, newton_bs = create_button " Newton " []
-  and mandelbrot_b, mandelbrot_bs = create_button " Mandelbrot " [] in 
-  set_layout (grid_layout (3, 1) m) m; 
+  and mandelbrot_b, mandelbrot_bs = create_button " Mandelbrot " []
+  and from_image_b, from_image_bs = create_button " From Image " [] in 
+  set_layout (grid_layout (2, 2) m) m; 
   add_component m (create_border main_b []) [];
   add_component m (create_border newton_b []) ["Col", Iopt 1];
-  add_component m (create_border mandelbrot_b []) ["Col", Iopt 2];
+  add_component m (create_border mandelbrot_b []) ["Row", Iopt 1];
+  add_component m (create_border from_image_b []) 
+    ["Row", Iopt 1; "Col", Iopt 1];
   set_bs_action main_bs mainb;
   set_bs_action mandelbrot_bs mandelbrot;
   set_bs_action newton_bs newton;
+  set_bs_action from_image_bs 
+    (fun _ -> loop true false (create_input_from_image 700 700 st));
   set_col m;
   m
 
