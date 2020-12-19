@@ -387,8 +387,9 @@ let create_input_mandelbrot w h s =
   set_col color_panel;
 
   let big_pan = create_panel true 600 250 [] in
-  set_layout (grid_layout (3, 1) big_pan) big_pan;
-  add_component big_pan color_panel ["Col", Iopt 2];
+  set_layout (grid_layout (2, 1) big_pan) big_pan;
+  add_component big_pan name_panel [];
+  add_component big_pan color_panel ["Col", Iopt 1];
   set_col big_pan;
 
   let dim_panel = create_panel true 200 100 [] in 
@@ -542,7 +543,7 @@ let () = try loop false false landing with
     Graphics.close_graph ();
     Graphics.open_graph (" " ^ s.dim);
     Newton.full_newton s.ll s.ur s.iter s.coeffs s.tol
-  | Succmandelbrot s -> Mandelbrot.run (" " ^ s.dim) s.color
+  | Succmandelbrot s -> Mandelbrot.run (" " ^ s.dim) s.color s.name
 
 
 (*let create_conv w h fe = 

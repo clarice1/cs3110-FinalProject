@@ -10,7 +10,7 @@ let color_z2pc col c =
     (fun i -> ToImage.julia_color i col)
     (Polynomial.eval poly) 100 (string_of_complex c)
 
-let run dim col = 
+let run dim col name = 
   Graphics.open_graph dim;
   LineDrawer.start_with_bonus {re = -2.; im = -2.}
     {re = 2.; im = 2.} 
@@ -21,4 +21,4 @@ let run dim col =
     100
     (color_z2pc col)
     (fun x -> ())
-    "mandelbrot"
+    name
