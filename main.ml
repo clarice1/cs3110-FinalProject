@@ -215,22 +215,22 @@ let create_input w h s =
   and l_color = create_label "color:" ["Background", Copt gray1]
   and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
   and l_coeffs = create_label "coefficients:" ["Background", Copt gray1]
-  and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 false []
+  and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 true []
   and coeff_err = create_label err []
   and l_ll = create_label "lower left coordinate:" ["Background", Copt gray1]
-  and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 false []
+  and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 true []
   and ll_err = create_label err []
   and l_ur = create_label "upper right coordinate:" ["Background", Copt gray1]
-  and tf_ur, tfs_ur = create_text_field "2 + 2i" 20 false []
+  and tf_ur, tfs_ur = create_text_field "2 + 2i" 20 true []
   and ur_err = create_label err []
   and l_iter = create_label "number of iterations:" ["Background", Copt gray1]
-  and tf_iter, tfs_iter = create_text_field "100" 20 false []
+  and tf_iter, tfs_iter = create_text_field "100" 20 true []
   and iter_err = create_label err []
   and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
-  and tf_dim, tfs_dim = create_text_field "500x500" 20 false []
+  and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_label err []
   and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
-  and tf_name, tfs_name = create_text_field "fractal" 20 false []
+  and tf_name, tfs_name = create_text_field "fractal" 20 true []
   and b, bs = create_button " Go " []
   in 
   change_label_text coeff_err "";
@@ -341,14 +341,14 @@ let create_control w h =
   and newton_b, newton_bs = create_button " Newton " []
   and mandelbrot, mandelbrot_bs = create_button " Mandelbrot " [] in 
   set_layout (grid_layout (3, 1) m) m; 
-  add_component m main_b [];
-  add_component m newton_b ["Col", Iopt 1];
-  add_component m mandelbrot ["Col", Iopt 2];
+  add_component m (create_border main_b []) [];
+  add_component m (create_border newton_b []) ["Col", Iopt 1];
+  add_component m (create_border mandelbrot []) ["Col", Iopt 2];
   set_bs_action main_bs mainb;
   set_col m;
   m
 
-let landing = (create_control 700 700)
+let landing = create_control 700 700
 
 let () = try loop false false landing with | Graphic_failure _ -> ()
 

@@ -282,26 +282,24 @@ let initial_re =
 
 let loop b_disp b_motion c = 
   let res0 = ref initial_re in
-  try 
-    display c;
-    while true do 
-      let lev = [Graphics.Button_down; Graphics.Button_up; 
-                 Graphics.Key_pressed] in 
-      let flev = if b_motion then (Graphics.Mouse_motion) :: lev 
-        else lev in 
-      let s = Graphics.wait_next_event flev
-      in 
-      let res1 = {!res0 with stat = s} in 
-      try 
-        let res2 = {res1 with 
-                    re = compute_rich_event !res0.stat res1.stat} in
-        ignore(send_event res2 c);
-        send_new_events !res0 res2;
-        res0 := res2;      
-        if b_disp then display c
-      with Not_found -> ()
-    done
-  with e -> raise e;;
+  display c;
+  while true do 
+    let lev = [Graphics.Button_down; Graphics.Button_up; 
+               Graphics.Key_pressed] in 
+    let flev = if b_motion then (Graphics.Mouse_motion) :: lev 
+      else lev in 
+    let s = Graphics.wait_next_event flev
+    in 
+    let res1 = {!res0 with stat = s} in 
+    try 
+      let res2 = {res1 with 
+                  re = compute_rich_event !res0.stat res1.stat} in
+      ignore(send_event res2 c);
+      send_new_events !res0 res2;
+      res0 := res2;      
+      if b_disp then display c
+    with Not_found -> ()
+  done
 (*val loop : bool -> bool -> component -> unit = <fun>*)
 
 let make_click e x y = 
@@ -363,7 +361,7 @@ let create_panel b w h lopt =
   u.container <- b;
   u.info <- if b then "Panel container" else "Panel";
   let gc = make_default_context () in set_gc gc lopt; u.gc <- gc;
-  u;;
+  u
 
 let center_layout comp comp1 lopt = 
   comp1.x <- comp.x + ((comp.w -comp1.w) /2); 
@@ -380,7 +378,7 @@ let grid_layout (a, b)  c c1 lopt =
     else 
       c1.x <- c.x + px * lw + (lw - c1.w)/2;
     c1.y <- c.y + py * lh + (lh - c1.h)/2;
-  else  failwith "grid_placement: bad position";;
+  else  failwith "grid_placement: bad position"
 
 let open_main_window w h = 
   Graphics.close_graph();
@@ -388,7 +386,7 @@ let open_main_window w h =
   let u = create_component  w h in
   u.container <- true; 
   u.info <- "Main Window"; 
-  u;;
+  u
 
 type button_state = 
   { txt : string; 
@@ -398,14 +396,14 @@ let create_bs st = {txt = st; action = fun x -> ()}
 
 let set_bs_action bs f = bs.action <- f
 
-let get_bs_text bs = bs.txt;;
+let get_bs_text bs = bs.txt
 
 let display_button  c bs  () =  
   display_init c;  Graphics.draw_string (get_bs_text bs)
 
 let listener_button c bs  e = match get_event e with 
     MouseDown -> bs.action bs; c.display (); true
-  | _ -> false;;
+  | _ -> false
 
 let create_button s lopt     =
   let bs = create_bs s in  
@@ -417,7 +415,7 @@ let create_button s lopt     =
   u.listener <- listener_button u bs;
   u.info <- "Button";
   u.gc <- gc;
-  u,bs;;
+  u,bs
 
 (** The index ind shows which string is to be highlighted in the list of values. 
     The sep and height fields describe in pixels the distance between 
@@ -432,7 +430,7 @@ let create_cs sa =
    height = 1; action = fun x -> ()}
 
 let set_cs_action cs f = cs.action <- f
-let get_cs_text cs = cs.values.(cs.ind);;
+let get_cs_text cs = cs.values.(cs.ind)
 
 let display_choice comp cs  () = 
   display_init comp;
@@ -446,7 +444,7 @@ let display_choice comp cs  () =
   Graphics.fill_rect x (y+ cs.ind*(cs.height+ cs.sep)) comp.w cs.height;
   Graphics.set_color (get_bcol (get_gc comp));      
   Graphics.moveto x  (y + cs.ind*(cs.height + cs.sep));
-  Graphics.draw_string cs.values.(cs.ind) ;;
+  Graphics.draw_string cs.values.(cs.ind) 
 
 let listener_choice c cs e = match e.re with 
     MouseUp -> 
@@ -455,7 +453,7 @@ let listener_choice c cs e = match e.re with
     let i = (y - cy) / ( cs.height + cs.sep) in
     cs.ind <- i; c.display ();
     cs.action cs; true
-  |   _  -> false ;;
+  |   _  -> false 
 
 let create_choice lc lopt  =
   let sa =  (Array.of_list (List.rev lc)) in 
@@ -472,7 +470,7 @@ let create_choice lc lopt  =
   u.listener <- listener_choice u cs ;
   u.info <- "Choice "^ (string_of_int (Array.length cs.values));
   u.gc <- gc;
-  u,cs;;
+  u,cs
 
 type textfield_state = 
   { mutable txt : string; 
@@ -490,7 +488,7 @@ let create_tfs txt size dir  =
                else ((String.make (size-l) ' ')^txt )) in
   {txt = n_txt; dir=dir; ind1 = ind1; ind2 = ind2; len=size;
    visible_cursor  = false;  cursor = ' '; visible_echo =  true; echo = ' ';
-   action= fun x -> ()};;
+   action= fun x -> ()}
 
 let set_tfs_action tfs f = tfs.action <- f
 
@@ -542,7 +540,7 @@ let display_textfield c tfs  () =
   else Graphics.draw_string (String.make (String.length txt) tfs.echo);
   if (nl > tfs.ind2) && (tfs.dir) 
   then Graphics.draw_string (String.sub s tfs.ind2 (nl-tfs.ind2));
-  display_cursor c tfs;;
+  display_cursor c tfs
 
 
 let bt_set tfs e = 
@@ -553,25 +551,23 @@ let blt tfs ind =
   let b = Bytes.of_string tfs.txt in 
   String.blit tfs.txt 1 b 0 ind; Bytes.to_string b
 
+let g32 tfs e = if tfs.dir then 
+    ( ( ( if tfs.ind2 >= tfs.len then (
+          tfs.txt <- blt tfs (tfs.ind2 - 1); 
+          tfs.ind2 <- tfs.ind2-1) );
+          tfs.txt <- bt_set tfs e;
+          tfs.ind2 <- tfs.ind2 +1 ))
+  else 
+    ( tfs.txt <- blt tfs tfs.ind2; 
+      tfs.txt <- bt_set tfs e;
+      if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1)
+
 let listener_text_field u tfs e = 
   match e.re with 
     MouseDown -> take_key_focus e u ; true 
   | KeyPress -> 
     ( if Char.code (get_key e)  >= 32 then 
-        begin
-          ( if tfs.dir then 
-              ( ( ( if tfs.ind2 >= tfs.len then (
-                    tfs.txt <- blt tfs (tfs.ind2 - 1); 
-                    tfs.ind2 <- tfs.ind2-1) );
-                    tfs.txt <- bt_set tfs e;
-                    tfs.ind2 <- tfs.ind2 +1 ))
-            else 
-              ( tfs.txt <- blt tfs tfs.ind2; 
-                tfs.txt <- bt_set tfs e;
-                if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1
-              );                  
-          )
-        end
+        g32 tfs e
       else ( 
         ( match Char.code (get_key e) with 
             13 -> tfs.action tfs
@@ -582,7 +578,7 @@ let listener_text_field u tfs e =
             then tfs.ind1 <- tfs.ind1+1                   
           | _ -> ()
         ))); u.display(); true
-  | _ -> false;;
+  | _ -> false
 
 
 let create_text_field  txt size dir lopt  = 
@@ -594,7 +590,7 @@ let create_text_field  txt size dir lopt  =
   u.display <- display_textfield u tfs;
   u.listener <-  listener_text_field u tfs ;
   u.info <- "TextField"; u.gc <- gc;
-  u,tfs;;
+  u,tfs
 
 type border_state = 
   {mutable relief : string; mutable line : bool;
@@ -636,7 +632,7 @@ let create_border c lopt =
       (c.h + 2 * bs.size) lopt in 
   set_layout (center_layout p) p;
   p.display <- display_border bs c p;
-  add_component p c []; p;;
+  add_component p c []; p
 
 
 
