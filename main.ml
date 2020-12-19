@@ -398,9 +398,7 @@ let create_input_mandelbrot w h s =
 
 let create_input_newton w h s = 
   let m = open_main_window w h
-  and l_color = create_label "color:" ["Background", Copt gray1]
-  and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
-  and l_coeffs = create_label "coefficients:" ["Background", Copt gray1]
+  and l_coeffs = create_label "roots:" ["Background", Copt gray1]
   and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 false []
   and coeff_err = create_label err []
   and l_ll = create_label "lower left coordinate:" ["Background", Copt gray1]
@@ -446,20 +444,29 @@ let create_input_newton w h s =
   let ll_panel = create_panel true 180 100 [] in
   add_3 ll_panel l_ll tf_ll ll_err;
 
+  let dpan pan1 pan2 pan3 = 
+    set_layout (grid_layout (1, 2) pan1) pan1;
+    add_component pan1 pan2 ["Row", Iopt 0];
+    add_component pan1 pan3 ["Row", Iopt 1];
+    set_col pan1 in
+
   let iter_panel = create_panel true 180 100 [] in 
   add_3 iter_panel l_iter tf_iter iter_err;
 
   let ur_panel = create_panel true 180 100 [] in 
   add_3 ur_panel l_ur tf_ur ur_err;
 
+
   let big_pan = create_panel true 600 250 [] in
   set_layout (grid_layout (3, 1) big_pan) big_pan;
   set_col big_pan;
 
   let name_iter_panel = create_panel true 180 200 [] in 
+  dpan name_iter_panel name_panel iter_panel;
   add_component big_pan name_iter_panel [];
 
   let ll_ur_panel = create_panel true 180 200 [] in 
+  dpan ll_ur_panel ll_panel ur_panel;
   add_component big_pan ll_ur_panel ["Col", Iopt 1];
 
   let coeff_panel = create_panel true 450 100 [] in
@@ -478,7 +485,6 @@ let create_input_newton w h s =
   add_component big_pan_2 b ["Row", Iopt 0];
   set_col big_pan_2;
 
-  set_cs_action cs (action_dir s);
   set_bs_action bs 
     (action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
        coeff_err ll_err ur_err iter_err dim_err);
@@ -514,7 +520,7 @@ let mainb _ = try loop true false main_drawer
 
 let mandelbrot _ = try loop true false main_drawer_mandelbrot
   with 
-  | Succeeded s -> 
+  | Succmandelbrot s -> 
     Graphics.close_graph ();
     Graphics.open_graph (" " ^ s.dim);
     LineDrawer.start_with_bonus {re = -2.; im = -2.}
