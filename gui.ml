@@ -253,15 +253,27 @@ let compute_rich_event s0 s1  =
       if s1.Graphics.button then MouseDrag else MouseMove
     end
   else raise Not_found
+(*val compute_rich_event : Graphics.status -> Graphics.status -> rich_event =
+  <fun>*)
+
+let rec diff r1 r2 = 
+  r1.info <> r2.info || 
+  r1.x <> r2.x || 
+  r1.y <> r2.y || 
+  r1.w <> r2.w ||
+  r1.h <> r2.h ||
+  r1.gc <> r2.gc ||
+  r1.container <> r2.container ||
+  r1.layout_options <> r2.layout_options || 
+  List.fold_left2 (fun acc a b -> acc || diff a b) false r1.children r2.children
 
 let send_new_events res0 res1 = 
-  if res0.key_focus <> res1.key_focus then 
+  if diff res0.key_focus res1.key_focus  then 
     begin
       ignore(send_event  {res1 with re = LostFocus} res0.key_focus); 
       ignore(send_event  {res1 with re = GotFocus} res1.key_focus) 
     end;
-  if (res0.last <> res1.last) && 
-     (( res1.re = MouseMove) || (res1.re = MouseDrag)) then
+  if diff res0.last res1.last && (( res1.re = MouseMove) || (res1.re = MouseDrag)) then
     begin
       ignore(send_event  {res1 with re = MouseExit} res0.last); 
       ignore(send_event  {res1 with re = MouseEnter} res1.last )
@@ -494,7 +506,7 @@ let set_tfs_echo b c tfs =  tfs.visible_echo <- b; tfs.echo <- c
 
 let get_tfs_text tfs = 
   if tfs.dir then String.sub tfs.txt tfs.ind1 (tfs.ind2 - tfs.ind1)
-  else String.sub tfs.txt (tfs.ind1+1) (tfs.ind2 - tfs.ind1);;
+  else String.sub tfs.txt (tfs.ind1+1) (tfs.ind2 - tfs.ind1)
 
 let set_tfs_text tf tfs txt = 
   let l = String.length txt in 

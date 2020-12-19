@@ -9,7 +9,7 @@ open Matrix
 let do_big_test = false
 
 (** [pp_string s] pretty-prints string [s]. *)
-let pp_string s = Parse.string_of_complex
+let pp_string s = "\"" ^ s ^ "\""
 
 (** [pp_int] pretty-prints int [x]. *)
 let pp_int x = pp_string (string_of_int x)
@@ -35,8 +35,7 @@ let pp_list pp_elt lst =
 let pp_listlist pp_elt lst = 
   pp_list (pp_list pp_elt) lst
 
-let str_complex (z : Complex.t) = 
-  pp_string (string_of_float z.re ^ " + "^ string_of_float z.im ^ "i")
+let str_complex = Parse.string_of_complex
 
 let str_poly p = pp_list str_complex (Polynomial.to_list p)
 
@@ -206,6 +205,17 @@ let matrix_tests = [
          | _ -> failwith "impossible"))
     string_option_int_matrix;
 
+  check_eq "add index to 0123"
+    (Matrix.init 2 2 (fun x y -> 
+         match x, y with 
+         | 0, 0 -> 0
+         | 1, 0 -> 2
+         | 0, 1 -> 3
+         | 1, 1 -> 5
+         | _ -> failwith "impossible"))
+    (Matrix.mapi (fun i j x -> i + j + x) matrix_0123) 
+    (str_matrix string_of_int);
+
   if do_big_test then 
     begin
       iterate_with_stop_check 
@@ -349,6 +359,65 @@ let polynomial_tests = [
     {re = 6.; im = 0.};
 ]
 
+let f = QCheck.Gen.map2 (fun r im  : Complex.t -> {re = r; im = im}) 
+    QCheck.Gen.float QCheck.Gen.float
+        |> QCheck.make ~print:str_complex
+
+
+let lst = [Complex.zero; Complex.one; Complex.i; Complex.(neg one); 
+           Complex.(neg i)]
+
+let within_e z1 z2 = 
+  Complex.norm (Complex.sub z1 z2) < Complex.norm z1 /. 1e9
+
+
+let within_e_opt z1 z2 = 
+  match z1, z2 with 
+  | None, None -> true
+  | None, Some _ | Some _, None -> false 
+  | Some v1, Some v2 -> within_e v1 v2
+
+let p1 = Polynomial.from_roots lst
+
+let p2 = RootPolynomial.from_roots Complex.one lst
+
+let poly_test_aux comp a b = 
+  QCheck.Test.make ~count:1_000 f 
+    (fun z -> comp (a z) (b z))
+  |> QCheck_ounit.to_ounit2_test
+
+let poly_test = poly_test_aux within_e
+
+let poly_test_opt = poly_test_aux within_e_opt
+
+let rand_poly_tests = 
+  poly_test (Polynomial.eval p1) (RootPolynomial.eval p2)
+
+let rand_poly_bounded_tests = 
+  poly_test_opt (Polynomial.bounded p1) 
+    (RootPolynomial.bbounded (RootPolynomial.bound p2))
+
+let rand_poly_bbounded_tests = 
+  poly_test_opt (Polynomial.bbounded (Polynomial.bound p1)) 
+    (RootPolynomial.bbounded (RootPolynomial.bound p2))
+
+let rand_poly_convert_tests = 
+  poly_test (Polynomial.eval p1) 
+    (Polynomial.eval (RootPolynomial.to_poly p2))
+
+let rand_mul_tests = 
+  poly_test 
+    (fun z -> Complex.mul (Polynomial.eval p1 z) (RootPolynomial.eval p2 z))
+    (Polynomial.eval (Polynomial.mul p1 (RootPolynomial.to_poly p2)))
+
+let rand_p_tests = [
+  rand_poly_tests;
+  rand_poly_bounded_tests;
+  rand_poly_bbounded_tests;
+  rand_poly_convert_tests;
+  rand_mul_tests
+]
+
 (******************************************************************************)
 (*Tests for ToImage*)
 (******************************************************************************)
@@ -380,10 +449,6 @@ let julia_color_test
 let populate_black row col = black
 
 let small_black_matrix = init 10 10 populate_black
-
-(** [f_always_converges x] is a function that always returns black, which means
-    that every point on the complex plane converges. *)
-let f_always_converges (Some x, y) = black
 
 (** [colorize_test name f m expected_output] is an OUnit test named [name] that
     checks equivalence between [exected_output] and [colorize f m] *)
@@ -512,78 +577,225 @@ let deriv_identity_f (x : Complex.t) = {re = 1.; im = 0.}
 
 let root_identity_f = [{re = 0.; im = 0.}]
 
+let x3minx = 
+  from_list [Complex.one; Complex.zero; Complex.(neg one); Complex.zero] 
+  |> Polynomial.eval
+
+let diffx3minx = 
+  from_list [{re = 3.; im = 0.}; Complex.zero; Complex.(neg one)]
+  |> Polynomial.eval
+
+let rootx3minx = [Complex.one; 
+                  Complex.zero;
+                  Complex.(neg one)]
+
 let tolerance_identity_f = 1.
+
+let cmp z1 z2 = Complex.norm (Complex.sub z1 z2) < 1e-15
+
 (** [newton_fun_test name f f' roots tolerance z expected_output] is an OUnit
     test named [name] that asserts equality between [expected_output] and 
     [newton_fun f f' roots tolerance z]*)
 let newton_fun_test name f f' roots tolerance z expected_output = 
-  name >:: fun _ -> assert_equal expected_output 
-      (newton_fun f f' roots tolerance z)
+  name >:: fun _ ->
+    assert_equal
+      expected_output 
+      (newton_fun f f' roots tolerance z) 
+      ~printer:(function 
+          |None -> "None"
+          |Some v -> str_complex v)
+      ~cmp:(fun z w -> 
+          match z, w with
+          | Some a, Some b -> cmp a b 
+          | Some a, None | None, Some a -> false
+          | None, None -> true)
+
+let newton_fun_test_no_stop name f f' z expected_output = 
+  name >:: fun _ ->
+    assert_equal
+      expected_output
+      (newton_fun_no_stop f f' z)
+      ~printer:str_complex
+      ~cmp:cmp
+
 
 let newton_tests = [
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f 
-                  tolerance_identity_f {re = 0.; im = 0.} should return None"
+  newton_fun_test 
+    "Newton's method on the identity starting at 0 has converged"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
-    {re = 0.; im = 0.}
+    Complex.zero
     None;
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
-                   tolerance_identity_f {re = 1.; im = 1. should return 
-                   [Some (Complex.sub {re = 1.; im = 1.} (Complex.div 
-                   (identity_f {re = 1.; im = 1.}) (deriv_identity_f {re = 1.; 
-                   im = 1.}))))]"
+
+  newton_fun_test_no_stop 
+    "Newton's method on the identity starting at 0 goes to 0"
+    identity_f
+    deriv_identity_f
+    Complex.zero
+    Complex.zero;
+
+  newton_fun_test 
+    "Newton's method on the identity starting at 1+1i goes to 0 immediately"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
     {re = 1.; im = 1.}
-    (Some (Complex.sub {re = 1.; im = 1.} 
-             (Complex.div (identity_f {re = 1.; im = 1.}) 
-                (deriv_identity_f {re = 1.; im = 1.}))));
+    (Some Complex.zero);
 
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
-                   tolerance_identity_f {re = 100.; im = 100. should return 
-                   [Some (Complex.sub {re = 100.; im = 100.} (Complex.div 
-                   (identity_f {re = 100.; im = 100.}) (deriv_identity_f 
-                   {re = 100.; im = 100.}))))]"
+  newton_fun_test_no_stop
+    "Newton's method on the identity starting at 1+1i goes to 0 no stop"
+    identity_f
+    deriv_identity_f
+    {re = 1.; im = 1.}
+    Complex.zero;
+
+  newton_fun_test 
+    "Newton's method on the identity starting at 100+100i goes to 0 immediately"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
     {re = 100.; im = 100.}
-    (Some (Complex.sub {re = 100.; im = 100.} 
-             (Complex.div (identity_f {re = 100.; im = 100.}) 
-                (deriv_identity_f {re = 100.; im = 100.}))));
+    (Some Complex.zero);
 
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
-                   tolerance_identity_f {re = -1.; im = -1. should return 
-                   [Some (Complex.sub {re = -1.; im = -1.} (Complex.div 
-                   (identity_f {re = -1.; im = -1.}) (deriv_identity_f 
-                   {re = -1.; im = -1.}))))]"
+  newton_fun_test_no_stop
+    "Newton's method on the identity starting at 100+100i goes to 0 no stop"
     identity_f
     deriv_identity_f
-    root_identity_f
-    tolerance_identity_f
-    {re = -1.; im = -1.}
-    (Some (Complex.sub {re = -1.; im = -1.} 
-             (Complex.div (identity_f {re = -1.; im = -1.}) 
-                (deriv_identity_f {re = -1.; im = -1.}))));
+    {re = 100.; im = 100.}
+    Complex.zero;
 
-  newton_fun_test "newton_fun identity_f deriv_identity_f root_identity_f
-                   tolerance_identity_f {re = 10000.; im = 10000. should return 
-                   [Some (Complex.sub {re = 10000.; im = 10000.} (Complex.div 
-                   (identity_f {re = 10000.; im = 10000.}) (deriv_identity_f 
-                   {re = 10000.; im = 10000.}))))]"
+  newton_fun_test_no_stop
+    "Newton's method on the identity starting at -1-i goes to 0 no stop"
+    identity_f
+    deriv_identity_f
+    {re = -1.; im = -1.}
+    Complex.zero;
+
+  newton_fun_test 
+    "Newton's method on the identity starting at 10k+10ki goes to 0 immediately"
     identity_f
     deriv_identity_f
     root_identity_f
     tolerance_identity_f
     {re = 10000.; im = 10000.}
-    (Some (Complex.sub {re = 10000.; im = 10000.} 
-             (Complex.div (identity_f {re = 10000.; im = 10000.}) 
-                (deriv_identity_f {re = 10000.; im = 10000.}))));
+    (Some Complex.zero);
+
+  newton_fun_test_no_stop
+    "Newton's method on the identity starting at 10k+10ki goes to 0 no stop"
+    identity_f
+    deriv_identity_f
+    {re = 10000.; im = 10000.}
+    Complex.zero;
+
+  newton_fun_test
+    "Newton's method on x^3-x starting at i for one step"
+    x3minx
+    diffx3minx
+    rootx3minx
+    0.01
+    Complex.i 
+    (Some {re = 0.; im = 0.5});
+
+  newton_fun_test_no_stop
+    "Newton's method on x^3-x starting at i for one step no stop"
+    x3minx
+    diffx3minx
+    Complex.i 
+    {re = 0.; im = 0.5};
+
+  newton_fun_test 
+    "Newton's method on x^3-x starting at 1+i"
+    x3minx
+    diffx3minx
+    rootx3minx
+    0.01
+    Complex.(add one i)
+    (let x = Complex.(add one i) in 
+     (Some Complex.(sub x (div (x3minx x) (diffx3minx x) ))));
+
+  newton_fun_test_no_stop
+    "Newton's method on x^3-x starting at 1+i no stop"
+    x3minx
+    diffx3minx
+    Complex.(add one i)
+    (let x = Complex.(add one i) in 
+     (Complex.(sub x (div (x3minx x) (diffx3minx x)))));
+
+  newton_fun_test
+    "0.001 is within 0.1 of 0"
+    x3minx
+    diffx3minx
+    rootx3minx
+    0.01
+    {re = 0.001; im = 0.}
+    None;
+
+  newton_fun_test_no_stop
+    "Newton of x^3-x starting at 0.001"
+    x3minx
+    diffx3minx
+    {re = 0.001; im = 0.}
+    {re = 0.001 -. (0.001 ** 3. -. 0.001) /. (3. *. 0.001 ** 2. -. 1.); im = 0.};
+
+  newton_fun_test
+    "Newton's method on x^3-x starting at 0.1"
+    x3minx
+    diffx3minx
+    rootx3minx
+    0.1
+    {re = 0.1; im = 0.}
+    (Some {re = 0.1 -. (0.1 ** 3. -. 0.1) /. (3. *. 0.1 ** 2. -. 1.); im = 0.});
+
+  newton_fun_test_no_stop
+    "Newton's method on x^3-x starting at 0.1 no stop"
+    x3minx
+    diffx3minx
+    {re = 0.1; im = 0.}
+    {re = 0.1 -. (0.1 ** 3. -. 0.1) /. (3. *. 0.1 ** 2. -. 1.); im = 0.}
+
+]
+
+(******************************************************************************)
+(*Tests for Parse*)
+(******************************************************************************)
+open Parse 
+
+let check_raise name ex f = 
+  name >:: (fun _ -> assert_raises ex f)
+
+let parse_tests = [
+  check_eq "Complex one" "1. + 0.i" (string_of_complex Complex.one) pp_string;
+  check_eq "1 from string 1" Complex.one (complex_of_string "1") str_complex;
+  check_eq "1 from string 1+0i" Complex.one (complex_of_string "1+0i") 
+    str_complex;
+  check_eq "1 from string 1 + 0.i" Complex.one (complex_of_string "1 + 0.i") 
+    str_complex;
+  check_eq "7 + 46i from string" {re = 7.; im = 46.} 
+    (complex_of_string "7+ 46i") str_complex;
+  check_eq "i from string" {re = 0.; im = 1.} (complex_of_string "i") 
+    str_complex;
+  check_raise "7i8 is not a complex number" (Failure "invalid") 
+    (fun () -> complex_of_string "7i8");
+  check_raise "hello is not a complex number" (Failure "float_of_string") 
+    (fun () -> complex_of_string "hello");
+  check_raise "the empty string is not a complex number" 
+    (Failure "float_of_string") 
+    (fun () -> complex_of_string "");
+  check_raise {|"hello" is not a complex number|} (Failure "float_of_string") 
+    (fun () -> complex_of_string {|"hello"|});
+  check_raise "1    i is not a complex number" (Failure "float_of_string")
+    (fun () -> complex_of_string "1    i");
+  check_eq {|complex numbers from string|} 
+    [Complex.one; Complex.i; Complex.zero; Complex.one; {re = 7.; im = 0.26}]
+    (lst_cx "1+ 0i, 0+1.i,0., 1, 7+ 0.26i") (pp_list str_complex);
+  check_eq "empty list" [] (lst_cx "") (pp_list str_complex);
+  check_raise "bad number in list" (Failure "float_of_string") 
+    (fun () -> lst_cx {|1+7i, "hello"|});
+
 ]
 
 
@@ -593,7 +805,9 @@ let tests =
     polynomial_tests;
     toImage_tests;
     (*main_tests;*)
-    newton_tests
+    newton_tests;
+    parse_tests;
+    rand_p_tests
   ]
 
 let _ = run_test_tt_main tests
