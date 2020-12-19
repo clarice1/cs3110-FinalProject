@@ -336,7 +336,7 @@ let create_input_mandelbrot w h s =
   and tf_dim, tfs_dim = create_text_field "500x500" 20 false []
   and dim_err = create_label err []
   and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
-  and tf_name, tfs_name = create_text_field "fractal" 20 false []
+  and tf_name, tfs_name = create_text_field "mandelbrot" 20 false []
   and b, bs = create_button " Go " []
   in 
   change_label_text dim_err "";
@@ -395,11 +395,106 @@ let create_input_mandelbrot w h s =
   set_bcol (get_gc m) gray1;
   m
 
+let create_input_newton w h s = 
+  let m = open_main_window w h
+  and l_color = create_label "color:" ["Background", Copt gray1]
+  and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
+  and l_coeffs = create_label "coefficients:" ["Background", Copt gray1]
+  and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 false []
+  and coeff_err = create_label err []
+  and l_ll = create_label "lower left coordinate:" ["Background", Copt gray1]
+  and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 false []
+  and ll_err = create_label err []
+  and l_ur = create_label "upper right coordinate:" ["Background", Copt gray1]
+  and tf_ur, tfs_ur = create_text_field "2 + 2i" 20 false []
+  and ur_err = create_label err []
+  and l_iter = create_label "number of iterations:" ["Background", Copt gray1]
+  and tf_iter, tfs_iter = create_text_field "100" 20 false []
+  and iter_err = create_label err []
+  and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
+  and tf_dim, tfs_dim = create_text_field "500x500" 20 false []
+  and dim_err = create_label err []
+  and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
+  and tf_name, tfs_name = create_text_field "fractal" 20 false []
+  and b, bs = create_button " Go " []
+  in 
+  change_label_text coeff_err "";
+  change_label_text ll_err "";
+  change_label_text ur_err "";
+  change_label_text iter_err "";
+  change_label_text dim_err "";
+
+  let rbox_opts = ["Relief", Sopt "Top"; 
+                   "Background", Copt Graphics.red; 
+                   "Border_size", Iopt 4] in
+
+  let add_3 panel el1 el2 el3 = 
+    set_layout (grid_layout (1, 3) panel) panel;
+    add_component panel (create_border el1 []) ["Row", Iopt 2];
+    add_component panel (create_border el2 rbox_opts) ["Row", Iopt 1];
+    add_component panel el3 ["Row", Iopt 0];
+    set_col panel;
+    set_col el3 in
+
+  let name_panel = create_panel true 180 100 [] in
+  set_layout (grid_layout (1, 3) name_panel) name_panel;
+  add_component name_panel (create_border l_name []) ["Row", Iopt 2];
+  add_component name_panel (create_border tf_name rbox_opts) ["Row", Iopt 1];
+  set_col name_panel;
+
+  let ll_panel = create_panel true 180 100 [] in
+  add_3 ll_panel l_ll tf_ll ll_err;
+
+  let iter_panel = create_panel true 180 100 [] in 
+  add_3 iter_panel l_iter tf_iter iter_err;
+
+  let ur_panel = create_panel true 180 100 [] in 
+  add_3 ur_panel l_ur tf_ur ur_err;
+
+  let big_pan = create_panel true 600 250 [] in
+  set_layout (grid_layout (3, 1) big_pan) big_pan;
+  set_col big_pan;
+
+  let name_iter_panel = create_panel true 180 200 [] in 
+  add_component big_pan name_iter_panel [];
+
+  let ll_ur_panel = create_panel true 180 200 [] in 
+  add_component big_pan ll_ur_panel ["Col", Iopt 1];
+
+  let coeff_panel = create_panel true 450 100 [] in
+  add_3 coeff_panel l_coeffs tf_coeffs coeff_err;
+
+  let dim_panel = create_panel true 200 100 [] in 
+  add_3 dim_panel l_dim tf_dim dim_err;
+
+  set_bcol (get_gc coeff_panel) gray1;
+  set_bcol (get_gc coeff_err) gray1;
+
+  let big_pan_2 = create_panel true 600 300 [] in
+  set_layout (grid_layout (1, 3) big_pan_2) big_pan_2;
+  add_component big_pan_2 dim_panel ["Row", Iopt 2];
+  add_component big_pan_2 coeff_panel ["Row", Iopt 1];
+  add_component big_pan_2 b ["Row", Iopt 0];
+  set_col big_pan_2;
+
+  set_cs_action cs (action_dir s);
+  set_bs_action bs 
+    (action_go s tfs_coeffs tfs_ll tfs_ur tfs_iter tfs_dim tfs_name 
+       coeff_err ll_err ur_err iter_err dim_err);
+
+  set_layout (grid_layout (1,2) m) m;
+  add_component m big_pan ["Row", Iopt 1];
+  add_component m big_pan_2 ["Row", Iopt 0];
+
+  set_bcol (get_gc m) gray1;
+  m
 
 
 let main_drawer = create_input 700 700 st
 
 let main_drawer_mandelbrot = create_input_mandelbrot 700 700 st
+
+let main_drawer_newton = create_input_newton 700 700 st
 
 let mainb _ = try loop true false main_drawer
   with 
@@ -416,7 +511,23 @@ let mainb _ = try loop true false main_drawer
       s.name;
     raise (Graphic_failure "Linedrawer completed")
 
-let mandelbrot _ = try loop true false main_drawer
+let mandelbrot _ = try loop true false main_drawer_mandelbrot
+  with 
+  | Succeeded s -> 
+    Graphics.close_graph ();
+    Graphics.open_graph (" " ^ s.dim);
+    LineDrawer.start_with_bonus {re = -2.; im = -2.}
+      {re = 2.; im = 2.} 
+      Graphics.red
+      (fun c -> Polynomial.bounded (poly c))
+      (fun i -> ToImage.julia_color i s.color)
+      (fun c z -> Complex.add (Complex.mul z z) c)
+      100
+      color_z2pc
+      (fun x -> ())
+      s.name
+
+let newton _ = try loop true false main_drawer_newton
   with 
   | Succeeded s -> 
     Graphics.close_graph ();
@@ -444,6 +555,7 @@ let create_control w h =
   add_component m mandelbrot_b ["Col", Iopt 2];
   set_bs_action main_bs mainb;
   set_bs_action mandelbrot_bs mandelbrot;
+  set_bs_action newton_bs newton;
   set_col m;
   m
 
