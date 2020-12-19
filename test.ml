@@ -768,7 +768,7 @@ let check_raise name ex f =
   name >:: (fun _ -> assert_raises ex f)
 
 let parse_tests = [
-  check_eq "Complex neg i" {re = 1.; im = -1.} (complex_of_string "1+ -i") 
+  check_eq "Complex neg i" {re = -1.; im = -1.} (complex_of_string "-1 + -i") 
     str_complex;
   check_eq "Complex one" "1. + 0.i" (string_of_complex Complex.one) pp_string;
   check_eq "1 from string 1" Complex.one (complex_of_string "1") str_complex;
@@ -797,7 +797,14 @@ let parse_tests = [
   check_eq "empty list" [] (lst_cx "") (pp_list str_complex);
   check_raise "bad number in list" (Failure "float_of_string") 
     (fun () -> lst_cx {|1+7i, "hello"|});
-
+  check_raise "10 + 8i + 7 fails" (Failure "invalid") 
+    (fun () -> complex_of_string "10 + 8i + 7");
+  check_raise "10 + +8i fails" (Failure "invalid") 
+    (fun () -> complex_of_string "10 + +8i");
+  check_raise "6 - 8 + i fails" (Failure "invalid")
+    (fun () -> complex_of_string "6 - 8 + i");
+  check_eq "minus instead of plus" {re = -2.; im = -1.} 
+    (complex_of_string "-2-i") str_complex;
 ]
 
 
