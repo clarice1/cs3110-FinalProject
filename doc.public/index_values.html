@@ -1,0 +1,288 @@
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Matrix" rel="Chapter" href="Matrix.html">
+<link title="Polynomial" rel="Chapter" href="Polynomial.html">
+<link title="ToImage" rel="Chapter" href="ToImage.html">
+<link title="Main" rel="Chapter" href="Main.html">
+<link title="Newton" rel="Chapter" href="Newton.html">
+<link title="FromImage" rel="Chapter" href="FromImage.html">
+<link title="Parse" rel="Chapter" href="Parse.html"><title>Index of values</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Index of values</h1>
+<table>
+<tr><td align="left"><div>B</div></td></tr>
+<tr><td><a href="Polynomial.html#VALbbounded">bbounded</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">bbounded</code> is like <code class="code">bounded</code>, but more efficient since the bound is already
+   cached</p>
+
+</div>
+</td></tr>
+<tr><td><a href="FromImage.html#VALblack_vals">black_vals</a> [<a href="FromImage.html">FromImage</a>]</td>
+<td><div class="info">
+<p><code class="code">black_vals m</code> is the first argument in any pair where the second argument
+   is black</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Polynomial.html#VALbound">bound</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">bound p</code> caches a bound after which divergence is guaranteed</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Polynomial.html#VALbounded">bounded</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">bounded p input</code> is <code class="code">None</code> if iterating polynomial <code class="code">p</code> beginning at <code class="code">input</code>
+    is guaranteed to diverge and <code class="code">Some (eval p input)</code> if <code class="code">p</code> is not guaranteed 
+    to diverge</p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>C</div></td></tr>
+<tr><td><a href="FromImage.html#VALcolor_matrix">color_matrix</a> [<a href="FromImage.html">FromImage</a>]</td>
+<td><div class="info">
+<p><code class="code">color_matrix image ll ur</code> is the matrix of pairs of the complex coordinate
+   at the point and the color at the point.</p>
+
+</div>
+</td></tr>
+<tr><td><a href="ToImage.html#VALcolorize">colorize</a> [<a href="ToImage.html">ToImage</a>]</td>
+<td><div class="info">
+<p><code class="code">colorize f m </code> is the image of matrix <code class="code">m</code> with function <code class="code">f</code> applied to
+    each complex coordinate to determine the color of that corresponding region
+    of the image</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Matrix.html#VALcolumns">columns</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p><code class="code">columns m</code> is the number of columns in <code class="code">m</code></p>
+
+</div>
+</td></tr>
+<tr><td><a href="Parse.html#VALcomplex_of_string">complex_of_string</a> [<a href="Parse.html">Parse</a>]</td>
+<td><div class="info">
+<p><code class="code">complex_of_string s</code> is the complex number represented by the string <code class="code">s</code>.</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Matrix.html#VALcx_init">cx_init</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p><code class="code">complex_init ll ur rows columns</code> is the complex matrix with <code class="code">rows</code> many 
+   rows and <code class="code">columns</code> many columns whose values are a grid of evenly spaced 
+   complex numbers with the value <code class="code">ll</code> in its lower left corner and the value 
+   <code class="code">ur</code> in its upper right corner
+   Requires: <code class="code">ll.re &lt; ur.re</code>
+             <code class="code">ll.im &lt; ur.im</code>
+             <code class="code">rows, columns &gt;= 2</code></p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>D</div></td></tr>
+<tr><td><a href="Polynomial.html#VALdiff">diff</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">diff p</code> is the derivative of <code class="code">p</code></p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>E</div></td></tr>
+<tr><td><a href="Polynomial.html#VALeval">eval</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">eval p z</code> is the result of applying polynomial <code class="code">p</code> to input <code class="code">z</code></p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>F</div></td></tr>
+<tr><td><a href="Polynomial.html#VALforget">forget</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">forget p</code> is <code class="code">p</code> with the cached bound removed</p>
+
+</div>
+</td></tr>
+<tr><td><a href="FromImage.html#VALfrom_file">from_file</a> [<a href="FromImage.html">FromImage</a>]</td>
+<td><div class="info">
+<p><code class="code">from_file file ll ur n iterations s coeff roots</code> completes the entire 
+   process starting with the image with name <code class="code">file</code>.</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Polynomial.html#VALfrom_list">from_list</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">from_list lst</code> is the polynomial with coefficients in <code class="code">lst</code>.</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Polynomial.html#VALfrom_roots">from_roots</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td></td></tr>
+<tr><td><a href="Newton.html#VALfull_newton">full_newton</a> [<a href="Newton.html">Newton</a>]</td>
+<td><div class="info">
+<p><code class="code">full_newton ll ur iter width height roots tolerance</code> 
+   manages all of Newton's method for an image of width <code class="code">width</code>, height 
+   <code class="code">height</code>, <code class="code">iter</code> many iterations on
+   a polynomial with roots in <code class="code">roots</code>.</p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>G</div></td></tr>
+<tr><td><a href="Matrix.html#VALget">get</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p><code class="code">get i j m</code> is the value in the <code class="code">i</code>th row and <code class="code">j</code>th column of matrix <code class="code">m</code> 
+   Raises: <code class="code">Invalid_argument "(i, j)"</code> if there is no value for that index</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Polynomial.html#VALget_bound">get_bound</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">get_bound p</code> returns a radius outside of which iterating polynomial <code class="code">p</code> is 
+    guaranteed to diverge</p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>I</div></td></tr>
+<tr><td><a href="Matrix.html#VALinit">init</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p><code class="code">init rows columns f</code> is a matrix with <code class="code">rows</code> many rows and <code class="code">columns</code> many 
+   columns.</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Matrix.html#VALiterate">iterate</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p><code class="code">iterate f n m</code> is the matrix with the same number of rows and columns as <code class="code">m</code>
+   but whose value at row <code class="code">i</code> column <code class="code">j</code> is <code class="code">f^n m(i, j)</code>, i.e.</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Matrix.html#VALiterate_with_stop">iterate_with_stop</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p><code class="code">iterate_with_stop f n m</code> is the matrix with the same number of rows and 
+   columns as <code class="code">m</code> but whose value at index row i, column j is (Some k, z) 
+   if 0 &lt;= k &lt;= n is such that 
+      -<code class="code">(z -&gt; Option.bind z f)^k (Some m(i, j)) = Some z</code> and 
+      -<code class="code">(z -&gt; Option.bind z f)^(k+1) (Some m(i,j)) = None</code>, 
+      or <code class="code">(None, f^n(z))</code> if no such <code class="code">k</code> exists</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Matrix.html#VALiterate_with_stop_2">iterate_with_stop_2</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p>Like iterate_with_stop, but the function map also depends on its initial
+   value.</p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>J</div></td></tr>
+<tr><td><a href="ToImage.html#VALjulia_color">julia_color</a> [<a href="ToImage.html">ToImage</a>]</td>
+<td><div class="info">
+<p><code class="code">julia_color iter of_color coordinate</code> is the color of a particular complex
+    <code class="code">coordinate</code> in the matrix, having applied the function for this particular 
+    Julia Set <code class="code">iter</code> times.</p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>L</div></td></tr>
+<tr><td><a href="Parse.html#VALlst_cx">lst_cx</a> [<a href="Parse.html">Parse</a>]</td>
+<td><div class="info">
+<p><code class="code">lst_cx str</code> is the list of complex numbers represented by the string <code class="code">str</code>
+   of comma-separated values in <code class="code">str</code>.</p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>M</div></td></tr>
+<tr><td><a href="Matrix.html#VALmapi">mapi</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p><code class="code">mapi f m</code> is the matrix whose value at row <code class="code">i</code>, column <code class="code">j</code> is 
+   <code class="code">f i j (get i j m)</code></p>
+
+</div>
+</td></tr>
+<tr><td><a href="Polynomial.html#VALmul">mul</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">mul p q</code> is the polynomial <code class="code">pq</code></p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>N</div></td></tr>
+<tr><td><a href="Newton.html#VALnewton_color">newton_color</a> [<a href="Newton.html">Newton</a>]</td>
+<td><div class="info">
+<p><code class="code">newton_color colors roots tolerance (n, z)</code> is a color
+   in <code class="code">colors</code> satisfying <code class="code">|z - c &lt; tolerance|</code>, where <code class="code">c</code> is the
+   position at the corresponding location in <code class="code">roots</code>, or black if no such 
+   root exists</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Newton.html#VALnewton_fun">newton_fun</a> [<a href="Newton.html">Newton</a>]</td>
+<td><div class="info">
+<p><code class="code">newton_fun f f' roots tolerance z</code> is <code class="code">None</code> if <code class="code">z</code> is within
+   <code class="code">tolerance</code> of a value in <code class="code">roots</code> and is <code class="code">Some z-f(z)/f'(z)</code> otherwise</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Newton.html#VALnewton_fun_no_stop">newton_fun_no_stop</a> [<a href="Newton.html">Newton</a>]</td>
+<td><div class="info">
+<p><code class="code">newton_fun_no_stop</code> is like <code class="code">newton_fun</code> but does not stop if a value
+   is near a root.</p>
+
+</div>
+</td></tr>
+<tr><td><a href="Newton.html#VALnewton_with_defs">newton_with_defs</a> [<a href="Newton.html">Newton</a>]</td>
+<td><div class="info">
+<p><code class="code">newton_with_defs</code> is like <code class="code">newton_color</code> but with a built-in default list of
+   colors.</p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>P</div></td></tr>
+<tr><td><a href="FromImage.html#VALpoly">poly</a> [<a href="FromImage.html">FromImage</a>]</td>
+<td></td></tr>
+<tr><td align="left"><div>R</div></td></tr>
+<tr><td><a href="Matrix.html#VALrows">rows</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p><code class="code">rows m</code> is the number of rows in <code class="code">m</code></p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>S</div></td></tr>
+<tr><td><a href="Parse.html#VALstring_of_complex">string_of_complex</a> [<a href="Parse.html">Parse</a>]</td>
+<td></td></tr>
+<tr><td><a href="Polynomial.html#VALsum">sum</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">sum p q</code> is the polynomial <code class="code">p + q</code></p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>T</div></td></tr>
+<tr><td><a href="Polynomial.html#VALto_list">to_list</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">from_list p</code> is the list of coefficients of <code class="code">p</code></p>
+
+</div>
+</td></tr>
+<tr><td><a href="Matrix.html#VALto_lst">to_lst</a> [<a href="Matrix.html">Matrix</a>]</td>
+<td><div class="info">
+<p><code class="code">to_lst m</code> is a list of the rows of matrix <code class="code">m</code>, each represented as a list</p>
+
+</div>
+</td></tr>
+<tr><td align="left"><div>Z</div></td></tr>
+<tr><td><a href="Polynomial.html#VALzero">zero</a> [<a href="Polynomial.html">Polynomial</a>]</td>
+<td><div class="info">
+<p><code class="code">zero</code> is the zero polynomial</p>
+
+</div>
+</td></tr>
+</table>
+</body>
+</html>

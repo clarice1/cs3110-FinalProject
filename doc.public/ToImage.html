@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Polynomial.html">
+<link rel="next" href="Main.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Matrix" rel="Chapter" href="Matrix.html">
+<link title="Polynomial" rel="Chapter" href="Polynomial.html">
+<link title="ToImage" rel="Chapter" href="ToImage.html">
+<link title="Main" rel="Chapter" href="Main.html">
+<link title="Newton" rel="Chapter" href="Newton.html">
+<link title="FromImage" rel="Chapter" href="FromImage.html">
+<link title="Parse" rel="Chapter" href="Parse.html"><title>ToImage</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Polynomial.html" title="Polynomial">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Main.html" title="Main">Next</a>
+</div>
+<h1>Module <a href="type_ToImage.html">ToImage</a></h1>
+
+<pre><span id="MODULEToImage"><span class="keyword">module</span> ToImage</span>: <code class="code">sig</code> <a href="ToImage.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<div class="info-desc">
+<p>Representation of a matrix in a .bmp image.</p>
+
+<p>This module maps a matrix onto a graphic .bmp image, with each value in the
+   matrix determining the particular color in the corresponding region on .bmp.
+   It further handles the colorization of a Julia Set.</p>
+</div>
+</div>
+<hr width="100%">
+<p><code class="code">col</code> is the type invariant that represents the color desired by the 
+    client for the fractal. If the col were to be R, then the fractal would be 
+    colored with shades of red. This is also true for B (Blue) and G (Green).</p>
+
+<pre><span id="VALjulia_color"><span class="keyword">val</span> julia_color</span> : <code class="type">int -> Color.rgb -> int option * Stdlib.Complex.t -> Color.rgb</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">julia_color iter of_color coordinate</code> is the color of a particular complex
+    <code class="code">coordinate</code> in the matrix, having applied the function for this particular 
+    Julia Set <code class="code">iter</code> times. N.B. <code class="code">coordinate</code> is a pair containing the final 
+    value option after applying the function <code class="code">iter</code> times (should it converge)
+    as well as the complex coordinate</p>
+</div>
+</div>
+
+<pre><span id="VALcolorize"><span class="keyword">val</span> colorize</span> : <code class="type">(int option * 'a -> Color.rgb) -> (int option * 'a) <a href="Matrix.html#TYPEt">Matrix.t</a> -> Images.t</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">colorize f m </code> is the image of matrix <code class="code">m</code> with function <code class="code">f</code> applied to
+    each complex coordinate to determine the color of that corresponding region
+    of the image</p>
+</div>
+</div>
+</body></html>

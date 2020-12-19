@@ -240,7 +240,6 @@ let rec send_event rs c =
         else false )
     else List.exists (fun sun -> send_event rs sun) c.children
   | _  -> c.listener rs
-(*val send_event : rich_status -> component -> bool = <fun>*)
 
 let compute_rich_event s0 s1  = 
   if s0.Graphics.button <> s1.Graphics.button then            
@@ -268,7 +267,6 @@ let send_new_events res0 res1 =
       ignore(send_event  {res1 with re = MouseExit} res0.last); 
       ignore(send_event  {res1 with re = MouseEnter} res1.last )
     end
-(*val send_new_events : rich_status -> rich_status -> unit = <fun>*)
 
 let initial_re = 
   { re = Exposure; 
@@ -498,7 +496,7 @@ let set_tfs_echo b c tfs =  tfs.visible_echo <- b; tfs.echo <- c
 
 let get_tfs_text tfs = 
   if tfs.dir then String.sub tfs.txt tfs.ind1 (tfs.ind2 - tfs.ind1)
-  else String.sub tfs.txt (tfs.ind1+1) (tfs.ind2 - tfs.ind1);;
+  else String.sub tfs.txt (tfs.ind1+1) (tfs.ind2 - tfs.ind1)
 
 let set_tfs_text tf tfs txt = 
   let l = String.length txt in 

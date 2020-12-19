@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="Start" href="index.html">
+<link rel="next" href="Polynomial.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Matrix" rel="Chapter" href="Matrix.html">
+<link title="Polynomial" rel="Chapter" href="Polynomial.html">
+<link title="ToImage" rel="Chapter" href="ToImage.html">
+<link title="Main" rel="Chapter" href="Main.html">
+<link title="Newton" rel="Chapter" href="Newton.html">
+<link title="FromImage" rel="Chapter" href="FromImage.html">
+<link title="Parse" rel="Chapter" href="Parse.html"><title>Matrix</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Polynomial.html" title="Polynomial">Next</a>
+</div>
+<h1>Module <a href="type_Matrix.html">Matrix</a></h1>
+
+<pre><span id="MODULEMatrix"><span class="keyword">module</span> Matrix</span>: <code class="code">sig</code> <a href="Matrix.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<div class="info-desc">
+<p>Representation of a matrix.</p>
+
+<p>This module represents a matrix and the data stored within it, including 
+   complex matrices.</p>
+</div>
+</div>
+<hr width="100%">
+
+<pre><span id="TYPEt"><span class="keyword">type</span> <code class="type">'a</code> t</span> </pre>
+<div class="info ">
+<div class="info-desc">
+<p><code class="code">'a t</code> is the type of a matrix containing values of type <code class="code">'a</code></p>
+</div>
+</div>
+
+
+<pre><span id="TYPEcx_t"><span class="keyword">type</span> <code class="type"></code>cx_t</span> = <code class="type">Stdlib.Complex.t <a href="Matrix.html#TYPEt">t</a></code> </pre>
+<div class="info ">
+<div class="info-desc">
+<p><code class="code">cx_t</code> is the type representing complex numbers</p>
+</div>
+</div>
+
+
+<pre><span id="VALto_lst"><span class="keyword">val</span> to_lst</span> : <code class="type">'a <a href="Matrix.html#TYPEt">t</a> -> 'a list list</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">to_lst m</code> is a list of the rows of matrix <code class="code">m</code>, each represented as a list</p>
+</div>
+</div>
+
+<pre><span id="VALinit"><span class="keyword">val</span> init</span> : <code class="type">int -> int -> (int -> int -> 'a) -> 'a <a href="Matrix.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">init rows columns f</code> is a matrix with <code class="code">rows</code> many rows and <code class="code">columns</code> many 
+   columns. Further, the value at the the <code class="code">i</code>th row and <code class="code">j</code>th column of this 
+   matrix is <code class="code">f i j</code></p>
+</div>
+</div>
+
+<pre><span id="VALrows"><span class="keyword">val</span> rows</span> : <code class="type">'a <a href="Matrix.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">rows m</code> is the number of rows in <code class="code">m</code></p>
+</div>
+</div>
+
+<pre><span id="VALcolumns"><span class="keyword">val</span> columns</span> : <code class="type">'a <a href="Matrix.html#TYPEt">t</a> -> int</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">columns m</code> is the number of columns in <code class="code">m</code></p>
+</div>
+</div>
+
+<pre><span id="VALcx_init"><span class="keyword">val</span> cx_init</span> : <code class="type">Stdlib.Complex.t -> Stdlib.Complex.t -> int -> int -> <a href="Matrix.html#TYPEcx_t">cx_t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">complex_init ll ur rows columns</code> is the complex matrix with <code class="code">rows</code> many 
+   rows and <code class="code">columns</code> many columns whose values are a grid of evenly spaced 
+   complex numbers with the value <code class="code">ll</code> in its lower left corner and the value 
+   <code class="code">ur</code> in its upper right corner
+   Requires: <code class="code">ll.re &lt; ur.re</code>
+             <code class="code">ll.im &lt; ur.im</code>
+             <code class="code">rows, columns &gt;= 2</code></p>
+</div>
+</div>
+
+<pre><span id="VALget"><span class="keyword">val</span> get</span> : <code class="type">int -> int -> 'a <a href="Matrix.html#TYPEt">t</a> -> 'a</code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">get i j m</code> is the value in the <code class="code">i</code>th row and <code class="code">j</code>th column of matrix <code class="code">m</code> 
+   Raises: <code class="code">Invalid_argument "(i, j)"</code> if there is no value for that index</p>
+</div>
+</div>
+
+<pre><span id="VALmapi"><span class="keyword">val</span> mapi</span> : <code class="type">(int -> int -> 'a -> 'b) -> 'a <a href="Matrix.html#TYPEt">t</a> -> 'b <a href="Matrix.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">mapi f m</code> is the matrix whose value at row <code class="code">i</code>, column <code class="code">j</code> is 
+   <code class="code">f i j (get i j m)</code></p>
+</div>
+</div>
+
+<pre><span id="VALiterate"><span class="keyword">val</span> iterate</span> : <code class="type">('a -> 'a) -> int -> 'a <a href="Matrix.html#TYPEt">t</a> -> 'a <a href="Matrix.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">iterate f n m</code> is the matrix with the same number of rows and columns as <code class="code">m</code>
+   but whose value at row <code class="code">i</code> column <code class="code">j</code> is <code class="code">f^n m(i, j)</code>, i.e. the n-fold 
+   composition of f with itself
+   Requires: <code class="code">n</code> is greater than 0</p>
+</div>
+</div>
+
+<pre><span id="VALiterate_with_stop"><span class="keyword">val</span> iterate_with_stop</span> : <code class="type">('a -> 'a option) -> int -> 'a <a href="Matrix.html#TYPEt">t</a> -> (int option * 'a) <a href="Matrix.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p><code class="code">iterate_with_stop f n m</code> is the matrix with the same number of rows and 
+   columns as <code class="code">m</code> but whose value at index row i, column j is (Some k, z) 
+   if 0 &lt;= k &lt;= n is such that 
+      -<code class="code">(z -&gt; Option.bind z f)^k (Some m(i, j)) = Some z</code> and 
+      -<code class="code">(z -&gt; Option.bind z f)^(k+1) (Some m(i,j)) = None</code>, 
+      or <code class="code">(None, f^n(z))</code> if no such <code class="code">k</code> exists</p>
+</div>
+</div>
+
+<pre><span id="VALiterate_with_stop_2"><span class="keyword">val</span> iterate_with_stop_2</span> : <code class="type">('a -> 'a -> 'a option) -> int -> 'a <a href="Matrix.html#TYPEt">t</a> -> (int option * 'a) <a href="Matrix.html#TYPEt">t</a></code></pre><div class="info ">
+<div class="info-desc">
+<p>Like iterate_with_stop, but the function map also depends on its initial
+   value. The input function should have as its first argument the initial
+   value and its second the most recent value.</p>
+</div>
+</div>
+</body></html>
