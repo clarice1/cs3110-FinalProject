@@ -171,6 +171,13 @@ type succmandelbrot = {color : Color.rgb; dim : string; name : string}
 
 exception Succmandelbrot of succmandelbrot
 
+type succ_from_image = 
+  {name : string; degree : int; s : float; dim : string; iter_compute : int; 
+   iter_draw : int; roots : string; coeff : string; save : string; 
+   color : Color.rgb}
+
+exception Succ_from_im of succ_from_image
+
 let action_dir s cs = 
   s.col <- match get_cs_text cs with 
     |"R" -> {b = 39; r = 234; g = 32;}
@@ -241,6 +248,29 @@ let action_go_mandelbrot s tfs_dim tfs_name
           name = get_tfs_text tfs_name
          })
   with | Failure _ -> ()
+
+let is_valid s = 
+  try ignore(Bmp.load s []); s 
+  with | _ -> failwith "not a bmp"
+
+let action_go_from_im s tfs_name tfs_deg tfs_s tfs_dim tfs_itercomp tfs_iterdraw 
+    tfs_roots tfs_coeff tfs_save deg_err s_err itercomp_err iterdraw_err 
+    file_err dim_err x = 
+  try wipe_labels [deg_err; s_err; itercomp_err; iterdraw_err; file_err];
+    raise (Succ_from_im {
+        name = get_input is_valid tfs_name file_err;
+        degree = get_input int_of_string tfs_deg deg_err;
+        s = get_input float_of_string tfs_s s_err;
+        dim = get_input valid_dim tfs_dim dim_err;
+        iter_compute = get_input int_of_string tfs_itercomp itercomp_err;
+        iter_draw = get_input int_of_string tfs_iterdraw iterdraw_err;
+        roots = get_tfs_text tfs_roots;
+        coeff = get_tfs_text tfs_coeff;
+        save = get_tfs_text tfs_save;
+        color = s.col
+      })
+  with | Failure _ -> ()
+
 
 let gray1 = (Graphics.rgb 120 120 120)
 
@@ -568,6 +598,13 @@ let create_input_from_image w h s=
   add_component m big_pan ["Row", Iopt 1];
   add_component m big_pan_2 [];
 
+  set_cs_action cs (action_dir s);
+  set_bs_action bs (action_go_from_im s tfs_file tfs_deg tfs_s tfs_dim tfs_iter 
+                      tfs_it_draw 
+                      tfs_roots tfs_coeff tfs_name deg_err s_err iter_err 
+                      it_draw_err 
+                      rf_err dim_err);
+
   set_col m;
 
   m
@@ -619,6 +656,23 @@ let succ (s  : success) =
     s.iter 
     s.name
 
+let succ_fi (s : succ_from_image) = 
+  Graphics.close_graph ();
+  let ll : Complex.t = {re = -1.; im = -1.} in 
+  let ur : Complex.t = {re = 1.; im = 1.} in 
+  Random.self_init ();
+  let poly = FromImage.from_file s.name
+      ll ur s.degree s.iter_compute s.s
+      s.coeff
+      s.roots in 
+  let bpoly = RootPolynomial.bound poly in
+  Graphics.open_graph (" " ^ s.dim) ;
+  LineDrawer.start ll ur Graphics.red (RootPolynomial.bbounded bpoly)
+    (fun i -> ToImage.julia_color i s.color)
+    (RootPolynomial.eval poly)
+    s.iter_draw
+    s.save
+
 let () = try loop false false landing with 
   | Graphic_failure _ -> ()
   | Succeeded s -> succ s
@@ -627,6 +681,7 @@ let () = try loop false false landing with
     Graphics.open_graph (" " ^ s.dim);
     Newton.full_newton s.ll s.ur s.iter s.coeffs s.tol
   | Succmandelbrot s -> Mandelbrot.run (" " ^ s.dim) s.color s.name
+  | Succ_from_im s -> succ_fi s
 
 
 (*let create_conv w h fe = 
