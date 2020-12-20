@@ -4,9 +4,8 @@ MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
-MANDELBROT=mandelbrot.byte
 NEWTON=newtonDrawer.byte
-IM=readImage.byte
+MAINTERM=mainTerminal.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 BW=black_and_white.byte
 
@@ -16,15 +15,14 @@ default: build
 
 build:
 	$(OCAMLBUILD) $(OBJECTS)
-
-mandelbrot:
-	$(OCAMLBUILD) $(MANDELBROT) && ./$(MANDELBROT)
 	
 newton:
 	$(OCAMLBUILD) $(NEWTON) && ./$(NEWTON)
 
-im:
-	$(OCAMLBUILD) $(IM) && ./$(IM)
+
+terminalFractal:
+	$(OCAMLBUILD) $(MAINTERM) && ./$(MAINTERM)
+
 
 zip:
 	zip ms1.zip *.ml* _tags Makefile *.txt
