@@ -34,8 +34,8 @@ val sum : t -> t -> t
 (**[mul p q] is the polynomial [pq] *)
 val mul : t -> t -> t
 
-(**[from_roots [c_1; ...; c_n] is the 
-   polynomial (z - c_1)(z - c_2)...(z - c_n)*)
+(** [from_roots [c_1; ...; c_n]] is the 
+    polynomial [(z - c_1)(z - c_2)...(z - c_n)]. *)
 val from_roots : Complex.t list -> t
 
 (** [bounded p input] is [None] if iterating polynomial [p] beginning at [input]

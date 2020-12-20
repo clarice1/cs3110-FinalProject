@@ -1,13 +1,18 @@
 (** 
-   Graphical user interface for fractal production.
+   Tools for constructing a graphical user interface.
 
-   This module implements our funtionality in a graphic window (as opposed to 
-   working straight out of terminal).  
+    This module implements our funtionality in a graphic window (as opposed to 
+    working straight out of terminal).  
+
+    Implementation largely from the book 
+
+    Chailloux, Emmanuel, Manoury, Pascal, Pagano, Bruno (2000) 
+    Chapter 13 Constructing a Graphical Interface, 
+    Développement d’applications avec Objective Caml
+
+    a translation of which can be found at 
+    https://caml.inria.fr/pub/docs/oreilly-book/html/book-ora124.html
 *)
-
-
-(**[t] is the type containing the specifications of a Graphical
-   User Interface (GUI).*)
 
 (******************************************************************************)
 (*Graphics Context*)
@@ -124,7 +129,7 @@ val get_bool : ('a * opt_val) list -> 'a -> bool -> bool
 (** [set_gc gc lst_opt] creates a graphics context from [lopt]. *)
 val set_gc : t -> (string * opt_val) list -> unit
 
-(** [make_dc] IS THIS A NECESSARY FUNCTION? I will check *)
+(** [make_dc] is a synonym for [make_default_context]. *)
 val make_dc : unit -> t
 
 
@@ -258,6 +263,7 @@ val make_key : rich_event -> 'a -> char -> rich_status
 (******************************************************************************)
 (*Defining Components*)
 (******************************************************************************)
+
 (** [display_init comp] erases the graphical region and selects the color of the
     label*)
 val display_init : component -> unit
@@ -365,10 +371,12 @@ val listener_text_field : component -> textfield_state -> rich_status -> bool
     right justified with extra options in [lopt]*)
 val create_text_field : string -> int -> bool -> 
   (string * opt_val) list -> component * textfield_state
-  
+
+
 (******************************************************************************)
 (*Enriched Components*)
 (******************************************************************************)
+
 type border_state = 
   {mutable relief : string; mutable line : bool;
    mutable bg2 : Graphics.color; mutable size : int};;

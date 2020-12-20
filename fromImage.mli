@@ -1,3 +1,8 @@
+(**
+   Functions to convert images to a polynomial so filled Julia sets resemble 
+   input images.
+*)
+
 (**[poly values n iterations s] computes an approximation to the polynomial
    on page 8506 of the paper. As [iterations] increases, a better result is
    obtained. [delta_n] is used as the logarithmic capacity. *)
