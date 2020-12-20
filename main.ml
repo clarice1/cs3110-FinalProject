@@ -171,6 +171,13 @@ type succmandelbrot = {color : Color.rgb; dim : string; name : string}
 
 exception Succmandelbrot of succmandelbrot
 
+type succ_from_image = 
+  {name : string; degree : int; s : float; dim : string; iter_compute : int; 
+   iter_draw : int; roots : string; coeff : string; save : string; 
+   color : Color.rgb}
+
+exception Succ_from_im of succ_from_image
+
 let action_dir s cs = 
   s.col <- match get_cs_text cs with 
     |"R" -> {b = 39; r = 234; g = 32;}
@@ -242,6 +249,29 @@ let action_go_mandelbrot s tfs_dim tfs_name
          })
   with | Failure _ -> ()
 
+let is_valid s = 
+  try ignore(Bmp.load s []); s 
+  with | _ -> failwith "not a bmp"
+
+let action_go_from_im s tfs_name tfs_deg tfs_s tfs_dim tfs_itercomp tfs_iterdraw 
+    tfs_roots tfs_coeff tfs_save deg_err s_err itercomp_err iterdraw_err 
+    file_err dim_err x = 
+  try wipe_labels [deg_err; s_err; itercomp_err; iterdraw_err; file_err];
+    raise (Succ_from_im {
+        name = get_input is_valid tfs_name file_err;
+        degree = get_input int_of_string tfs_deg deg_err;
+        s = get_input float_of_string tfs_s s_err;
+        dim = get_input valid_dim tfs_dim dim_err;
+        iter_compute = get_input int_of_string tfs_itercomp itercomp_err;
+        iter_draw = get_input int_of_string tfs_iterdraw iterdraw_err;
+        roots = get_tfs_text tfs_roots;
+        coeff = get_tfs_text tfs_coeff;
+        save = get_tfs_text tfs_save;
+        color = s.col
+      })
+  with | Failure _ -> ()
+
+
 let gray1 = (Graphics.rgb 120 120 120)
 
 let set_col comp = set_bcol (get_gc comp) gray1
@@ -269,26 +299,28 @@ let create_err () =
   let l = create_label err [] in 
   change_label_text l ""; l
 
+let l_bg = ["Background", Copt gray1]
+
 let create_input w h s = 
   let m = open_main_window w h
-  and l_color = create_label "color:" ["Background", Copt gray1]
+  and l_color = create_label "color:" l_bg
   and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
-  and l_coeffs = create_label "coefficients:" ["Background", Copt gray1]
+  and l_coeffs = create_label "coefficients:" l_bg
   and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.26" 70 true []
   and coeff_err = create_err ()
-  and l_ll = create_label "lower left coordinate:" ["Background", Copt gray1]
+  and l_ll = create_label "lower left coordinate:" l_bg
   and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 true []
   and ll_err = create_err ()
-  and l_ur = create_label "upper right coordinate:" ["Background", Copt gray1]
+  and l_ur = create_label "upper right coordinate:" l_bg
   and tf_ur, tfs_ur = create_text_field "2 + 2i" 20 true []
   and ur_err = create_err ()
-  and l_iter = create_label "number of iterations:" ["Background", Copt gray1]
+  and l_iter = create_label "number of iterations:" l_bg
   and tf_iter, tfs_iter = create_text_field "100" 20 true []
   and iter_err = create_err ()
-  and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
+  and l_dim = create_label "dimensions of window:" l_bg
   and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_err ()
-  and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
+  and l_name = create_label "name for saving images:" l_bg 
   and tf_name, tfs_name = create_text_field "fractal" 20 true []
   and b, bs = create_button " Go " []
   in 
@@ -352,12 +384,12 @@ let create_input w h s =
 
 let create_input_mandelbrot w h s = 
   let m = open_main_window w h
-  and l_color = create_label "color:" ["Background", Copt gray1]
+  and l_color = create_label "color:" l_bg
   and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
-  and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
+  and l_dim = create_label "dimensions of window:" l_bg
   and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_err ()
-  and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
+  and l_name = create_label "name for saving images:" l_bg 
   and tf_name, tfs_name = create_text_field "mandelbrot" 20 true []
   and b, bs = create_button " Go " []
   in 
@@ -414,24 +446,24 @@ let create_input_mandelbrot w h s =
 
 let create_input_newton w h s = 
   let m = open_main_window w h
-  and l_coeffs = create_label "roots:" ["Background", Copt gray1]
-  and tf_coeffs, tfs_coeffs = create_text_field "1, -1, i, -1i" 70 true []
+  and l_coeffs = create_label "roots:" l_bg
+  and tf_coeffs, tfs_coeffs = create_text_field "1, 0 + 0i, 0.25" 70 true []
   and coeff_err = create_err ()
-  and l_ll = create_label "lower left coordinate:" ["Background", Copt gray1]
+  and l_ll = create_label "lower left coordinate:" l_bg
   and tf_ll, tfs_ll = create_text_field "-2 + -2i" 20 true []
   and ll_err = create_err ()
-  and l_ur = create_label "upper right coordinate:" ["Background", Copt gray1]
+  and l_ur = create_label "upper right coordinate:" l_bg
   and tf_ur, tfs_ur = create_text_field "2 + 2i" 20 true []
   and ur_err = create_err ()
-  and l_iter = create_label "number of iterations:" ["Background", Copt gray1]
+  and l_iter = create_label "number of iterations:" l_bg
   and tf_iter, tfs_iter = create_text_field "100" 20 true []
   and iter_err = create_err ()
-  and l_dim = create_label "dimensions of window:" ["Background", Copt gray1]
+  and l_dim = create_label "dimensions of window:" l_bg
   and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
   and dim_err = create_err ()
-  and l_name = create_label "name for saving images:" ["Background", Copt gray1] 
+  and l_name = create_label "name for saving images:" l_bg 
   and tf_name, tfs_name = create_text_field "fractal" 20 true []
-  and l_tolerance = create_label "tolerance:" ["Background", Copt gray1]
+  and l_tolerance = create_label "tolerance:" l_bg
   and tf_tolerance, tfs_tolerance = create_text_field "0.01" 20 true []
   and tol_err = create_err ()
   and b, bs = create_button " Go " []
@@ -494,31 +526,119 @@ let create_input_newton w h s =
   set_bcol (get_gc m) gray1;
   m
 
+let create_input_from_image w h s= 
+  let m = open_main_window w h 
+  and lfile = create_label "file to load:" l_bg 
+  and tf_file, tfs_file = create_text_field "bmp examples/cat1.bmp" 21 true [] 
+  and rf_err = create_err ()
+  and l_coeff = create_label "file for storing coefficients:" l_bg 
+  and tf_coeff, tfs_coeff = create_text_field 
+      "cat/coefficients.txt" 20 true [] 
+  and l_roots = create_label "file for storing roots:" l_bg 
+  and tf_roots, tfs_roots = create_text_field "cat/roots.txt" 20 true [] 
+  and l_dim = create_label "dimensions of window:" l_bg
+  and tf_dim, tfs_dim = create_text_field "500x500" 20 true []
+  and dim_err = create_err () 
+  and l_name = create_label "name for saving images:" l_bg
+  and tf_name, tfs_name = create_text_field "cat/kitty" 20 true []
+  and name_err = create_err () 
+  and l_deg = create_label "degree of polynomial:" l_bg
+  and tf_deg, tfs_deg = create_text_field "400" 20 true []
+  and deg_err = create_err () 
+  and l_iter = create_label "computing iterations:" l_bg
+  and tf_iter, tfs_iter = create_text_field "10000" 20 true []
+  and iter_err = create_err ()
+  and l_it_draw = create_label "drawing iterations:" l_bg
+  and tf_it_draw, tfs_it_draw = create_text_field "30" 20 true []
+  and it_draw_err = create_err ()
+  and l_s = create_label "s value:" l_bg 
+  and tf_s, tfs_s = create_text_field "0.0025" 20 true []
+  and s_err = create_err () 
+  and l_color = create_label "color:" l_bg
+  and c, cs = create_choice ["R"; "O"; "Y"; "G"; "B"; "I"; "V"] []
+  and b, bs = create_button " Go " [] in
 
-let main_drawer = create_input 700 700 st
+  let file_panel = add_3 lfile tf_file rf_err 220 100 
+  and deg_panel = add_3 l_deg tf_deg deg_err 220 100 
+  and dim_panel = add_3 l_dim tf_dim dim_err 220 100 
+  and s_panel = add_3 l_s tf_s s_err 220 100 
+  and iter_pan_1 = add_3 l_iter tf_iter iter_err 220 100 
+  and iter_pan_2 = add_3 l_it_draw tf_it_draw it_draw_err 220 100
+  and coeff_panel = add_3 l_coeff tf_coeff (create_err ()) 300 100
+  and roots_panel = add_3 l_roots tf_roots (create_err ()) 300 100
+  and name_panel = add_3 l_name tf_name name_err 300 100
 
-let main_drawer_mandelbrot = create_input_mandelbrot 700 700 st
+  in 
+  let file_s_panel = add_3 file_panel s_panel iter_pan_1 230 330
+  and deg_dim_panel = add_3 deg_panel dim_panel iter_pan_2 230 330 in
 
-let main_drawer_newton = create_input_newton 700 700 st
+  let color_panel = create_panel true 50 250 [] in
+  set_layout (grid_layout (1, 2) color_panel) color_panel;
+  add_component color_panel (create_border l_color []) ["Row", Iopt 1];
+  add_component color_panel (create_border c []) ["Row", Iopt 0];
+  set_col color_panel;
 
-let mainb _ = loop true false main_drawer
+  let big_pan = create_panel true 700 350 [] in 
+  set_layout (grid_layout (3, 1) big_pan) big_pan;
+  add_component big_pan file_s_panel [];
+  add_component big_pan deg_dim_panel ["Col", Iopt 1];
+  add_component big_pan color_panel ["Col", Iopt 2];
+  set_col big_pan;
 
-let mandelbrot _ = loop true false main_drawer_mandelbrot
+  let big_pan_2 = create_panel true 700 350 [] in
+  set_layout (grid_layout (2, 2) big_pan_2) big_pan_2;
+  add_component big_pan_2 coeff_panel [];
+  add_component big_pan_2 roots_panel ["Row", Iopt 1];
+  add_component big_pan_2 name_panel ["Row", Iopt 1; "Col", Iopt 1];
+  add_component big_pan_2 b ["Col", Iopt 1];
 
-let newton _ = loop true false main_drawer_newton
+  set_col big_pan_2;
+
+  set_layout (grid_layout (1, 2) m) m;
+  add_component m big_pan ["Row", Iopt 1];
+  add_component m big_pan_2 [];
+
+  set_cs_action cs (action_dir s);
+  set_bs_action bs (action_go_from_im s tfs_file tfs_deg tfs_s tfs_dim tfs_iter 
+                      tfs_it_draw 
+                      tfs_roots tfs_coeff tfs_name deg_err s_err iter_err 
+                      it_draw_err 
+                      rf_err dim_err);
+
+  set_col m;
+
+  m
+
+
+let main_drawer () = create_input 700 700 st
+
+let main_drawer_mandelbrot () = create_input_mandelbrot 700 700 st
+
+let main_drawer_newton () = create_input_newton 700 700 st
+
+let mainb _ = loop true false (main_drawer ())
+
+let mandelbrot _ = loop true false (main_drawer_mandelbrot ())
+
+let newton _ = loop true false (main_drawer_newton ())
 
 let create_control w h = 
   let m = open_main_window w h in
   let main_b, main_bs = create_button " Main " [] 
   and newton_b, newton_bs = create_button " Newton " []
-  and mandelbrot_b, mandelbrot_bs = create_button " Mandelbrot " [] in 
-  set_layout (grid_layout (3, 1) m) m; 
+  and mandelbrot_b, mandelbrot_bs = create_button " Mandelbrot " []
+  and from_image_b, from_image_bs = create_button " From Image " [] in 
+  set_layout (grid_layout (2, 2) m) m; 
   add_component m (create_border main_b []) [];
   add_component m (create_border newton_b []) ["Col", Iopt 1];
-  add_component m (create_border mandelbrot_b []) ["Col", Iopt 2];
+  add_component m (create_border mandelbrot_b []) ["Row", Iopt 1];
+  add_component m (create_border from_image_b []) 
+    ["Row", Iopt 1; "Col", Iopt 1];
   set_bs_action main_bs mainb;
   set_bs_action mandelbrot_bs mandelbrot;
   set_bs_action newton_bs newton;
+  set_bs_action from_image_bs 
+    (fun _ -> loop true false (create_input_from_image 700 700 st));
   set_col m;
   m
 
@@ -536,6 +656,23 @@ let succ (s  : success) =
     s.iter 
     s.name
 
+let succ_fi (s : succ_from_image) = 
+  Graphics.close_graph ();
+  let ll : Complex.t = {re = -1.; im = -1.} in 
+  let ur : Complex.t = {re = 1.; im = 1.} in 
+  Random.self_init ();
+  let poly = FromImage.from_file s.name
+      ll ur s.degree s.iter_compute s.s
+      s.coeff
+      s.roots in 
+  let bpoly = RootPolynomial.bound poly in
+  Graphics.open_graph (" " ^ s.dim) ;
+  LineDrawer.start ll ur Graphics.red (RootPolynomial.bbounded bpoly)
+    (fun i -> ToImage.julia_color i s.color)
+    (RootPolynomial.eval poly)
+    s.iter_draw
+    s.save
+
 let () = try loop false false landing with 
   | Graphic_failure _ -> ()
   | Succeeded s -> succ s
@@ -544,6 +681,7 @@ let () = try loop false false landing with
     Graphics.open_graph (" " ^ s.dim);
     Newton.full_newton s.ll s.ur s.iter s.coeffs s.tol
   | Succmandelbrot s -> Mandelbrot.run (" " ^ s.dim) s.color s.name
+  | Succ_from_im s -> succ_fi s
 
 
 (*let create_conv w h fe = 
