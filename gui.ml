@@ -416,8 +416,9 @@ let create_button s lopt     =
 
 (** The index ind shows which string is to be highlighted in the list of values. 
     The sep and height fields describe in pixels the distance between 
-    two choices and the height of a choice. The action function takes an argument 
-    of type choice_state as an input and does its job using the index.*)
+    two choices and the height of a choice. The action function takes an 
+    argument of type choice_state as an input and does its job using the index.
+*)
 type choice_state = 
   { mutable ind : int; values : string array; mutable sep : int; 
     mutable height : int; mutable action : choice_state -> unit }
