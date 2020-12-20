@@ -1,8 +1,10 @@
 (**[string_of_complex z] is the string representation of [z]*)
 let string_of_complex = Parse.string_of_complex
 
+(**[poly c] is the polynomial z^2+c*)
 let poly c = Polynomial.from_list [Complex.one; Complex.zero; c]
 
+(**[color_z2p col c] starts lineDrawer with the polynomial z^2+c*)
 let color_z2pc col c = 
   let poly = poly c in
   LineDrawer.start_ex {re = -2.; im = -2.}
