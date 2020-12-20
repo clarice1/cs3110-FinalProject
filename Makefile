@@ -1,4 +1,4 @@
-MODULES=matrix polynomial toImage main newton lineDrawer mandelbrot fromImage parse
+MODULES=matrix polynomial toImage main newton lineDrawer mandelbrot fromImage parse gui
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -9,6 +9,7 @@ NEWTON=newtonDrawer.byte
 IM=readImage.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 BW=black_and_white.byte
+
 
 default: build
 	utop

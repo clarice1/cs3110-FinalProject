@@ -4,3 +4,4 @@ PKG camlimages.core
 PKG camlimages.graphics
 PKG ANSITerminal
 PKG graphics
+PKG qcheck

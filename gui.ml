@@ -1,3 +1,14 @@
+(**Implementation largely from the book 
+
+Chailloux, Emmanuel, Manoury, Pascal, Pagano, Bruno (2000) 
+Chapter 13 Constructing a Graphical Interface, 
+Développement d’applications avec Objective Caml
+
+a translation of which can be found at 
+https://caml.inria.fr/pub/docs/oreilly-book/html/book-ora124.html
+*)
+
+
 open Graphics
 
 (******************************************************************************)
@@ -106,7 +117,7 @@ let set_gc gc lst_opt =
   set_font_size gc (get_int lst_opt "FontSize" (get_font_size gc));
   set_lw gc (get_int lst_opt "LineWidth" (get_lw gc))
 
-let make_dc = make_default_context ()
+let make_dc () = make_default_context ()
 
 
 (******************************************************************************)
@@ -240,37 +251,31 @@ let rec send_event rs c =
         else false )
     else List.exists (fun sun -> send_event rs sun) c.children
   | _  -> c.listener rs
-(*val send_event : rich_status -> component -> bool = <fun>*)
 
 let compute_rich_event s0 s1  = 
   if s0.Graphics.button <> s1.Graphics.button then            
     begin
-      if s0.Graphics.button then MouseDown else MouseUp 
+      if s1.Graphics.button then MouseDown else MouseUp 
     end
-  else if s1.Graphics.keypressed then KeyPress                   
+  else if s1.Graphics.keypressed then KeyPress                
   else if (s0.Graphics.mouse_x <> s1.Graphics.mouse_x  ) ||  
           (s0.Graphics.mouse_y <> s1.Graphics.mouse_y  ) then
     begin
       if s1.Graphics.button then MouseDrag else MouseMove
     end
   else raise Not_found
-(*val compute_rich_event : Graphics.status -> Graphics.status -> rich_event =
-  <fun>*)
-
 
 let send_new_events res0 res1 = 
-  if res0.key_focus <> res1.key_focus then 
+  if res0.key_focus != res1.key_focus  then 
     begin
       ignore(send_event  {res1 with re = LostFocus} res0.key_focus); 
       ignore(send_event  {res1 with re = GotFocus} res1.key_focus) 
     end;
-  if (res0.last <> res1.last) && 
-     (( res1.re = MouseMove) || (res1.re = MouseDrag)) then
+  if res0.last != res1.last && (( res1.re = MouseMove) || (res1.re = MouseDrag)) then
     begin
       ignore(send_event  {res1 with re = MouseExit} res0.last); 
       ignore(send_event  {res1 with re = MouseEnter} res1.last )
     end
-(*val send_new_events : rich_status -> rich_status -> unit = <fun>*)
 
 let initial_re = 
   { re = Exposure; 
@@ -284,27 +289,24 @@ let initial_re =
 
 let loop b_disp b_motion c = 
   let res0 = ref initial_re in
-  try 
-    display c;
-    while true do 
-      let lev = [Graphics.Button_down; Graphics.Button_up; 
-                 Graphics.Key_pressed] in 
-      let flev = if b_motion then (Graphics.Mouse_motion) :: lev 
-        else lev in 
-      let s = Graphics.wait_next_event flev
-      in 
-      let res1 = {!res0 with stat = s} in 
-      try 
-        let res2 = {res1 with 
-                    re = compute_rich_event !res0.stat res1.stat} in
-        ignore(send_event res2 c);
-        send_new_events !res0 res2;
-        res0 := res2;      
-        if b_disp then display c
-      with Not_found -> ()
-    done
-  with e -> raise e;;
-(*val loop : bool -> bool -> component -> unit = <fun>*)
+  display c;
+  while true do 
+    let lev = [Graphics.Button_down; Graphics.Button_up; 
+               Graphics.Key_pressed] in 
+    let flev = if b_motion then (Graphics.Mouse_motion) :: lev 
+      else lev in 
+    let s = Graphics.wait_next_event flev
+    in 
+    let res1 = {!res0 with stat = s} in 
+    try 
+      let res2 = {res1 with 
+                  re = compute_rich_event !res0.stat res1.stat} in
+      ignore(send_event res2 c);
+      send_new_events !res0 res2;
+      res0 := res2;      
+      if b_disp then display c
+    with Not_found -> ()
+  done
 
 let make_click e x y = 
   {re = e;
@@ -314,7 +316,6 @@ let make_click e x y =
    key_focus = empty_component;
    gen_focus = empty_component;
    last = empty_component}
-(*val make_click : rich_event -> int -> int -> rich_status = <fun>*)
 
 
 let make_key e ch c = 
@@ -324,9 +325,7 @@ let make_key e ch c =
            Graphics.keypressed = true};
    key_focus = empty_component;
    gen_focus = empty_component;
-   last = empty_component};;
-(*val make_key : rich_event -> 'a -> char -> rich_status = <fun>*)
-
+   last = empty_component}
 
 
 
@@ -342,6 +341,8 @@ let display_init comp =
   use_gui gui;
   let (a,b) = get_curr gui in 
   Graphics.moveto (comp.x+a) (comp.y+b)
+
+
 let display_label lab comp () = 
   display_init comp; Graphics.draw_string lab;;
 
@@ -349,20 +350,36 @@ let create_label s lopt =
   let gui = make_default_context () in   set_gc gui lopt; use_gui gui;
   let (w,h) = Graphics.text_size s in 
   let u = create_component w h  in 
-  u.mem <- (fun x -> false);  u.display <- display_label s  u;
+  u.mem <- (fun x -> false);  u.display <- display_label s u;
   u.info <- "Label"; u.gc <- gui;
-  u;;
+  u
+
+let change_label_text u s = u.display <- display_label s u 
+
 
 let create_panel b w h lopt =
   let u = create_component w h   in 
   u.container <- b;
   u.info <- if b then "Panel container" else "Panel";
   let gc = make_default_context () in set_gc gc lopt; u.gc <- gc;
-  u;;
+  u
 
 let center_layout comp comp1 lopt = 
   comp1.x <- comp.x + ((comp.w -comp1.w) /2); 
   comp1.y <- comp.y + ((comp.h -comp1.h) /2);;
+
+let grid_layout (a, b)  c c1 lopt = 
+  let px = get_int lopt "Col" 0
+  and py = get_int lopt "Row" 0 in 
+  if (px >= 0) && (px < a) && ( py >=0) && (py < b) then 
+    let lw = c.w /a 
+    and lh = c.h /b in 
+    if (c1.w > lw) || (c1.h > lh) then 
+      failwith "grid_placement: too big component"
+    else 
+      c1.x <- c.x + px * lw + (lw - c1.w)/2;
+    c1.y <- c.y + py * lh + (lh - c1.h)/2;
+  else  failwith "grid_placement: bad position"
 
 let open_main_window w h = 
   Graphics.close_graph();
@@ -370,7 +387,7 @@ let open_main_window w h =
   let u = create_component  w h in
   u.container <- true; 
   u.info <- "Main Window"; 
-  u;;
+  u
 
 type button_state = 
   { txt : string; 
@@ -380,14 +397,14 @@ let create_bs st = {txt = st; action = fun x -> ()}
 
 let set_bs_action bs f = bs.action <- f
 
-let get_bs_text bs = bs.txt;;
+let get_bs_text bs = bs.txt
 
 let display_button  c bs  () =  
   display_init c;  Graphics.draw_string (get_bs_text bs)
 
 let listener_button c bs  e = match get_event e with 
     MouseDown -> bs.action bs; c.display (); true
-  | _ -> false;;
+  | _ -> false
 
 let create_button s lopt     =
   let bs = create_bs s in  
@@ -399,7 +416,7 @@ let create_button s lopt     =
   u.listener <- listener_button u bs;
   u.info <- "Button";
   u.gc <- gc;
-  u,bs;;
+  u,bs
 
 (** The index ind shows which string is to be highlighted in the list of values. 
     The sep and height fields describe in pixels the distance between 
@@ -414,7 +431,7 @@ let create_cs sa =
    height = 1; action = fun x -> ()}
 
 let set_cs_action cs f = cs.action <- f
-let get_cs_text cs = cs.values.(cs.ind);;
+let get_cs_text cs = cs.values.(cs.ind)
 
 let display_choice comp cs  () = 
   display_init comp;
@@ -428,7 +445,7 @@ let display_choice comp cs  () =
   Graphics.fill_rect x (y+ cs.ind*(cs.height+ cs.sep)) comp.w cs.height;
   Graphics.set_color (get_bcol (get_gc comp));      
   Graphics.moveto x  (y + cs.ind*(cs.height + cs.sep));
-  Graphics.draw_string cs.values.(cs.ind) ;;
+  Graphics.draw_string cs.values.(cs.ind) 
 
 let listener_choice c cs e = match e.re with 
     MouseUp -> 
@@ -437,7 +454,7 @@ let listener_choice c cs e = match e.re with
     let i = (y - cy) / ( cs.height + cs.sep) in
     cs.ind <- i; c.display ();
     cs.action cs; true
-  |   _  -> false ;;
+  |   _  -> false 
 
 let create_choice lc lopt  =
   let sa =  (Array.of_list (List.rev lc)) in 
@@ -454,14 +471,12 @@ let create_choice lc lopt  =
   u.listener <- listener_choice u cs ;
   u.info <- "Choice "^ (string_of_int (Array.length cs.values));
   u.gc <- gc;
-  u,cs;;
-
 type textfield_state = 
-  { txt : string; 
+  { mutable txt : string; 
     dir : bool; mutable ind1 : int; mutable ind2 : int; len : int;
     mutable visible_cursor : bool; mutable cursor : char; 
     mutable visible_echo : bool; mutable echo : char; 
-    mutable action : textfield_state -> unit } ;;
+    mutable action : textfield_state -> unit } 
 
 let create_tfs txt size dir  = 
   let l = String.length txt in
@@ -472,7 +487,7 @@ let create_tfs txt size dir  =
                else ((String.make (size-l) ' ')^txt )) in
   {txt = n_txt; dir=dir; ind1 = ind1; ind2 = ind2; len=size;
    visible_cursor  = false;  cursor = ' '; visible_echo =  true; echo = ' ';
-   action= fun x -> ()};;
+   action= fun x -> ()}
 
 let set_tfs_action tfs f = tfs.action <- f
 
@@ -482,17 +497,26 @@ let set_tfs_echo b c tfs =  tfs.visible_echo <- b; tfs.echo <- c
 
 let get_tfs_text tfs = 
   if tfs.dir then String.sub tfs.txt tfs.ind1 (tfs.ind2 - tfs.ind1)
-  else String.sub tfs.txt (tfs.ind1+1) (tfs.ind2 - tfs.ind1);;
+  else String.sub tfs.txt (tfs.ind1+1) (tfs.ind2 - tfs.ind1)
 
 let set_tfs_text tf tfs txt = 
   let l = String.length txt in 
   if l > tfs.len then failwith "set_tfs_text";
-  String.blit  (String.make tfs.len ' ') 0 (Bytes.of_string tfs.txt) 0 tfs.len;
-  if tfs.dir then (String.blit txt 0 (Bytes.of_string tfs.txt) 0 l;
-                   tfs.ind2 <- l )
-  else   ( String.blit txt 0 (Bytes.of_string tfs.txt) (tfs.len -l) l; 
-           tfs.ind1 <- tfs.len-l-1 );
-  tf.display ();; 
+  let b = Bytes.of_string tfs.txt in
+  String.blit  (String.make tfs.len ' ') 0 b 0 tfs.len;
+  tfs.txt <- Bytes.to_string b;
+  if tfs.dir then 
+    (
+      let b = Bytes.of_string tfs.txt in
+      String.blit txt 0 b 0 l;
+      tfs.txt <- Bytes.to_string b;
+      tfs.ind2 <- l )
+  else   ( 
+    let b = Bytes.of_string tfs.txt in
+    String.blit txt 0 b (tfs.len -l) l;
+    tfs.txt <- Bytes.to_string b; 
+    tfs.ind1 <- tfs.len-l-1 );
+  tf.display ()
 
 let display_cursor c tfs = 
   if tfs.visible_cursor then 
@@ -515,27 +539,34 @@ let display_textfield c tfs  () =
   else Graphics.draw_string (String.make (String.length txt) tfs.echo);
   if (nl > tfs.ind2) && (tfs.dir) 
   then Graphics.draw_string (String.sub s tfs.ind2 (nl-tfs.ind2));
-  display_cursor c tfs;;
+  display_cursor c tfs
+
+
+let bt_set tfs e = 
+  let b = Bytes.of_string tfs.txt in 
+  Bytes.set b tfs.ind2 (get_key e); Bytes.to_string b
+
+let blt tfs ind = 
+  let b = Bytes.of_string tfs.txt in 
+  String.blit tfs.txt 1 b 0 ind; Bytes.to_string b
+
+let g32 tfs e = if tfs.dir then 
+    ( ( ( if tfs.ind2 >= tfs.len then (
+          tfs.txt <- blt tfs (tfs.ind2 - 1); 
+          tfs.ind2 <- tfs.ind2-1) );
+          tfs.txt <- bt_set tfs e;
+          tfs.ind2 <- tfs.ind2 +1 ))
+  else 
+    ( tfs.txt <- blt tfs tfs.ind2; 
+      tfs.txt <- bt_set tfs e;
+      if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1)
 
 let listener_text_field u tfs e = 
   match e.re with 
     MouseDown -> take_key_focus e u ; true 
   | KeyPress -> 
     ( if Char.code (get_key e)  >= 32 then 
-        begin
-          ( if tfs.dir then 
-              ( ( if tfs.ind2 >= tfs.len then (
-                    String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2-1); 
-                    tfs.ind2 <- tfs.ind2-1) );
-                (Bytes.of_string tfs.txt).[tfs.ind2] <- get_key e;
-                tfs.ind2 <- tfs.ind2 +1 )
-            else 
-              ( String.blit tfs.txt 1 (Bytes.of_string tfs.txt) 0 (tfs.ind2); 
-                (Bytes.of_string tfs.txt).[tfs.ind2] <- get_key e;
-                if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1
-              );                  
-          )
-        end
+        g32 tfs e
       else ( 
         ( match Char.code (get_key e) with 
             13 -> tfs.action tfs
@@ -546,12 +577,11 @@ let listener_text_field u tfs e =
             then tfs.ind1 <- tfs.ind1+1                   
           | _ -> ()
         ))); u.display(); true
-  | _ -> false;;
+  | _ -> false
 
 
 let create_text_field  txt size dir lopt  = 
-  let tfs = create_tfs txt size dir  
-  and l = String.length txt in
+  let tfs = create_tfs txt size dir in
   let gc = make_default_context () in 
   set_gc gc lopt; use_gui gc;
   let (w,h) = Graphics.text_size (tfs.txt) in 
@@ -559,7 +589,49 @@ let create_text_field  txt size dir lopt  =
   u.display <- display_textfield u tfs;
   u.listener <-  listener_text_field u tfs ;
   u.info <- "TextField"; u.gc <- gc;
-  u,tfs;;
+  u,tfs
+
+type border_state = 
+  {mutable relief : string; mutable line : bool;
+   mutable bg2 : Graphics.color; mutable size : int};;
+
+let create_border_state lopt = 
+  {relief = get_string lopt "Relief" "Flat";
+   line = get_bool lopt "Outlined" false;
+   bg2 = get_color lopt "Background2" Graphics.black;
+   size = get_int lopt "Border_size" 2};;
+
+let display_border bs c1 c () = 
+  let x1 = c.x  and y1 = c.y in
+  let x2 = x1+c.w-1 and y2 = y1+c.h-1 in 
+  let ix1 = c1.x and iy1 =  c1.y in
+  let ix2 = ix1+c1.w-1 and iy2 = iy1+c1.h-1 in 
+  let border1 g = Graphics.set_color g;
+    Graphics.fill_poly [| (x1,y1);(ix1,iy1);(ix2,iy1);(x2,y1) |] ;
+    Graphics.fill_poly [| (x2,y1);(ix2,iy1);(ix2,iy2);(x2,y2) |] 
+  in
+  let border2 g =  Graphics.set_color g;
+    Graphics.fill_poly [| (x1,y2);(ix1,iy2);(ix2,iy2);(x2,y2) |] ;
+    Graphics.fill_poly [| (x1,y1);(ix1,iy1);(ix1,iy2);(x1,y2) |] 
+  in
+  display_rect c ();
+  if bs.line then (Graphics.set_color (get_fcol (get_gc c));
+                   draw_rect x1 y1 c.w c.h);
+  let b1_col = get_bcol ( get_gc c)  
+  and b2_col = bs.bg2 in 
+  match bs.relief with 
+    "Top" ->  (border1 b1_col; border2 b2_col)
+  |  "Bot" -> (border1 b2_col; border2 b1_col) 
+  |  "Flat" ->  (border1 b1_col; border2 b1_col)
+  |  s -> failwith ("display_border: unknown relief: "^s) 
+
+let create_border c lopt = 
+  let bs = create_border_state lopt in  
+  let p = create_panel true (c.w + 2 * bs.size) 
+      (c.h + 2 * bs.size) lopt in 
+  set_layout (center_layout p) p;
+  p.display <- display_border bs c p;
+  add_component p c []; p
 
 
 
