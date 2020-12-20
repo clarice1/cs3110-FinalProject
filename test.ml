@@ -803,6 +803,14 @@ let parse_tests = [
     (fun () -> complex_of_string "10 + +8i");
   check_raise "6 - 8 + i fails" (Failure "invalid")
     (fun () -> complex_of_string "6 - 8 + i");
+  check_raise "3 real pieces h&h raises invalid" (Failure "invalid")
+    (fun () -> complex_of_string "-6 - 8 + 2");
+  check_raise "3 real pieces raises invalid" (Failure "invalid")
+    (fun () -> complex_of_string "6 + 8 + 2");
+  check_raise "3 real pieces all n raises invalid" (Failure "invalid")
+    (fun () -> complex_of_string "-6 - 8 - 2");
+  check_raise "two i's separated" (Failure "invalid")
+    (fun () -> complex_of_string "-2-i+i");
   check_eq "minus instead of plus" {re = -2.; im = -1.} 
     (complex_of_string "-2-i") str_complex;
 ]
