@@ -25,7 +25,7 @@ terminalFractal:
 
 
 zip:
-	zip ms1.zip *.ml* _tags Makefile *.txt
+	zip ms3.zip *.ml* _tags Makefile *.txt
 
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)

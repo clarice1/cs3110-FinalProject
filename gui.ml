@@ -1,11 +1,11 @@
-(**Implementation largely from the book 
+(** Implementation largely from the book 
 
-   Chailloux, Emmanuel, Manoury, Pascal, Pagano, Bruno (2000) 
-   Chapter 13 Constructing a Graphical Interface, 
-   Développement d’applications avec Objective Caml
+    Chailloux, Emmanuel, Manoury, Pascal, Pagano, Bruno (2000) 
+    Chapter 13 Constructing a Graphical Interface, 
+    Développement d’applications avec Objective Caml
 
-   a translation of which can be found at 
-   https://caml.inria.fr/pub/docs/oreilly-book/html/book-ora124.html
+    a translation of which can be found at 
+    https://caml.inria.fr/pub/docs/oreilly-book/html/book-ora124.html
 *)
 
 
