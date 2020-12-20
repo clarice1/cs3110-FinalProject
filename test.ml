@@ -1,3 +1,41 @@
+(*Test Plan
+  Big picture: we tested the parts of functionality in our code that were easily 
+  testable via OUnit (computations, functions with easy to compare outputs, 
+  etc.) but most of the GUI and other graphics functionality was tested 
+  visually. Main was tested manually, of course, though we initially wrote some 
+  test cases for it (they have been commented out).
+
+  Modules that we tested:
+  Matrix
+  Polynomial
+  ToImage
+  Newton
+  Parse
+
+  Modules not tested via Unit:
+  LineDrawer: because we tested it visually (it is the module that makes a 
+  window with the fractal image)
+  Gui: because we tested it visually (it is the module that makes the guy we 
+  use)
+  Main: because all the code is tested manually by making it run the other 
+  modules
+
+  How the test cases were developed:
+  For each of the 5 modules we tested, we used a combination of glass box and 
+  black box testing. We also made some random test cases, taking care to cover 
+  as wide a range as possible of potential inputs (big numbers, small numbers, 
+  negative, positive, etc.)
+
+  How this testing strategy demonstrates correctness:
+  We demonstrate program correctness here by rigorously testing the parts of the
+  code that are unit-testable (115 tests total!). The combination of black-box, 
+  glass-box, and randomized testing ensure that these sections of our code are 
+  correct. In terms of the graphics and GUI material, we tested these manually 
+  by varying our inputs in the program and observing what happens, making sure 
+  everything is correct.
+*)
+
+
 open OUnit2
 
 (******************************************************************************)
