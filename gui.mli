@@ -274,10 +274,6 @@ val create_label : string -> (string * opt_val) list -> component
 val change_label_text : component -> string -> unit
 
 
-val courier_bold_18 : opt_val
-
-val courier_bold_24 : opt_val
-
 (** [create_panel b w h lopt] creates a panel that a graphical area 
     that can be a container *)
 val create_panel : bool -> int -> int -> (string * opt_val) list -> component
@@ -307,8 +303,8 @@ val get_bs_text : button_state -> string
 (** [display_button comp bs ()] displays the button on the screen *)
 val display_button : component -> button_state -> unit -> unit
 
-
-(** [create_button st lopt] creates a button in a component. *)
+(** [create_button st lopt] creates a button in a component. [st] st is the
+    label on the button*)
 val create_button : string -> (string * opt_val) list -> component * button_state 
 
 (** [listener_button comp bs e] activates the action function when the button
@@ -332,7 +328,7 @@ val display_choice : component -> choice_state -> unit -> unit
 val listener_choice : component -> choice_state -> rich_status -> bool
 
 (** [create_choice lc lopt] creates a component with the list 
-    of possible choices.  *)
+    of possible choices. The choices have label in the list *)
 val create_choice : string list -> (string * opt_val) list -> component * choice_state
 
 (** [create_tfs txt size dir] creates the internal state of textfields. *)
@@ -364,11 +360,12 @@ val display_textfield : component -> textfield_state -> unit -> unit
     click in the input zone. *)
 val listener_text_field : component -> textfield_state -> rich_status -> bool
 
-(** *)
-val create_text_field : string ->int -> bool -> 
+(**[create_text_filed txt size dir lopt] creates a text entry field with
+    initial text [txt], size [size], is left justified if [dir] otherwise 
+    right justified with extra options in [lopt]*)
+val create_text_field : string -> int -> bool -> 
   (string * opt_val) list -> component * textfield_state
-
-
+  
 (******************************************************************************)
 (*Enriched Components*)
 (******************************************************************************)

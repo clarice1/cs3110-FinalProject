@@ -1,3 +1,14 @@
+(**Implementation largely from the book 
+
+Chailloux, Emmanuel, Manoury, Pascal, Pagano, Bruno (2000) 
+Chapter 13 Constructing a Graphical Interface, 
+Développement d’applications avec Objective Caml
+
+a translation of which can be found at 
+https://caml.inria.fr/pub/docs/oreilly-book/html/book-ora124.html
+*)
+
+
 open Graphics
 
 (******************************************************************************)
@@ -253,8 +264,6 @@ let compute_rich_event s0 s1  =
       if s1.Graphics.button then MouseDrag else MouseMove
     end
   else raise Not_found
-(*val compute_rich_event : Graphics.status -> Graphics.status -> rich_event =
-  <fun>*)
 
 let send_new_events res0 res1 = 
   if res0.key_focus != res1.key_focus  then 
@@ -298,7 +307,6 @@ let loop b_disp b_motion c =
       if b_disp then display c
     with Not_found -> ()
   done
-(*val loop : bool -> bool -> component -> unit = <fun>*)
 
 let make_click e x y = 
   {re = e;
@@ -308,7 +316,6 @@ let make_click e x y =
    key_focus = empty_component;
    gen_focus = empty_component;
    last = empty_component}
-(*val make_click : rich_event -> int -> int -> rich_status = <fun>*)
 
 
 let make_key e ch c = 
@@ -318,9 +325,7 @@ let make_key e ch c =
            Graphics.keypressed = true};
    key_focus = empty_component;
    gen_focus = empty_component;
-   last = empty_component};;
-(*val make_key : rich_event -> 'a -> char -> rich_status = <fun>*)
-
+   last = empty_component}
 
 
 
@@ -337,6 +342,7 @@ let display_init comp =
   let (a,b) = get_curr gui in 
   Graphics.moveto (comp.x+a) (comp.y+b)
 
+
 let display_label lab comp () = 
   display_init comp; Graphics.draw_string lab;;
 
@@ -350,9 +356,6 @@ let create_label s lopt =
 
 let change_label_text u s = u.display <- display_label s u 
 
-let courier_bold_24 = Sopt "*courier-bold-r-normal-*24*"
-
-let courier_bold_18 = Sopt "*courier-bold-r-normal-*18*"
 
 let create_panel b w h lopt =
   let u = create_component w h   in 
@@ -468,14 +471,12 @@ let create_choice lc lopt  =
   u.listener <- listener_choice u cs ;
   u.info <- "Choice "^ (string_of_int (Array.length cs.values));
   u.gc <- gc;
-  u,cs
-
 type textfield_state = 
   { mutable txt : string; 
     dir : bool; mutable ind1 : int; mutable ind2 : int; len : int;
     mutable visible_cursor : bool; mutable cursor : char; 
     mutable visible_echo : bool; mutable echo : char; 
-    mutable action : textfield_state -> unit } ;;
+    mutable action : textfield_state -> unit } 
 
 let create_tfs txt size dir  = 
   let l = String.length txt in
