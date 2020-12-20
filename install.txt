@@ -16,30 +16,7 @@ Our program requires
 Installation
 
 1. Download and extract the files
-2. Build the system. At the moment, the system is somewhat fragmented. Here are 
-   some useful make commands: 
-   -The command ``make fractal'' will build and start the main system,
-   asking for input on relevant fields to construct a system
-   -The command ``make mandelbrot'' will build and start a system that draws the
-   mandelbrot set. Clicking on a point will draw the associated Julia set. 
-   -The command ``make newton'' will give an example of a fractal created 
-   through Newton's method
-3. Whichever option you choose, perhaps after inputting information as 
-   prompted, a graphical window will appear (assuming graphics is configured).
-   You can now explore the fractal to your heart's content. At the moment, the
-   following key bindings are implemented:
-   q: quit the application. If this is used while looking at a Julia set from 
-      make mandelbrot, pressing q once will bring you back to the mandelbrot set 
-      and pressing q again will quit. 
-   z: undo last action. If there are no actions to undo, quit the application
-   y: redo last press of z. The action of leaving the window for a polynomial 
-      during make mandelbrot cannot be redone 
-   e: double the number of iterations computed
-   c: zoom in by a factor of 20, centered on current mouse position
-   digits 1-9: zoom in by that factor, centered on current mouse position
+2. Build the system. 
+3. Run the program and enjoy!
 
- 
-4. Look at output
-   -if make fractal is run, a .bmp image will appear in the current directory
-
-Congratulations! You have generated your own fractal.
+For more information on running the program, look at the README.

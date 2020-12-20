@@ -1,9 +1,9 @@
 (** 
-   Representation of a matrix in a .bmp image.
-
-   This module maps a matrix onto a graphic .bmp image, with each value in the
+   Maps a matrix onto a graphic .bmp image, with each value in the
    matrix determining the particular color in the corresponding region on .bmp.
    It further handles the colorization of a Julia Set.
+
+   Representation of a matrix in a .bmp image.
 *)
 open Images
 

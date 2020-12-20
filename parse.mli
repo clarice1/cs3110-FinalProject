@@ -1,3 +1,7 @@
+(**
+   Functions to convert between strings and complex numbers.
+*)
+
 (**[string_of_complex z] is the string corresponding to [z]*)
 val string_of_complex : Complex.t -> string
 

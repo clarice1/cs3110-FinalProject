@@ -8,7 +8,6 @@
    that particular point. 
 *)
 
-
 (**[start ll_cx ur_cx c fb fc f iter] reads user input on the location of the 
    mouse and starts drawing a lines corresponding to where the point is mapped 
    by repeatedly applying [f]. [ll_cx] and [ur_cx] are
