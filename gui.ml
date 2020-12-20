@@ -1,11 +1,11 @@
 (**Implementation largely from the book 
 
-Chailloux, Emmanuel, Manoury, Pascal, Pagano, Bruno (2000) 
-Chapter 13 Constructing a Graphical Interface, 
-Développement d’applications avec Objective Caml
+   Chailloux, Emmanuel, Manoury, Pascal, Pagano, Bruno (2000) 
+   Chapter 13 Constructing a Graphical Interface, 
+   Développement d’applications avec Objective Caml
 
-a translation of which can be found at 
-https://caml.inria.fr/pub/docs/oreilly-book/html/book-ora124.html
+   a translation of which can be found at 
+   https://caml.inria.fr/pub/docs/oreilly-book/html/book-ora124.html
 *)
 
 
@@ -471,6 +471,8 @@ let create_choice lc lopt  =
   u.listener <- listener_choice u cs ;
   u.info <- "Choice "^ (string_of_int (Array.length cs.values));
   u.gc <- gc;
+  (u, cs)
+
 type textfield_state = 
   { mutable txt : string; 
     dir : bool; mutable ind1 : int; mutable ind2 : int; len : int;
