@@ -1,9 +1,9 @@
 (*Test Plan
   Big picture: we tested the parts of functionality in our code that were easily 
   testable via OUnit (computations, functions with easy to compare outputs, 
-  etc.) but most of the GUI and other graphics functionality was tested 
-  visually. Main was tested manually, of course, though we initially wrote some 
-  test cases for it (they have been commented out).
+  etc.) but most of the GUI and other graphics functionality was playtested. 
+  Main and MainTerminal were also playtested, though we initially wrote some 
+  test cases for them (they have been commented out).
 
   Modules that we tested:
   Matrix
@@ -19,6 +19,11 @@
   use)
   Main: because all the code is tested manually by making it run the other 
   modules
+  MainTerminal: also playtested
+  FromImage: nondeterministic and knowing what the image should be requires 
+  running it, also playtested to see if the image looked reasonable
+  Mandelbrot: knowing what the image should be requires running it, also 
+  playtested
 
   How the test cases were developed:
   For each of the 5 modules we tested, we used a combination of glass box and 
