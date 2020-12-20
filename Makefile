@@ -4,10 +4,8 @@ MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
-NEWTON=newtonDrawer.byte
 MAINTERM=mainTerminal.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
-BW=black_and_white.byte
 
 
 default: build
@@ -15,26 +13,15 @@ default: build
 
 build:
 	$(OCAMLBUILD) $(OBJECTS)
-	
-newton:
-	$(OCAMLBUILD) $(NEWTON) && ./$(NEWTON)
-
 
 terminalFractal:
 	$(OCAMLBUILD) $(MAINTERM) && ./$(MAINTERM)
-
 
 zip:
 	zip ms3.zip *.ml* _tags Makefile *.txt
 
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
-
-image:
-	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
-
-bw:
-	$(OCAMLBUILD) $(BW) && ./$(BW) 1000 1000 a.bmp
 
 clean:
 	ocamlbuild -clean

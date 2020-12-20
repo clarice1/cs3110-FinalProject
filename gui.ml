@@ -540,14 +540,20 @@ let display_textfield c tfs  () =
   then Graphics.draw_string (String.sub s tfs.ind2 (nl-tfs.ind2));
   display_cursor c tfs
 
+(** [bt_set tfs e] is [tfs.txt] with the value  at [tfs.ind2] replaced with 
+    [get_key e]. *)
 let bt_set tfs e = 
   let b = Bytes.of_string tfs.txt in 
   Bytes.set b tfs.ind2 (get_key e); Bytes.to_string b
 
+(** [blt tfs ind] is the result of prepending the first [ind] many characters 
+    of [tfs.txt] to [tfs.txt]. *)
 let blt tfs ind = 
   let b = Bytes.of_string tfs.txt in 
   String.blit tfs.txt 1 b 0 ind; Bytes.to_string b
 
+(** [g32 tfs e] is the action performed on text field state [tfs] when
+    a key is pressed with code at least [32]. *)
 let g32 tfs e = if tfs.dir then 
     ( ( ( if tfs.ind2 >= tfs.len then (
           tfs.txt <- blt tfs (tfs.ind2 - 1); 
