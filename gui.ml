@@ -186,12 +186,12 @@ let empty_component = create_component 0 0
 
 let rec change_coord c (dx, dy) = 
   c.x <- c.x + dx; c.y <- c.y + dy;
-  List.iter (fun s -> change_coord s (dx,dy) ) c.children
+  List.iter (fun s -> change_coord s (dx,dy)) c.children
 
 let add_component c c1 lopt =
   if c1.parent <> [] then failwith "add_component: already a parent"
   else
-  if not (is_container c ) then failwith "add_component: not a container"
+  if not (is_container c) then failwith "add_component: not a container"
   else
   if (c1.x + c1.w > c.w) || (c1.y + c1.h > c.h) 
   then failwith "add_component: bad position"
@@ -246,8 +246,8 @@ let rec send_event rs c =
     else false
   | KeyPress | KeyRelease -> 
     if has_key_focus rs c then 
-      ( if c.listener rs then (rs.last<-c; true ) 
-        else false )
+      if c.listener rs then (rs.last<-c; true) 
+      else false
     else List.exists (fun sun -> send_event rs sun) c.children
   | _  -> c.listener rs
 
@@ -270,10 +270,11 @@ let send_new_events res0 res1 =
       ignore(send_event  {res1 with re = LostFocus} res0.key_focus); 
       ignore(send_event  {res1 with re = GotFocus} res1.key_focus) 
     end;
-  if res0.last != res1.last && (( res1.re = MouseMove) || (res1.re = MouseDrag)) then
+  if res0.last != res1.last && (( res1.re = MouseMove) || (res1.re = MouseDrag))
+  then
     begin
-      ignore(send_event  {res1 with re = MouseExit} res0.last); 
-      ignore(send_event  {res1 with re = MouseEnter} res1.last )
+      ignore (send_event  {res1 with re = MouseExit} res0.last); 
+      ignore (send_event  {res1 with re = MouseEnter} res1.last)
     end
 
 let initial_re = 
@@ -344,7 +345,7 @@ let display_label lab comp () =
 
 let create_label s lopt =
   let gui = make_default_context () in   set_gc gui lopt; use_gui gui;
-  let (w,h) = Graphics.text_size s in 
+  let (w, h) = Graphics.text_size s in 
   let u = create_component w h  in 
   u.mem <- (fun x -> false);  u.display <- display_label s u;
   u.info <- "Label"; u.gc <- gui;
@@ -378,7 +379,7 @@ let grid_layout (a, b)  c c1 lopt =
 
 let open_main_window w h = 
   Graphics.close_graph();
-  Graphics.open_graph (" "^(string_of_int w)^"x"^(string_of_int h));
+  Graphics.open_graph (" "^ string_of_int w ^"x"^ string_of_int h);
   let u = create_component  w h in
   u.container <- true; 
   u.info <- "Main Window"; 
@@ -395,7 +396,7 @@ let set_bs_action bs f = bs.action <- f
 let get_bs_text bs = bs.txt
 
 let display_button  c bs  () =  
-  display_init c;  Graphics.draw_string (get_bs_text bs)
+  display_init c; Graphics.draw_string (get_bs_text bs)
 
 let listener_button c bs  e = match get_event e with 
     MouseDown -> bs.action bs; c.display (); true
@@ -433,13 +434,13 @@ let display_choice comp cs  () =
   let (x,y) = Graphics.current_point()  
   and nb = Array.length cs.values in 
   for i = 0 to nb-1 do 
-    Graphics.moveto x (y + i*(cs.height+ cs.sep));
+    Graphics.moveto x (y + i*(cs.height + cs.sep));
     Graphics.draw_string cs.values.(i)
   done;
   Graphics.set_color (get_fcol (get_gc comp));
-  Graphics.fill_rect x (y+ cs.ind*(cs.height+ cs.sep)) comp.w cs.height;
+  Graphics.fill_rect x (y + cs.ind * (cs.height + cs.sep)) comp.w cs.height;
   Graphics.set_color (get_bcol (get_gc comp));      
-  Graphics.moveto x  (y + cs.ind*(cs.height + cs.sep));
+  Graphics.moveto x  (y + cs.ind * (cs.height + cs.sep));
   Graphics.draw_string cs.values.(cs.ind) 
 
 let listener_choice c cs e = match e.re with 
@@ -459,12 +460,12 @@ let create_choice lc lopt  =
   let awh = Array.map (Graphics.text_size) cs.values in 
   let w = Array.fold_right (fun (x,y) -> max x)  awh 0 
   and h = Array.fold_right (fun (x,y) -> max y)  awh 0 in
-  let h1 = (h+cs.sep) * (Array.length sa) + cs.sep  in  
+  let h1 = (h + cs.sep) * (Array.length sa) + cs.sep  in  
   cs.height <- h;
   let u = create_component w h1   in
   u.display <- display_choice u cs;
   u.listener <- listener_choice u cs ;
-  u.info <- "Choice "^ (string_of_int (Array.length cs.values));
+  u.info <- "Choice " ^ (string_of_int (Array.length cs.values));
   u.gc <- gc;
   (u, cs)
 
@@ -477,7 +478,7 @@ type textfield_state =
 
 let create_tfs txt size dir  = 
   let l = String.length txt in
-  (if size < l then failwith "create_tfs");
+  if size < l then failwith "create_tfs";
   let ind1 = if dir then 0 else size-1-l 
   and ind2 = if dir then l else size-1 in 
   let n_txt = (if dir then (txt^(String.make (size-l) ' '))
@@ -494,13 +495,13 @@ let set_tfs_echo b c tfs =  tfs.visible_echo <- b; tfs.echo <- c
 
 let get_tfs_text tfs = 
   if tfs.dir then String.sub tfs.txt tfs.ind1 (tfs.ind2 - tfs.ind1)
-  else String.sub tfs.txt (tfs.ind1+1) (tfs.ind2 - tfs.ind1)
+  else String.sub tfs.txt (tfs.ind1 + 1) (tfs.ind2 - tfs.ind1)
 
 let set_tfs_text tf tfs txt = 
   let l = String.length txt in 
   if l > tfs.len then failwith "set_tfs_text";
   let b = Bytes.of_string tfs.txt in
-  String.blit  (String.make tfs.len ' ') 0 b 0 tfs.len;
+  String.blit (String.make tfs.len ' ') 0 b 0 tfs.len;
   tfs.txt <- Bytes.to_string b;
   if tfs.dir then 
     (
@@ -520,9 +521,9 @@ let display_cursor c tfs =
     ( use_gui (get_gc c);
       let (x,y) = Graphics.current_point() in 
       let (a,b) = Graphics.text_size " " in 
-      let shift =  a *  (if tfs.dir then max (min (tfs.len-1) tfs.ind2)  0 
-                         else tfs.ind2) in  
-      Graphics.moveto (c.x+x + shift) (c.y+y);
+      let shift =  a * (if tfs.dir then max (min (tfs.len-1) tfs.ind2)  0 
+                        else tfs.ind2) in  
+      Graphics.moveto (c.x + x + shift) (c.y + y);
       Graphics.draw_char tfs.cursor)
 
 let display_textfield c tfs  () = 
@@ -549,28 +550,28 @@ let blt tfs ind =
 let g32 tfs e = if tfs.dir then 
     ( ( ( if tfs.ind2 >= tfs.len then (
           tfs.txt <- blt tfs (tfs.ind2 - 1); 
-          tfs.ind2 <- tfs.ind2-1) );
+          tfs.ind2 <- tfs.ind2 - 1));
           tfs.txt <- bt_set tfs e;
-          tfs.ind2 <- tfs.ind2 +1 ))
+          tfs.ind2 <- tfs.ind2 + 1))
   else 
     ( tfs.txt <- blt tfs tfs.ind2; 
       tfs.txt <- bt_set tfs e;
-      if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 -1)
+      if tfs.ind1 >= 0 then tfs.ind1 <- tfs.ind1 - 1)
 
 let listener_text_field u tfs e = 
   match e.re with 
     MouseDown -> take_key_focus e u ; true 
   | KeyPress -> 
-    ( if Char.code (get_key e)  >= 32 then 
+    ( if Char.code (get_key e) >= 32 then 
         g32 tfs e
       else ( 
         ( match Char.code (get_key e) with 
             13 -> tfs.action tfs
           |  9 -> lose_key_focus e u
           |  8 -> if (tfs.dir && (tfs.ind2 > 0)) 
-            then tfs.ind2 <- tfs.ind2 -1
-            else if (not tfs.dir) && (tfs.ind1 < tfs.len -1) 
-            then tfs.ind1 <- tfs.ind1+1                   
+            then tfs.ind2 <- tfs.ind2 - 1
+            else if (not tfs.dir) && (tfs.ind1 < tfs.len - 1) 
+            then tfs.ind1 <- tfs.ind1 + 1                   
           | _ -> ()
         ))); u.display(); true
   | _ -> false
