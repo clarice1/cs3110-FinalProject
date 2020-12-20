@@ -1,0 +1,15 @@
+Much of the code in gui.ml does not count for our LOC, as it was taken from the 
+book we cited in both gui.ml and gui.mli. We created gui.mli but added the 
+citation for transparency.
+
+We did have to modify the use of Bytes and added a function to change labels in 
+gui.ml.
+
+Our LOC are
+
+1854 with nothing from gui
+1869 with our original code from gui
+2358 including gui
+
+
+
