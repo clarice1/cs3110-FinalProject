@@ -108,7 +108,6 @@ let get_bool lo name default =
     | Bopt b -> b 
     | _  -> raise OptErr
   with Not_found -> default
-(* Can we combine these into one function? Would we even want to (LOC) *)
 
 let set_gc gc lst_opt = 
   set_bcol gc (get_color lst_opt "Background" (get_bcol gc));
@@ -328,13 +327,10 @@ let make_key e ch c =
    last = empty_component}
 
 
-
-
-
-
 (******************************************************************************)
 (*Defining Components*)
 (******************************************************************************)
+
 let display_init comp = 
   Graphics.set_color (get_bcol (get_gc comp)); display_rect  comp ();
   let gui= get_gc comp in 
@@ -344,7 +340,7 @@ let display_init comp =
 
 
 let display_label lab comp () = 
-  display_init comp; Graphics.draw_string lab;;
+  display_init comp; Graphics.draw_string lab
 
 let create_label s lopt =
   let gui = make_default_context () in   set_gc gui lopt; use_gui gui;
@@ -356,7 +352,6 @@ let create_label s lopt =
 
 let change_label_text u s = u.display <- display_label s u 
 
-
 let create_panel b w h lopt =
   let u = create_component w h   in 
   u.container <- b;
@@ -366,7 +361,7 @@ let create_panel b w h lopt =
 
 let center_layout comp comp1 lopt = 
   comp1.x <- comp.x + ((comp.w -comp1.w) /2); 
-  comp1.y <- comp.y + ((comp.h -comp1.h) /2);;
+  comp1.y <- comp.y + ((comp.h -comp1.h) /2)
 
 let grid_layout (a, b)  c c1 lopt = 
   let px = get_int lopt "Col" 0
@@ -528,7 +523,7 @@ let display_cursor c tfs =
       let shift =  a *  (if tfs.dir then max (min (tfs.len-1) tfs.ind2)  0 
                          else tfs.ind2) in  
       Graphics.moveto (c.x+x + shift) (c.y+y);
-      Graphics.draw_char tfs.cursor);;
+      Graphics.draw_char tfs.cursor)
 
 let display_textfield c tfs  () = 
   display_init c;
@@ -542,7 +537,6 @@ let display_textfield c tfs  () =
   if (nl > tfs.ind2) && (tfs.dir) 
   then Graphics.draw_string (String.sub s tfs.ind2 (nl-tfs.ind2));
   display_cursor c tfs
-
 
 let bt_set tfs e = 
   let b = Bytes.of_string tfs.txt in 
@@ -581,7 +575,6 @@ let listener_text_field u tfs e =
         ))); u.display(); true
   | _ -> false
 
-
 let create_text_field  txt size dir lopt  = 
   let tfs = create_tfs txt size dir in
   let gc = make_default_context () in 
@@ -595,13 +588,13 @@ let create_text_field  txt size dir lopt  =
 
 type border_state = 
   {mutable relief : string; mutable line : bool;
-   mutable bg2 : Graphics.color; mutable size : int};;
+   mutable bg2 : Graphics.color; mutable size : int}
 
 let create_border_state lopt = 
   {relief = get_string lopt "Relief" "Flat";
    line = get_bool lopt "Outlined" false;
    bg2 = get_color lopt "Background2" Graphics.black;
-   size = get_int lopt "Border_size" 2};;
+   size = get_int lopt "Border_size" 2}
 
 let display_border bs c1 c () = 
   let x1 = c.x  and y1 = c.y in
@@ -634,11 +627,3 @@ let create_border c lopt =
   set_layout (center_layout p) p;
   p.display <- display_border bs c p;
   add_component p c []; p
-
-
-
-
-
-(******************************************************************************)
-(*Enriched Components*)
-(******************************************************************************)
